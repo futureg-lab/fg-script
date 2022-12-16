@@ -67,5 +67,18 @@ namespace fg_script_test
                 Assert.AreEqual(expected[i], list[i].Lexeme);
             }
         }
+
+        [TestMethod]
+        public void TestSyntaxErrorInterminatedString()
+        {
+            string content = "Hello, world!";
+            string str = String.Format("\"{0}", content);
+            Lexer lexer = new(str, "<test>");
+
+            Assert.ThrowsException<SyntaxErrorException>(() =>
+            {
+                lexer.Tokenize();
+            });
+        }
     }
 }
