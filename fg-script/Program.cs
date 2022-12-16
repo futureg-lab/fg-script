@@ -1,17 +1,9 @@
 ﻿using fg_script.core;
 using fg_script.utils;
 
-
-List<Token> list = new List<Token>();
-Parser parser = new Parser(ref list);
-
-Console.WriteLine(Utils.UnderlineText("Hello, World!", 3, 7));
-
-
-/*
 try
 {
-    string source = "let x = \"hello world\";\n 1234.65    145!";
+    string source = "let myVar_123 \"123.6\" 123.6";
     Lexer lexer = new Lexer(source, "<none>");
     List<Token> list = lexer.Tokenize();
 
@@ -28,4 +20,3 @@ catch (Exception exception)
 {
     throw exception;
 }
-*/

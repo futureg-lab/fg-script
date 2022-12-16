@@ -28,19 +28,19 @@
                     continue;
                 }
 
-                if (IsNum(CurrentChar))
-                {
-                    string str = MakeNumber();
-                    Token token = new(str, TokenType.NUMBER, Cursor.Copy());
-                    tokens.Add(token);
-                    continue;
-                }
-
                 // has to be alphanum + _
                 if (IsAlpha(CurrentChar))
                 {
                     string str = MakeStandardExpression();
                     Token token = new(str, TokenType.KEYWORD_OR_NAME, Cursor.Copy());
+                    tokens.Add(token);
+                    continue;
+                }
+
+                if (IsNum(CurrentChar))
+                {
+                    string str = MakeNumber();
+                    Token token = new(str, TokenType.NUMBER, Cursor.Copy());
                     tokens.Add(token);
                     continue;
                 }
@@ -142,7 +142,7 @@
         // 
         public static bool IsStandardExpression(char? character)
         {
-            return IsAlpha(character) || character == '_';
+            return IsAlpha(character) || character == '_' || IsNum(character);
         }
 
         public void NextChar()
