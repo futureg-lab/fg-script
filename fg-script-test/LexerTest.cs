@@ -29,6 +29,7 @@ namespace fg_script_test
             Assert.AreEqual(2, list.Count);
             
             Token token = list.First();
+            Assert.AreEqual(token.Type, TokenType.NUMBER);
             Assert.AreEqual(token.Lexeme, num);
         }
 
@@ -44,6 +45,8 @@ namespace fg_script_test
             Assert.AreEqual(2, list.Count);
 
             Token token = list.First();
+
+            Assert.AreEqual(token.Type, TokenType.STRING);
             Assert.AreEqual(token.Lexeme, content);
         }
 
