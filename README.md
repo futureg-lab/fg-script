@@ -6,7 +6,7 @@ FGScript lang implementation in C#
 ```c
 // import function from csharp to a fg-script
 @extern requestHtml(str)
-@extern requestHtmlJSON(str)
+@extern requestHttpJSON(str)
 
 // expose a function to the host language
 @expose fn sayHello(name) {
@@ -26,16 +26,17 @@ example_dic = (
 	a : 6,
 	b : 8,
 	c : (
-		e : h,
+		e : "Some text",
 		h : 3,
 		q : (1, 2, 3, 4, 5)
 	)
 )
 
 fn fibo (n) {
-	if n <= 2
-		ret 1
 	// return is implicit
+	if n <= 2 {
+		1
+	}
 	fibo (n - 1) + fibo (n - 2)
 }
 
@@ -54,7 +55,7 @@ fn main {
 		}
 	}
 	
-	data = requestHtmlJSON()
+	some_data = requestHttpJSON()
 	
 	cond_expr = false
 	while cond_expr {
