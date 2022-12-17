@@ -23,7 +23,7 @@ The project solution is located at the root directory
     "Hello World! " + name
 }
 
-// Native types : str, num (f64 representation), tup
+// Native types : str, num (double representation), tup
 // a value, a tuple, an array, a dictionary, everything is a tuple !
 
 tup tuple = (1, 2, 3, 4, 5, (1, 2 ("something", 2)))
