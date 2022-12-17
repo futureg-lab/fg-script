@@ -5,6 +5,7 @@ obj/**/*
 *.exe
 *.dll
 .vs
+.vscode
 TestResults
 
 ## Ignore Visual Studio temporary files, build results, and
