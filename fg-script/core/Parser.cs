@@ -2,26 +2,37 @@
 {
     public class Parser
     {
-        // private:
-        List<Token> Tokens { get; set;  }
+        private List<Token> Tokens { get; set; }
 
         int Position { get; set; } = 0;
 
-        // public:
         public Parser(ref List<Token> tokens)
         {
             Tokens = tokens;
         }
 
 
-        // protected:
-        public Token? TokenAt(UInt32 pos) 
+        protected Token? TokenAt(int pos) 
         {
-            return null;
+            if (pos < 0)
+                throw new ParseException("Cursor has negative value");
+            pos = Math.Max(0, Math.Min(pos, Tokens.Count - 1));
+            return Tokens[pos];
         }
 
-        public Token? PeekNextToken() { return null;  }
-        public Token? NextToken() { return null; }
-        public Token? CurrentToken() { return null;  }
+        protected Token? PeekNextToken() 
+        {
+            return TokenAt(Position + 1);
+        }
+
+        protected Token? NextToken() 
+        {
+            return TokenAt(Position++);
+        }
+
+        protected Token? CurrentToken()
+        {
+            return TokenAt(Position);
+        }
     }
 }

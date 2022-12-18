@@ -16,6 +16,14 @@
         }
     }
 
+    public class ParseException : FGScriptException
+    {
+        public ParseException(string reason, string full_description = "")
+            : base("parsing", reason, full_description)
+        {
+        }
+    }
+
     public class SyntaxErrorException : FGScriptException
     {
         public SyntaxErrorException(string reason, CursorPosition cursor, string filename, string full_description = "")
