@@ -172,10 +172,8 @@ namespace fg_script.core
                     continue;
                 }
 
-                {
-                    tokens.Add(new(lexeme, TokenType.UNKNOWN, Cursor.Copy()));
-                    NextChar();
-                }
+                tokens.Add(new(lexeme, TokenType.UNKNOWN, Cursor.Copy()));
+                NextChar();
             }
             tokens.Add(new("EOF", TokenType.EOF, Cursor.Copy()));
             return tokens;
@@ -194,6 +192,7 @@ namespace fg_script.core
             return str;
         }
 
+        // Does not allow multiline comment nesting
         protected string MakeMultiLineComment()
         {
             string str = "/*";

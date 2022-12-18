@@ -2,7 +2,7 @@
 {
     public class Parser
     {
-        private List<Token> Tokens { get; set; }
+        private readonly List<Token> Tokens;
 
         int Position { get; set; } = 0;
 

@@ -141,7 +141,7 @@ namespace fg_script_test
         }
 
         [TestMethod]
-        public void TestCommentScanner()
+        public void TestCommentOfAllTypes()
         {
             string source =
                 "/** Example function\n *v1.0 */" +
@@ -173,6 +173,24 @@ namespace fg_script_test
             {
                 Assert.AreEqual(comments_expected[i], comments_res[i].Lexeme);
             }
+        }
+
+        [TestMethod]
+        public void TestInvalidNestedMultilineComment()
+        {
+            // last */ should be ignored
+            string source = "/* one /* two /* three */ */";
+            Lexer lexer = new(source, "<test>");
+            List<Token> list = lexer.Tokenize();
+            List<string> expected = new()
+            {
+                "/* one /* two /* three */",
+                "*/" // TokenType == KEYWORD_OR_NAME
+            };
+
+            Assert.AreEqual(3, list.Count);
+            Assert.AreEqual(expected[0], list[0].Lexeme);
+            Assert.AreEqual(expected[1], list[1].Lexeme);
         }
 
         [TestMethod]
