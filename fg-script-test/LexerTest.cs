@@ -139,5 +139,40 @@ namespace fg_script_test
                 Assert.AreEqual(expected[i], list[i].Type);
             }
         }
+
+        [TestMethod]
+        public void TestCommentScanner()
+        {
+            string source =
+                "/** Example function\n *v1.0 */" +
+                "fn test (num x, num y) -> num {\n" +
+                "\tif (x + y) % 2 is not 0 {\n" +
+                "\t\tret 1 // we are good\n" +
+                "\t} else {\n" +
+                "\t\terr \"unable to solve\"\n" +
+                "\t}\n" +
+                "}";
+
+            Lexer lexer = new(source, "<test>");
+            List<Token> list = lexer.Tokenize();
+
+            List<string> comments_expected = new()
+            {
+                "/** Example function\n *v1.0 */",
+                "// we are good"
+            };
+
+            List<Token> comments_res = list.FindAll((Token token) =>
+            {
+                return token.Type == TokenType.COMMENT;
+            });
+
+            Assert.AreEqual(comments_expected.Count, comments_res.Count);
+
+            for (int i = 0; i < comments_expected.Count; i++)
+            {
+                Assert.AreEqual(comments_expected[i], comments_res[i].Lexeme);
+            }
+        }
     }
 }
