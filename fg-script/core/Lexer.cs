@@ -83,10 +83,10 @@ namespace fg_script.core
         {
             EncloseSymbols.Add("(", TokenType.LEFT_PARENTH);
             EncloseSymbols.Add(")", TokenType.RIGHT_PARENTH);
-            EncloseSymbols.Add("{", TokenType.LEFT_BRACKET);
-            EncloseSymbols.Add("}", TokenType.RIGHT_BRACKET);
-            EncloseSymbols.Add("[", TokenType.LEFT_GRAPH);
-            EncloseSymbols.Add("]", TokenType.RIGHT_GRAPH);
+            EncloseSymbols.Add("{", TokenType.LEFT_BRACE);
+            EncloseSymbols.Add("}", TokenType.RIGHT_BRACE);
+            EncloseSymbols.Add("[", TokenType.LEFT_BRACKET);
+            EncloseSymbols.Add("]", TokenType.RIGHT_BRACKET);
         }
 
         public List<Token> Tokenize()

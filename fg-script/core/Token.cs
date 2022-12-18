@@ -30,10 +30,10 @@
         // enclosures
         LEFT_PARENTH,       // (
         RIGHT_PARENTH,      // )
-        LEFT_BRACKET,       // {
-        RIGHT_BRACKET,      // }
-        LEFT_GRAPH,         // [
-        RIGHT_GRAPH,        // ]
+        LEFT_BRACE,         // {
+        RIGHT_BRACE,        // }
+        LEFT_BRACKET,       // [
+        RIGHT_BRACKET,      // ]
 
 
         // LITERALS

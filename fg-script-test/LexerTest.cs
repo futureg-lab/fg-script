@@ -127,8 +127,8 @@ namespace fg_script_test
                 TokenType.MINUS, TokenType.MULT, TokenType.DIV, TokenType.ASSIGN,
                 TokenType.MOD, TokenType.EQ, TokenType.NEQ, TokenType.GE, TokenType.LE,
                 TokenType.LT, TokenType.GT, TokenType.NOT, TokenType.NEW_LINE, TokenType.RET_OP, 
-                TokenType.LEFT_PARENTH, TokenType.RIGHT_PARENTH, TokenType.LEFT_BRACKET, TokenType.RIGHT_BRACKET,
-                TokenType.LEFT_GRAPH, TokenType.RIGHT_GRAPH, TokenType.COMMA, TokenType.DOT, TokenType.DBL_DOT,
+                TokenType.LEFT_PARENTH, TokenType.RIGHT_PARENTH, TokenType.LEFT_BRACE, TokenType.RIGHT_BRACE,
+                TokenType.LEFT_BRACKET, TokenType.RIGHT_BRACKET, TokenType.COMMA, TokenType.DOT, TokenType.DBL_DOT,
                 TokenType.EOF
             };
 
