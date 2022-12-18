@@ -3,10 +3,16 @@ using fg_script.utils;
 
 try
 {
-    string source = "num   bool  tup   if else elif loop   true  false    and or is fn" +
-                 "  extern expose ret somethingThatMeansNothing  err";
+    string source = 
+        "fn test (num x, num y) -> num {\n" +
+        "\tif (x + y) % 2 is not 0 {\n" +
+        "\t\tret 1\n" +
+        "\t} else {\n" +
+        "\t\terr \"unable to solve\"\n"+
+        "\t}\n" +
+        "}";
     Console.WriteLine(source);
-    Lexer lexer = new Lexer(source, "<none>");
+    Lexer lexer = new(source, "<none>");
     List<Token> list = lexer.Tokenize();
 
     foreach (Token token in list)

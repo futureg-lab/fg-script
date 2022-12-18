@@ -112,5 +112,32 @@ namespace fg_script_test
                 Assert.AreEqual(expected[i], list[i].Type);
             }
         }
+
+        [TestMethod]
+        public void TestReservedSymbolsAndOperators()
+        {
+            string source = "+ \n\n   -   *  /  =   % ==  !=  >=   <= < >  ! \n  ->  () {}[] , . ..";
+
+            Lexer lexer = new(source, "<test>");
+            List<Token> list = lexer.Tokenize();
+
+            List<TokenType> expected = new()
+            {
+                TokenType.PLUS, TokenType.NEW_LINE, TokenType.NEW_LINE,
+                TokenType.MINUS, TokenType.MULT, TokenType.DIV, TokenType.ASSIGN,
+                TokenType.MOD, TokenType.EQ, TokenType.NEQ, TokenType.GE, TokenType.LE,
+                TokenType.LT, TokenType.GT, TokenType.NOT, TokenType.NEW_LINE, TokenType.RET_OP, 
+                TokenType.LEFT_PARENTH, TokenType.RIGHT_PARENTH, TokenType.LEFT_BRACKET, TokenType.RIGHT_BRACKET,
+                TokenType.LEFT_GRAPH, TokenType.RIGHT_GRAPH, TokenType.COMMA, TokenType.DOT, TokenType.DBL_DOT,
+                TokenType.EOF
+            };
+
+            Assert.AreEqual(expected.Count, list.Count);
+
+            for (int i = 0; i < expected.Count; i++)
+            {
+                Assert.AreEqual(expected[i], list[i].Type);
+            }
+        }
     }
 }

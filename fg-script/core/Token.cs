@@ -16,43 +16,49 @@
         LT,                 // <
         GT,                 // >
         NOT,                // ! or not
+        COMMA,              // ,
+        DOT,                // .
+        
+        EQ,                 // ==
+        NEQ,                // !=
+        GE,                 // >=
+        LE,                 // <=
+        RET_OP,             // ->
+        DBL_DOT,            // x..y == (x, x+1, ..., y)
+        NEW_LINE,           // \n
+
+        // enclosures
         LEFT_PARENTH,       // (
         RIGHT_PARENTH,      // )
         LEFT_BRACKET,       // {
         RIGHT_BRACKET,      // }
-        COMMA,              // ,
-
-        EQ,     // ==
-        NEQ,    // !=
-        GE,     // >=
-        LE,     // <=
-        RET_OP, // ->
-        DBL_DT, // x..y == (x, x+1, ..., y)
+        LEFT_GRAPH,         // [
+        RIGHT_GRAPH,        // ]
 
 
         // LITERALS
-        STRING, // "any string"
-        NUMBER, // 1235.6
-        BOOL,   // false | true
-        TUPLE,  // ( a, b, c, d, ...)
+        STRING,             // "any string"
+        NUMBER,             // 1235.6
+        BOOL,               // false | true
+        TUPLE,              // ( a, b, c, d, ...)
 
         // keywords
-        EXTERN,     // extern
-        EXPOSE,     // expose
-        FUN_DECL,   // fn
-        TYPE,       // bool, tup, num
-        IN,         // (i, val) in (1, 2, 3, 4..)
-        IS,         // x is y -> bool
-        OR,         // x or y -> bool
-        AND,        // x and y -> bool
+        EXTERN,             // extern
+        EXPOSE,             // expose
+        FUN_DECL,           // fn
+        TYPE,               // bool, tup, num
+        IN,                 // (i, val) in (1, 2, 3, 4..)
+        IS,                 // x is y -> bool
+        OR,                 // x or y -> bool
+        AND,                // x and y -> bool
 
-        IF,
-        ELSE,
-        ELSE_IF,
-        LOOP,
-        WHILE,
-        ERROR,      // err
-        RETURN,     // ret
+        IF,                 // if
+        ELSE,               // else
+        ELSE_IF,            // elif
+        LOOP,               // loop
+        WHILE,              // while
+        ERROR,              // err
+        RETURN,             // ret
     }
 
     public class CursorPosition
