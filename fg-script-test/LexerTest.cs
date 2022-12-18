@@ -15,7 +15,7 @@ namespace fg_script_test
             Assert.AreEqual(1, list.Count);
 
             Token token = list.First();
-            Assert.AreEqual(token.Lexeme, "EOF");
+            Assert.AreEqual("EOF", token.Lexeme);
         }
 
         [TestMethod]
@@ -29,8 +29,8 @@ namespace fg_script_test
             Assert.AreEqual(2, list.Count);
             
             Token token = list.First();
-            Assert.AreEqual(token.Type, TokenType.NUMBER);
-            Assert.AreEqual(token.Lexeme, num);
+            Assert.AreEqual(TokenType.NUMBER, token.Type);
+            Assert.AreEqual(num, token.Lexeme);
         }
 
         [TestMethod]
@@ -173,6 +173,19 @@ namespace fg_script_test
             {
                 Assert.AreEqual(comments_expected[i], comments_res[i].Lexeme);
             }
+        }
+
+        [TestMethod]
+        public void TestInvalidCommentShouldTriggerAnException()
+        {
+            string source = "/** Example non terminated comment \n\n ";
+
+            Lexer lexer = new(source, "<test>");
+
+            Assert.ThrowsException<SyntaxErrorException>(() =>
+            {
+                lexer.Tokenize();
+            });
         }
     }
 }
