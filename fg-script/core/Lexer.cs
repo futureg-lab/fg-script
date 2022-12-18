@@ -1,4 +1,6 @@
-﻿namespace fg_script.core
+﻿using System.Collections;
+
+namespace fg_script.core
 {
     public class Lexer
     {
@@ -6,6 +8,44 @@
         protected string Source { get; set; } = "";
         protected string Filepath { get; set; } = "";
         protected CursorPosition Cursor = new(0, 0, -1);
+        protected Hashtable ReservedWords = new();
+
+        public Lexer(string source, string filepath = "<console>")
+        {
+            Source = source;
+            Filepath = filepath;
+            InitReservedWords();
+        }
+
+        private void InitReservedWords()
+        {
+            ReservedWords.Add("fn", TokenType.FUN_DECL);
+            ReservedWords.Add("extern", TokenType.EXTERN);
+            ReservedWords.Add("expose", TokenType.EXPOSE);
+            ReservedWords.Add("false", TokenType.BOOL);
+            ReservedWords.Add("true", TokenType.BOOL);
+            
+            // branching, loops
+            ReservedWords.Add("loop", TokenType.LOOP);
+            ReservedWords.Add("while", TokenType.WHILE);
+            ReservedWords.Add("if", TokenType.IF);
+            ReservedWords.Add("elif", TokenType.ELSE_IF);
+            ReservedWords.Add("else", TokenType.ELSE);
+
+            // types
+            ReservedWords.Add("bool", TokenType.TYPE);
+            ReservedWords.Add("num", TokenType.TYPE);
+            ReservedWords.Add("str", TokenType.TYPE);
+            ReservedWords.Add("tup", TokenType.TYPE);
+
+            // other
+            ReservedWords.Add("is", TokenType.IS);
+            ReservedWords.Add("and", TokenType.AND);
+            ReservedWords.Add("or", TokenType.OR);
+            ReservedWords.Add("not", TokenType.NOT);
+            ReservedWords.Add("ret", TokenType.RETURN);
+            ReservedWords.Add("err", TokenType.ERROR);
+        }
 
         public List<Token> Tokenize()
         {
@@ -29,18 +69,23 @@
                 }
 
                 // has to be alphanum + _
-                if (IsAlpha(CurrentChar))
-                {
-                    string str = MakeStandardExpression();
-                    Token token = new(str, TokenType.KEYWORD_OR_NAME, Cursor.Copy());
-                    tokens.Add(token);
-                    continue;
-                }
-
                 if (IsNum(CurrentChar))
                 {
                     string str = MakeNumber();
                     Token token = new(str, TokenType.NUMBER, Cursor.Copy());
+                    tokens.Add(token);
+                    continue;
+                }
+
+                if (IsAlpha(CurrentChar))
+                {
+                    string str = MakeStandardExpression();
+                    TokenType type = TokenType.KEYWORD_OR_NAME;
+                    if (ReservedWords.ContainsKey(str))
+                    {
+                        type = (TokenType) ReservedWords[str];
+                    }
+                    Token token = new(str, type, Cursor.Copy());
                     tokens.Add(token);
                     continue;
                 }
@@ -77,7 +122,7 @@
                     throw new SyntaxErrorException("interminated string", Cursor.Copy(), Filepath);
             }
             NextChar(); // ignore '"'
-            return str;
+            return String.Format("\"{0}\"", str);
         }
 
         // [0-9]+
@@ -109,12 +154,6 @@
                 NextChar();
             }
             return str;
-        }
-
-        public Lexer(string source, string filepath = "<console>")
-        {
-            Source = source;
-            Filepath = filepath;
         }
 
         // [0-9]

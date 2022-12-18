@@ -3,7 +3,9 @@ using fg_script.utils;
 
 try
 {
-    string source = "let myVar_123 \"123.6\" 123.6";
+    string source = "num   bool  tup   if else elif loop   true  false    and or is fn" +
+                 "  extern expose ret somethingThatMeansNothing  err";
+    Console.WriteLine(source);
     Lexer lexer = new Lexer(source, "<none>");
     List<Token> list = lexer.Tokenize();
 

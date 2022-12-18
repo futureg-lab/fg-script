@@ -13,13 +13,13 @@ The project solution is located at the root directory
 
 # fg-script lang overview
 
-```c
+```rust
 // import function from csharp to a fg-script
-@extern requestHtml(str) -> str
-@extern requestHttpJSON(str) -> tup
+extern requestHtml(str) -> str
+extern requestHttpJSON(str) -> tup
 
 // expose a function to the host language
-@expose fn sayHello(name) -> str {
+expose fn sayHello(name) -> str {
     "Hello World! " + name
 }
 
@@ -35,6 +35,17 @@ shift(tup_empt) // remove and return first item "1"
 pop(tup_empt) // remove and return last item "3"
 // tup_empt => (2)
 
+// using tuples as a dynamic array
+tup arr = arraytup() // add a flags that enforces number indexing
+arr[0] = 1
+arr[1] = 2
+// arr[2] = 3 // error
+print(size(arr)) // 2
+print(type(arr)) // tuple
+print(isarray(arr)) // true
+print(istuple(arr)) // true
+
+// string
 str some_str = "Hello World"
 
 num some_num = 5
@@ -84,15 +95,15 @@ fn fibo (num n) -> num {
 }
 
 fn main -> void {
-	for i = 0 .. 10 {
+	loop i = 0 .. 10 {
 		print("index " + i)
 	}
 	
-	for (i, val) : (1, 2, 3, 4) {
+	loop (i, val) in (1, 2, 3, 4) {
 		print("index " + i + ":" + val + "\n")
 	}
 	
-	for (key, value) : example_dic {
+	loop (key, value) in example_dic {
 		if type(value) is "tuple" {
 			print("Raw value at " + key + " : " + value)
 		}

@@ -47,7 +47,7 @@ namespace fg_script_test
             Token token = list.First();
 
             Assert.AreEqual(token.Type, TokenType.STRING);
-            Assert.AreEqual(token.Lexeme, content);
+            Assert.AreEqual(token.Lexeme, str);
         }
 
         [TestMethod]
@@ -60,7 +60,7 @@ namespace fg_script_test
             List<string> expected = new() 
             {
                 "let", "myVar_123",
-                "123.6", "123.6", "EOF"
+                "\"123.6\"", "123.6", "EOF"
             };
 
             Assert.AreEqual(expected.Count, list.Count);
@@ -82,6 +82,35 @@ namespace fg_script_test
             {
                 lexer.Tokenize();
             });
+        }
+
+        [TestMethod]
+        public void TestReservedKeywords()
+        {
+            string source = "num   bool  tup   if else elif loop   true  false    and or is fn" +
+                 "  extern expose ret somethingThatMeansNothing  err";
+
+
+            Lexer lexer = new(source, "<test>");
+            List<Token> list = lexer.Tokenize();
+
+            List<TokenType> expected = new()
+            {
+                TokenType.TYPE, TokenType.TYPE, TokenType.TYPE,
+                TokenType.IF, TokenType.ELSE, TokenType.ELSE_IF, TokenType.LOOP, 
+                TokenType.BOOL, TokenType.BOOL, 
+                TokenType.AND, TokenType.OR, TokenType.IS, TokenType.FUN_DECL,
+                TokenType.EXTERN, TokenType.EXPOSE, TokenType.RETURN, TokenType.KEYWORD_OR_NAME,
+                TokenType.ERROR, 
+                TokenType.EOF
+            };
+
+            Assert.AreEqual(expected.Count, list.Count);
+
+            for (int i = 0; i < expected.Count; i++)
+            {
+                Assert.AreEqual(expected[i], list[i].Type);
+            }
         }
     }
 }
