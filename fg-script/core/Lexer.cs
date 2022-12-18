@@ -110,6 +110,14 @@ namespace fg_script.core
                     continue;
                 }
 
+                if (CurrentChar == '/' && (PeekNextChar() == '/' || PeekNextChar() == '*'))
+                {
+                    string str = PeekNextChar() == '*' ? MakeMultiLineComment() : MakeComment();
+                    tokens.Add(new(str, TokenType.COMMENT, Cursor.Copy()));
+                    // nextchar is handled in MakeComment | MakeMultiLineComment
+                    continue;
+                }
+
                 string lexeme = "" + CurrentChar;
                 if (lexeme.StartsWith("\""))
                 {
@@ -173,6 +181,37 @@ namespace fg_script.core
             return tokens;
         }
 
+        protected string MakeComment()
+        {
+            string str = "//";
+            NextChar();
+            NextChar();
+            while (!HasEnded() && !IsNewLine(CurrentChar))
+            {
+                str += CurrentChar;
+                NextChar();
+            }
+            return str;
+        }
+
+        protected string MakeMultiLineComment()
+        {
+            string str = "/*";
+            NextChar();
+            NextChar();
+            while ( !(CurrentChar == '*' && PeekNextChar() == '/') )
+            {
+                str += CurrentChar;
+                NextChar();
+                if (HasEnded())
+                    throw new SyntaxErrorException("interminated comment", Cursor.Copy(), Filepath);
+            }
+            str += "*/";
+            NextChar();
+            NextChar();
+            return str;
+        }
+
         // standard string : "hello world!"
         protected string MakeString()
         {
@@ -186,7 +225,7 @@ namespace fg_script.core
                     throw new SyntaxErrorException("interminated string", Cursor.Copy(), Filepath);
             }
             NextChar(); // ignore '"'
-            return String.Format("\"{0}\"", str);
+            return string.Format("\"{0}\"", str);
         }
 
         // [0-9]+

@@ -18,6 +18,8 @@
         NOT,                // ! or not
         COMMA,              // ,
         DOT,                // .
+
+        COMMENT,            // //
         
         EQ,                 // ==
         NEQ,                // !=
