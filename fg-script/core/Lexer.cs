@@ -27,7 +27,8 @@
             ReservedWords.Add("expose", TokenType.EXPOSE);
             ReservedWords.Add("false", TokenType.BOOL);
             ReservedWords.Add("true", TokenType.BOOL);
-            
+            ReservedWords.Add("null", TokenType.NULL);
+
             // branching, loops
             ReservedWords.Add("loop", TokenType.LOOP);
             ReservedWords.Add("while", TokenType.WHILE);

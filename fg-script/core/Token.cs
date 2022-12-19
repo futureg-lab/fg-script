@@ -45,6 +45,7 @@ namespace fg_script.core
         NUMBER,             // 1235.6
         BOOL,               // false | true
         TUPLE,              // ( a, b, c, d, ...)
+        NULL,               // null keyword
 
         // keywords
         EXTERN,             // extern

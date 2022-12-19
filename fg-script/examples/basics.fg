@@ -1,11 +1,19 @@
 ﻿
+/**
+ * example external function
+ * doesn't need to be correct
+ * just for testing our lexer
+ */
+
 // example external function
 extern kron(num) -> bool
 
-
-fn piececIsBlack(num x, num y) -> bool {
+// now let's expose our api
+expose fn piececIsBlack(num x, num y) -> bool {
+	bool res = null
 	if kron (x, y) {
-		true
+		res = true
 	}
-	false
+	res = false
+	ret res
 }
