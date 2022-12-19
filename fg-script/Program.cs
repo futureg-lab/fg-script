@@ -3,8 +3,9 @@ using fg_script.utils;
 
 try
 {
-    string source = "let myVar_123 \"123.6\" 123.6";
-    Lexer lexer = new Lexer(source, "<none>");
+    string source = "/* one /* two /* three */ */";
+    Console.WriteLine(source);
+    Lexer lexer = new(source, "<none>");
     List<Token> list = lexer.Tokenize();
 
     foreach (Token token in list)

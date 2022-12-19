@@ -5,18 +5,62 @@
         EOF = -1,
         KEYWORD_OR_NAME, // alphanum | _
         UNKNOWN,
-        // operators
-        EQUAL,
-        PLUS,
-        MINUS,
-        DIV,
-        MULT,
-        MOD,
 
-        // types
-        STRING,
-        NUMBER,
-        BOOL
+        // operators
+        ASSIGN,             // =
+        PLUS,               // +
+        MINUS,              // -
+        DIV,                // /
+        MULT,               // *
+        MOD,                // %
+        LT,                 // <
+        GT,                 // >
+        NOT,                // ! or not
+        COMMA,              // ,
+        DOT,                // .
+
+        COMMENT,            // //
+        
+        EQ,                 // ==
+        NEQ,                // !=
+        GE,                 // >=
+        LE,                 // <=
+        RET_OP,             // ->
+        DBL_DOT,            // x..y == (x, x+1, ..., y)
+        NEW_LINE,           // \n
+
+        // enclosures
+        LEFT_PARENTH,       // (
+        RIGHT_PARENTH,      // )
+        LEFT_BRACE,         // {
+        RIGHT_BRACE,        // }
+        LEFT_BRACKET,       // [
+        RIGHT_BRACKET,      // ]
+
+
+        // LITERALS
+        STRING,             // "any string"
+        NUMBER,             // 1235.6
+        BOOL,               // false | true
+        TUPLE,              // ( a, b, c, d, ...)
+
+        // keywords
+        EXTERN,             // extern
+        EXPOSE,             // expose
+        FUN_DECL,           // fn
+        TYPE,               // bool, tup, num
+        IN,                 // (i, val) in (1, 2, 3, 4..)
+        IS,                 // x is y -> bool
+        OR,                 // x or y -> bool
+        AND,                // x and y -> bool
+
+        IF,                 // if
+        ELSE,               // else
+        ELSE_IF,            // elif
+        LOOP,               // loop
+        WHILE,              // while
+        ERROR,              // err
+        RETURN,             // ret
     }
 
     public class CursorPosition
@@ -58,7 +102,7 @@
 
         public override string ToString()
         {
-            return String.Format("[type = {0}, lexeme = \"{1}\", position {2}]", Type, Lexeme, Cursor);
+            return String.Format("[type = {0}, lexeme = {1}, position {2}]", Type, Lexeme, Cursor);
         }
     }
 }

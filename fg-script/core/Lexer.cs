@@ -1,68 +1,215 @@
-﻿namespace fg_script.core
+﻿using System.Collections;
+
+namespace fg_script.core
 {
     public class Lexer
     {
         protected char? CurrentChar { get; set; } = null;
         protected string Source { get; set; } = "";
         protected string Filepath { get; set; } = "";
-        protected CursorPosition Cursor = new(0, 0, -1);
+        protected CursorPosition Cursor = new(1, 0, -1);
+
+        private Hashtable ReservedWords = new();
+        private Hashtable ReservedSymbols = new();
+        private Hashtable EncloseSymbols = new();
+
+        public Lexer(string source, string filepath = "<console>")
+        {
+            Source = source;
+            Filepath = filepath;
+            InitReservedWords();
+            InitReservedSymbols();
+            InitEnclosedSymbols();
+        }
+
+        private void InitReservedWords()
+        {
+            ReservedWords.Add("fn", TokenType.FUN_DECL);
+            ReservedWords.Add("extern", TokenType.EXTERN);
+            ReservedWords.Add("expose", TokenType.EXPOSE);
+            ReservedWords.Add("false", TokenType.BOOL);
+            ReservedWords.Add("true", TokenType.BOOL);
+            
+            // branching, loops
+            ReservedWords.Add("loop", TokenType.LOOP);
+            ReservedWords.Add("while", TokenType.WHILE);
+            ReservedWords.Add("if", TokenType.IF);
+            ReservedWords.Add("elif", TokenType.ELSE_IF);
+            ReservedWords.Add("else", TokenType.ELSE);
+
+            // types
+            ReservedWords.Add("bool", TokenType.TYPE);
+            ReservedWords.Add("num", TokenType.TYPE);
+            ReservedWords.Add("str", TokenType.TYPE);
+            ReservedWords.Add("tup", TokenType.TYPE);
+
+            // other
+            ReservedWords.Add("is", TokenType.IS);
+            ReservedWords.Add("and", TokenType.AND);
+            ReservedWords.Add("or", TokenType.OR);
+            ReservedWords.Add("not", TokenType.NOT);
+            ReservedWords.Add("ret", TokenType.RETURN);
+            ReservedWords.Add("err", TokenType.ERROR);
+        }
+
+        private void InitReservedSymbols()
+        {
+            // 1 char
+            ReservedSymbols.Add("=", TokenType.ASSIGN);
+
+            ReservedSymbols.Add("+", TokenType.PLUS);
+            ReservedSymbols.Add("-", TokenType.MINUS);
+            ReservedSymbols.Add("*", TokenType.MULT);
+            ReservedSymbols.Add("/", TokenType.DIV);
+
+            ReservedSymbols.Add("%", TokenType.MOD);
+            ReservedSymbols.Add(">", TokenType.GT);
+            ReservedSymbols.Add("<", TokenType.LT);
+            ReservedSymbols.Add("!", TokenType.NOT);
+
+            ReservedSymbols.Add(",", TokenType.COMMA);
+            ReservedSymbols.Add(".", TokenType.DOT);
+
+            // 2 chars
+            ReservedSymbols.Add("==", TokenType.EQ);
+            ReservedSymbols.Add("!=", TokenType.NEQ);
+            ReservedSymbols.Add(">=", TokenType.GE);
+            ReservedSymbols.Add("<=", TokenType.LE);
+            ReservedSymbols.Add("->", TokenType.RET_OP);
+            ReservedSymbols.Add("..", TokenType.DBL_DOT);
+        }
+
+        private void InitEnclosedSymbols()
+        {
+            EncloseSymbols.Add("(", TokenType.LEFT_PARENTH);
+            EncloseSymbols.Add(")", TokenType.RIGHT_PARENTH);
+            EncloseSymbols.Add("{", TokenType.LEFT_BRACE);
+            EncloseSymbols.Add("}", TokenType.RIGHT_BRACE);
+            EncloseSymbols.Add("[", TokenType.LEFT_BRACKET);
+            EncloseSymbols.Add("]", TokenType.RIGHT_BRACKET);
+        }
 
         public List<Token> Tokenize()
         {
             List<Token> tokens = new();
             NextChar(); // -1 + 1 = 0
             while (!HasEnded())
-            {
-                string lexeme = "" + CurrentChar;
-                if (lexeme == " ")
+            {                
+                if (IsSpaceOrTab(CurrentChar))
                 {
                     NextChar();
                     continue;
                 }
+                
+                if (IsNewLine(CurrentChar))
+                {
+                    tokens.Add(new("\\n", TokenType.NEW_LINE, Cursor.Copy()));
+                    Cursor.Col = 0;
+                    Cursor.Line++;
+                    NextChar();
+                    continue;
+                }
 
+                if (CurrentChar == '/' && (PeekNextChar() == '/' || PeekNextChar() == '*'))
+                {
+                    string str = PeekNextChar() == '*' ? MakeMultiLineComment() : MakeComment();
+                    tokens.Add(new(str, TokenType.COMMENT, Cursor.Copy()));
+                    // nextchar is handled in MakeComment | MakeMultiLineComment
+                    continue;
+                }
+
+                string lexeme = "" + CurrentChar;
                 if (lexeme.StartsWith("\""))
                 {
                     string str = MakeString();
-                    Token token = new(str, TokenType.STRING, Cursor.Copy());
-                    tokens.Add(token);
+                    tokens.Add(new(str, TokenType.STRING, Cursor.Copy()));
+                    // nextchar is handled in MakeString
                     continue;
                 }
 
                 // has to be alphanum + _
-                if (IsAlpha(CurrentChar))
-                {
-                    string str = MakeStandardExpression();
-                    Token token = new(str, TokenType.KEYWORD_OR_NAME, Cursor.Copy());
-                    tokens.Add(token);
-                    continue;
-                }
-
                 if (IsNum(CurrentChar))
                 {
                     string str = MakeNumber();
-                    Token token = new(str, TokenType.NUMBER, Cursor.Copy());
-                    tokens.Add(token);
+                    tokens.Add(new(str, TokenType.NUMBER, Cursor.Copy()));
+                    // nextchar is handled in MakeNumber
                     continue;
                 }
 
+                if (IsAlpha(CurrentChar))
                 {
-                    Token token = new(lexeme, TokenType.UNKNOWN, Cursor.Copy());
-                    tokens.Add(token);
-                    NextChar();
+                    string str = MakeStandardExpression();
+                    TokenType type = TokenType.KEYWORD_OR_NAME;
+                    if (ReservedWords.ContainsKey(str))
+                    {
+                        type = (TokenType) ReservedWords[str];
+                    }
+                    tokens.Add(new(str, type, Cursor.Copy()));
+                    // nextchar is handled in MakeStandardExpression
+                    continue;
                 }
+
+                // +, -, *, /, =, ..., >=, !, <, ..
+                if (IsStandardSymbol(CurrentChar))
+                {
+                    string str = MakeStandardSymbols();
+                    TokenType type = TokenType.KEYWORD_OR_NAME;
+                    if (ReservedSymbols.ContainsKey(str))
+                    {
+                        type = (TokenType) ReservedSymbols[str];
+                    }
+                    tokens.Add(new(str, type, Cursor.Copy()));
+                    // nextchar is handled in MakeStandardSymbols
+                    continue;
+                }
+
+                // {, }, [, ], ( and ) 
+                if (IsEncloseSymbol(CurrentChar) && EncloseSymbols.Contains(lexeme))
+                {
+                    TokenType type = (TokenType) EncloseSymbols[lexeme];
+                    tokens.Add(new(lexeme, type, Cursor.Copy()));
+                    NextChar();
+                    continue;
+                }
+
+                tokens.Add(new(lexeme, TokenType.UNKNOWN, Cursor.Copy()));
+                NextChar();
             }
             tokens.Add(new("EOF", TokenType.EOF, Cursor.Copy()));
             return tokens;
         }
 
-        //
-        // FGScript specific token eaters
-        //
+        protected string MakeComment()
+        {
+            string str = "//";
+            NextChar();
+            NextChar();
+            while (!HasEnded() && !IsNewLine(CurrentChar))
+            {
+                str += CurrentChar;
+                NextChar();
+            }
+            return str;
+        }
 
-
-        //
-        // Basic token eaters
-        //
+        // Does not allow multiline comment nesting
+        protected string MakeMultiLineComment()
+        {
+            string str = "/*";
+            NextChar();
+            NextChar();
+            while ( !(CurrentChar == '*' && PeekNextChar() == '/') )
+            {
+                str += CurrentChar;
+                NextChar();
+                if (HasEnded())
+                    throw new SyntaxErrorException("interminated comment", Cursor.Copy(), Filepath);
+            }
+            str += "*/";
+            NextChar();
+            NextChar();
+            return str;
+        }
 
         // standard string : "hello world!"
         protected string MakeString()
@@ -77,7 +224,7 @@
                     throw new SyntaxErrorException("interminated string", Cursor.Copy(), Filepath);
             }
             NextChar(); // ignore '"'
-            return str;
+            return string.Format("\"{0}\"", str);
         }
 
         // [0-9]+
@@ -99,6 +246,17 @@
             return str;
         }
 
+        protected string MakeStandardSymbols()
+        {
+            string str = "";
+            while (IsStandardSymbol(CurrentChar))
+            {
+                str += CurrentChar;
+                NextChar();
+            }
+            return str;
+        }
+
         // [a-zA-Z0-9_]+
         protected string MakeStandardExpression()
         {
@@ -111,25 +269,26 @@
             return str;
         }
 
-        public Lexer(string source, string filepath = "<console>")
+        // new line
+        public static bool IsNewLine(char? character)
         {
-            Source = source;
-            Filepath = filepath;
+            return character == '\n';
+        }
+
+        public static bool IsSpaceOrTab(char? character)
+        {
+            return character == ' ' || character == '\t';
         }
 
         // [0-9]
         public static bool IsNum(char? character)
         {
-            if (character == null)
-                return false;
             return character >= '0' && character <= '9';
         }
 
         // [a-zA-Z]
         public static bool IsAlpha(char? character)
         {
-            if (character == null)
-                return false;
             return character >= 'a' && character <= 'z'
                 || character >= 'A' && character <= 'Z';
         }
@@ -145,6 +304,24 @@
             return IsAlpha(character) || character == '_' || IsNum(character);
         }
 
+        public static bool IsStandardSymbol(char? character)
+        {
+            if (character == null)
+                return false;
+
+            string symbols = "=+-*/%><!,.";
+            return symbols.Contains((char) character);
+        }
+
+        public static bool IsEncloseSymbol(char? character)
+        {
+            if (character == null)
+                return false;
+
+            string list = "(){}[]";
+            return list.Contains((char) character);
+        }
+
         public void NextChar()
         {
             Cursor.Pos++;
@@ -152,17 +329,7 @@
                 CurrentChar = null;
             else
                 CurrentChar = Source[Cursor.Pos];
-
-            if (CurrentChar == '\n')
-            {
-                Cursor.Line++;
-                Cursor.Col = 0;
-                NextChar();
-            }
-            else
-            {
-                Cursor.Col++;
-            }
+            Cursor.Col++;
         }
 
         public char? PeekNextChar()
