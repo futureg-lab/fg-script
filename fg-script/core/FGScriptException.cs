@@ -8,6 +8,14 @@
         }
     }
 
+    public class FileException : FGScriptException
+    {
+        public FileException(string reason, string full_description = "")
+            : base("file", reason, full_description)
+        {
+        }
+    }
+
     public class RuntimeException : FGScriptException
     {
         public RuntimeException(string reason, string full_description = "") 

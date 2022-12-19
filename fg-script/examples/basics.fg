@@ -1,0 +1,11 @@
+﻿
+// example external function
+extern kron(num) -> bool
+
+
+fn piececIsBlack(num x, num y) -> bool {
+	if kron (x, y) {
+		true
+	}
+	false
+}

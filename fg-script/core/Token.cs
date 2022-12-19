@@ -1,4 +1,6 @@
-﻿namespace fg_script.core
+﻿using System.Text.RegularExpressions;
+
+namespace fg_script.core
 {
     public enum TokenType
     {
@@ -102,7 +104,9 @@
 
         public override string ToString()
         {
-            return String.Format("[type = {0}, lexeme = {1}, position {2}]", Type, Lexeme, Cursor);
+            string lex = Lexeme ?? "";
+            return String
+                        .Format("[type = {0}, lexeme = {1}, position {2}]", Type, Lexeme, Cursor);
         }
     }
 }

@@ -3,8 +3,7 @@
     public class Parser
     {
         private readonly List<Token> Tokens;
-
-        int Position { get; set; } = 0;
+        private int Position { get; set; } = 0;
 
         public Parser(ref List<Token> tokens)
         {
