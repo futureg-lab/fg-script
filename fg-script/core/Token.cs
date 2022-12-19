@@ -104,9 +104,7 @@ namespace fg_script.core
 
         public override string ToString()
         {
-            string lex = Lexeme ?? "";
-            return String
-                        .Format("[type = {0}, lexeme = {1}, position {2}]", Type, Lexeme, Cursor);
+            return String.Format("[type = {0}, lexeme = {1}, position {2}]", Type, Lexeme, Cursor);
         }
     }
 }
