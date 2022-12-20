@@ -64,7 +64,7 @@ tup res3 = vec1 - vec2 // error : "-" operator is undefined for operands (num, s
 tup res4 = vec1 / vec2 // error : "/" operator is undefined for operands (num, str)
 
 // you can create a custom tuple !
-@type cust_tup = (name : str, age : num, attr : (str, str, num))
+define cust_tup = (name : str, age : num, attr : (str, str, num))
 cust_tup someone = (name : "Rakoto", age : 17, attr : ("foo", "bar", 42))
 
 // a dic is a tuple, with a label on each item

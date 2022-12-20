@@ -50,6 +50,7 @@ namespace fg_script.core
         // keywords
         EXTERN,             // extern
         EXPOSE,             // expose
+        DEFINE,             // define (for custom tuples)
         FUN_DECL,           // fn
         TYPE,               // bool, tup, num
         IN,                 // (i, val) in (1, 2, 3, 4..)

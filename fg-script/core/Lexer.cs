@@ -25,6 +25,7 @@
             ReservedWords.Add("fn", TokenType.FUN_DECL);
             ReservedWords.Add("extern", TokenType.EXTERN);
             ReservedWords.Add("expose", TokenType.EXPOSE);
+            ReservedWords.Add("define", TokenType.DEFINE);
             ReservedWords.Add("false", TokenType.BOOL);
             ReservedWords.Add("true", TokenType.BOOL);
             ReservedWords.Add("null", TokenType.NULL);
