@@ -1,10 +1,19 @@
-﻿namespace fg_script.utils 
+﻿using fg_script.core;
+
+namespace fg_script.utils 
 {
     public class Utils
     {
-        public static string? ReadTextFile(string filePath)
+        public static string ReadTextFile(string filePath)
         {
-            return "";
+            try
+            {
+                return File.ReadAllText(filePath);
+            }
+            catch (IOException exception)
+            {
+                throw new FileException(exception.Message, exception.StackTrace ?? "");
+            }
         }
 
         public static string UnderlineText(string text, int start, int end)

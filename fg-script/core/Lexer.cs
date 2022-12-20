@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace fg_script.core
+﻿namespace fg_script.core
 {
     public class Lexer
     {
@@ -9,9 +7,9 @@ namespace fg_script.core
         protected string Filepath { get; set; } = "";
         protected CursorPosition Cursor = new(1, 0, -1);
 
-        private Hashtable ReservedWords = new();
-        private Hashtable ReservedSymbols = new();
-        private Hashtable EncloseSymbols = new();
+        private Dictionary<string, TokenType> ReservedWords = new();
+        private Dictionary<string, TokenType> ReservedSymbols = new();
+        private Dictionary<string, TokenType> EncloseSymbols = new();
 
         public Lexer(string source, string filepath = "<console>")
         {
@@ -27,9 +25,11 @@ namespace fg_script.core
             ReservedWords.Add("fn", TokenType.FUN_DECL);
             ReservedWords.Add("extern", TokenType.EXTERN);
             ReservedWords.Add("expose", TokenType.EXPOSE);
+            ReservedWords.Add("define", TokenType.DEFINE);
             ReservedWords.Add("false", TokenType.BOOL);
             ReservedWords.Add("true", TokenType.BOOL);
-            
+            ReservedWords.Add("null", TokenType.NULL);
+
             // branching, loops
             ReservedWords.Add("loop", TokenType.LOOP);
             ReservedWords.Add("while", TokenType.WHILE);
@@ -103,9 +103,19 @@ namespace fg_script.core
                 
                 if (IsNewLine(CurrentChar))
                 {
-                    tokens.Add(new("\\n", TokenType.NEW_LINE, Cursor.Copy()));
+                    string str = "\\n";
+                    // windows
+                    if (CurrentChar == '\r' && PeekNextChar() == '\n')
+                    {
+                        str = "\\r" + str;
+                        NextChar(); // skip next \n
+                    }
+                    tokens.Add(new(str, TokenType.NEW_LINE, Cursor.Copy()));
+                    
+                    // update cursor position
                     Cursor.Col = 0;
                     Cursor.Line++;
+
                     NextChar();
                     continue;
                 }
@@ -142,7 +152,7 @@ namespace fg_script.core
                     TokenType type = TokenType.KEYWORD_OR_NAME;
                     if (ReservedWords.ContainsKey(str))
                     {
-                        type = (TokenType) ReservedWords[str];
+                        type = ReservedWords[str];
                     }
                     tokens.Add(new(str, type, Cursor.Copy()));
                     // nextchar is handled in MakeStandardExpression
@@ -156,7 +166,7 @@ namespace fg_script.core
                     TokenType type = TokenType.KEYWORD_OR_NAME;
                     if (ReservedSymbols.ContainsKey(str))
                     {
-                        type = (TokenType) ReservedSymbols[str];
+                        type = ReservedSymbols[str];
                     }
                     tokens.Add(new(str, type, Cursor.Copy()));
                     // nextchar is handled in MakeStandardSymbols
@@ -164,9 +174,9 @@ namespace fg_script.core
                 }
 
                 // {, }, [, ], ( and ) 
-                if (IsEncloseSymbol(CurrentChar) && EncloseSymbols.Contains(lexeme))
+                if (IsEncloseSymbol(CurrentChar) && EncloseSymbols.ContainsKey(lexeme))
                 {
-                    TokenType type = (TokenType) EncloseSymbols[lexeme];
+                    TokenType type = EncloseSymbols[lexeme];
                     tokens.Add(new(lexeme, type, Cursor.Copy()));
                     NextChar();
                     continue;
@@ -272,7 +282,7 @@ namespace fg_script.core
         // new line
         public static bool IsNewLine(char? character)
         {
-            return character == '\n';
+            return character == '\n' || character == '\r';
         }
 
         public static bool IsSpaceOrTab(char? character)

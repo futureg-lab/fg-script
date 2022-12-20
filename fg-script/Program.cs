@@ -3,9 +3,10 @@ using fg_script.utils;
 
 try
 {
-    string source = "/* one /* two /* three */ */";
+    string filePath = "../../../examples/basics.fg";
+    string source = Utils.ReadTextFile(filePath);
     Console.WriteLine(source);
-    Lexer lexer = new(source, "<none>");
+    Lexer lexer = new(source, "");
     List<Token> list = lexer.Tokenize();
 
     foreach (Token token in list)

@@ -1,4 +1,6 @@
-﻿namespace fg_script.core
+﻿using System.Text.RegularExpressions;
+
+namespace fg_script.core
 {
     public enum TokenType
     {
@@ -43,10 +45,12 @@
         NUMBER,             // 1235.6
         BOOL,               // false | true
         TUPLE,              // ( a, b, c, d, ...)
+        NULL,               // null keyword
 
         // keywords
         EXTERN,             // extern
         EXPOSE,             // expose
+        DEFINE,             // define (for custom tuples)
         FUN_DECL,           // fn
         TYPE,               // bool, tup, num
         IN,                 // (i, val) in (1, 2, 3, 4..)
