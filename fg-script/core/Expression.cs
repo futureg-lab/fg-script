@@ -2,10 +2,22 @@
 {
     public enum ExprType
     {
+        PROGRAM,
         UNARY,
         BINARY,
         LITERAL,
         GENERIC
+    }
+
+    public class Program
+    {
+        public String Filepath { get; } = "<unknown>";
+        public Expr Tree { get; set; } = new(ExprType.PROGRAM);
+        public Program(string? filepath)
+        {
+            if (filepath != null)
+                Filepath = filepath.Trim();
+        }
     }
 
     public class Expr

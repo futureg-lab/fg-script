@@ -61,7 +61,7 @@ namespace fg_script.core
         IF,                 // if
         ELSE,               // else
         ELSE_IF,            // elif
-        LOOP,               // loop
+        FOR,                // for
         WHILE,              // while
         ERROR,              // err
         RETURN,             // ret

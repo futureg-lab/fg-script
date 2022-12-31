@@ -31,7 +31,7 @@
             ReservedWords.Add("null", TokenType.NULL);
 
             // branching, loops
-            ReservedWords.Add("loop", TokenType.LOOP);
+            ReservedWords.Add("for", TokenType.FOR);
             ReservedWords.Add("while", TokenType.WHILE);
             ReservedWords.Add("if", TokenType.IF);
             ReservedWords.Add("elif", TokenType.ELSE_IF);
