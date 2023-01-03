@@ -87,7 +87,7 @@ namespace fg_script_test
         [TestMethod]
         public void TestReservedKeywords()
         {
-            string source = "num define  bool  tup   if else elif loop   true  false    and or is fn" +
+            string source = "num define  bool  tup   if else elif for   true  false    and or is fn" +
                  "  extern expose ret somethingThatMeansNothing  err";
 
 
@@ -97,7 +97,7 @@ namespace fg_script_test
             List<TokenType> expected = new()
             {
                 TokenType.TYPE, TokenType.DEFINE, TokenType.TYPE, TokenType.TYPE,
-                TokenType.IF, TokenType.ELSE, TokenType.ELSE_IF, TokenType.LOOP, 
+                TokenType.IF, TokenType.ELSE, TokenType.ELSE_IF, TokenType.FOR, 
                 TokenType.BOOL, TokenType.BOOL, 
                 TokenType.AND, TokenType.OR, TokenType.IS, TokenType.FUN_DECL,
                 TokenType.EXTERN, TokenType.EXPOSE, TokenType.RETURN, TokenType.KEYWORD_OR_NAME,
@@ -116,7 +116,7 @@ namespace fg_script_test
         [TestMethod]
         public void TestReservedSymbolsAndOperators()
         {
-            string source = "+ \n\n   -   *  /  =   % ==  !=  >=   <= < >  ! \n  ->  () {}[] , . ..";
+            string source = "+ \n\n  -   *  /  =   % ==  !=  >=   <= < >  ! \n  ->  () {}[] , . .. ;";
 
             Lexer lexer = new(source, "<test>");
             List<Token> list = lexer.Tokenize();
@@ -129,6 +129,7 @@ namespace fg_script_test
                 TokenType.LT, TokenType.GT, TokenType.NOT, TokenType.NEW_LINE, TokenType.RET_OP, 
                 TokenType.LEFT_PARENTH, TokenType.RIGHT_PARENTH, TokenType.LEFT_BRACE, TokenType.RIGHT_BRACE,
                 TokenType.LEFT_BRACKET, TokenType.RIGHT_BRACKET, TokenType.COMMA, TokenType.DOT, TokenType.DBL_DOT,
+                TokenType.SEMICOLUMN,
                 TokenType.EOF
             };
 
