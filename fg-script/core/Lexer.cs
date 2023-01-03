@@ -69,6 +69,8 @@
 
             ReservedSymbols.Add(",", TokenType.COMMA);
             ReservedSymbols.Add(".", TokenType.DOT);
+            ReservedSymbols.Add(";", TokenType.SEMICOLUMN);
+
 
             // 2 chars
             ReservedSymbols.Add("==", TokenType.EQ);
@@ -319,7 +321,7 @@
             if (character == null)
                 return false;
 
-            string symbols = "=+-*/%><!,.";
+            string symbols = "=+-*/%><!,.;";
             return symbols.Contains((char) character);
         }
 
