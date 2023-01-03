@@ -19,6 +19,7 @@ namespace fg_script.core
         GT,                 // >
         NOT,                // ! or not
         COMMA,              // ,
+        SEMICOLUMN,         // ;
         DOT,                // .
 
         COMMENT,            // //
@@ -95,7 +96,7 @@ namespace fg_script.core
         // type id
         public TokenType Type { get; set; } = TokenType.UNKNOWN;
         // string from source
-        public string? Lexeme { get; set; } = null;
+        public string Lexeme { get; set; }
 
         public Token(string lexeme, TokenType type, CursorPosition cursor)
         {
