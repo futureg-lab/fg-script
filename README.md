@@ -94,15 +94,15 @@ fn fibo (num n) -> num {
 }
 
 fn main -> void {
-	loop i = 0 .. 10 {
+	for i = 0 .. 10 {
 		print("index " + i);
 	}
 	
-	loop (i, val) in (1, 2, 3, 4) {
+	for (i, val) in (1, 2, 3, 4) {
 		print("index " + i + ":" + val + "\n");
 	}
 	
-	loop (key, value) in example_dic {
+	for (key, value) in example_dic {
 		if type(value) is "tuple" {
 			print("Raw value at " + key + " : " + value);
 		}
