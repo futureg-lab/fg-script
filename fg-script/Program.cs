@@ -34,7 +34,6 @@ try
     string filePath = "../../../examples/assign.fg";
     source = Utils.ReadTextFile(filePath);
 
-    Console.WriteLine(source);
     Lexer lexer = new(source, "");
     List<Token> list = lexer.Tokenize();
 

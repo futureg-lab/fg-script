@@ -70,11 +70,6 @@ namespace fg_script.core
         {
             return vistor.VisitIf(this);
         }
-
-        public override string ToString()
-        {
-            return "If";
-        }
     }
 
     public class For : Stmt
@@ -110,9 +105,31 @@ namespace fg_script.core
 
     public class Return : Stmt
     {
+        public Expr ReturnValue { get; }
+
+        public Return (Expr returnValue)
+        {
+            ReturnValue = returnValue;
+        }
+
         override public T Accept<T>(IVisitor<T> vistor)
         {
             return vistor.VisitReturn(this);
+        }
+    }
+
+    public class Error : Stmt
+    {
+        public Expr ThrownValue { get; }
+
+        public Error(Expr thrown)
+        {
+            ThrownValue = thrown;
+        }
+
+        override public T Accept<T>(IVisitor<T> vistor)
+        {
+            return vistor.VisitError(this);
         }
     }
 

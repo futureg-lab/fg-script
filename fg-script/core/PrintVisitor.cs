@@ -91,14 +91,13 @@ namespace fg_script.core
 
             all += string.Join("\n", lines);
 
-            all += "\n}";
             Depth--;
             return all;
         }
 
         public string VisitFuncCallDirect(FuncCallDirect stmt)
         {
-            return Print(stmt.Fcall);
+            return string.Format("(#root_call {0})", Print(stmt.Fcall));
         }
 
         public string VisitBreak(Break stmt)
@@ -146,7 +145,7 @@ namespace fg_script.core
                 args.Add(Print(arg));
             }
             string all_args = string.Join(", ", args);
-            return string.Format("(!declared_func {0} ({1}) -> {2})\n{3}", name, all_args, ret_type, Print(stmt.Body));
+            return string.Format("(#declare {0} ({1}) -> {2})\n{3}", name, all_args, ret_type, Print(stmt.Body));
         }
 
 
@@ -157,7 +156,14 @@ namespace fg_script.core
 
         public string VisitReturn(Return stmt)
         {
-            throw new NotImplementedException();
+            Expr returned = stmt.ReturnValue;
+            return string.Format("(#return {0})", Print(returned));
+        }
+
+        public string VisitError(Error stmt)
+        {
+            Expr thrown = stmt.ThrownValue;
+            return string.Format("(#error {0})", Print(thrown));
         }
 
         public string VisitStmt(Stmt stmt)

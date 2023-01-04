@@ -17,6 +17,7 @@ namespace fg_script.core
         public T VisitWhile(While stmt);
         public T VisitAssign(Assign stmt);
         public T VisitReturn(Return stmt);
+        public T VisitError(Error stmt);
         public T VisitBreak(Break stmt);
         public T VisitContinue(Continue stmt);
         public T VisitDefine(Define stmt);

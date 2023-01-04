@@ -38,17 +38,17 @@
             if (Match(TokenType.LEFT_BRACE)) return StateBlock();
             if (Match(TokenType.WHILE)) return StateWhile();
             if (Match(TokenType.FOR)) return StateFor();
-            // fcall on the root
             if (Match(TokenType.KEYWORD_OR_NAME)) return StateFuncCallRoot();
 
-            // if (Match(TokenType.RETURN)) return StateReturn();
+            if (Match(TokenType.RETURN)) return StateReturn();
+            if (Match(TokenType.ERROR)) return StateError();
+
             // if (Match(TokenType.BREAK)) return StateBreak();
             // if (Match(TokenType.CONTINUE)) return StateContinue();
 
-            if (HasEnded())  
+            if (HasEnded())
                 return null;
-            else
-                throw Error("unexpected symbol");
+            throw Error("unexpected token");
         }
 
         protected Func StateFuncDeclaration()
@@ -160,6 +160,22 @@
             FuncCall fcall = ConsumeFuncCall();
             Consume(TokenType.SEMICOLUMN, "; was expected");
             return new FuncCallDirect(fcall);
+        }
+
+        protected Return StateReturn()
+        {
+            Consume(TokenType.RETURN, "ret was expected");
+            Expr returned = ConsumeExpr();
+            Consume(TokenType.SEMICOLUMN, "; was expected");
+            return new(returned);
+        }
+
+        protected Error StateError()
+        {
+            Consume(TokenType.ERROR, "err was expected");
+            Expr thrown = ConsumeExpr();
+            Consume(TokenType.SEMICOLUMN, "; was expected");
+            return new(thrown);
         }
 
         // Expressions
