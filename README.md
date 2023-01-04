@@ -20,7 +20,7 @@ extern requestHttpJSON(str url) -> tup;
 
 // expose a function to the host language
 expose fn sayHello(name) -> str {
-    "Hello World! " + name
+    ret "Hello World! " + name;
 }
 
 // Native types : str, num (double representation), tup
