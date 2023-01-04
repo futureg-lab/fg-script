@@ -60,9 +60,9 @@
             List<ArgExpr> args = new();
             while(!Match(TokenType.RIGHT_PARENTH))
             {
-                Token arg_type = Consume(TokenType.TYPE, "type was expected");
+                Token arg_type = Consume(TokenType.TYPE, "valid return type was expected");
                 Token arg_name = Consume(TokenType.KEYWORD_OR_NAME, "invalid arg name");
-                ArgExpr arg = new(arg_type.Lexeme, arg_name.Lexeme);
+                ArgExpr arg = new(arg_type, arg_name);
                 args.Add(arg);
 
                 if (Match(TokenType.COMMA))
@@ -71,8 +71,12 @@
                     break;
             }
             Consume(TokenType.RIGHT_PARENTH, ") was expected");
+            Consume(TokenType.RET_OP, "-> was expeceted");
+            
+            Token ret_type = Consume(TokenType.TYPE, "valid return type was expected");
+
             Block body = StateBlock();
-            return new Func(name, args, body);
+            return new Func(name, args, body, ret_type);
         }
 
         protected Assign StateAssignDeclaration()
@@ -115,7 +119,9 @@
 
         protected Expose StateExternDeclaration()
         {
-            throw new Exception("todo");
+            Consume(TokenType.EXPOSE, "expose was expected");
+            Func func = StateFuncDeclaration();
+            return new(func);
         }
 
         protected If StateIf ()

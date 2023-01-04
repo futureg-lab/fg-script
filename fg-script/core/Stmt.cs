@@ -32,14 +32,16 @@ namespace fg_script.core
     public class Func : Stmt
     {
         public Token Name { get; }
+        public Token ReturnType { get; }
         public List<ArgExpr> Args { get; }
         public Block Body { get; }
 
-        public Func(Token name, List<ArgExpr> args, Block body)
+        public Func(Token name, List<ArgExpr> args, Block body, Token ret_type)
         {
             Name = name;
             Args = args;
             Body = body;
+            ReturnType = ret_type;
         }
 
         override public T Accept<T>(IVisitor<T> vistor)

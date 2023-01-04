@@ -8,6 +8,8 @@ namespace fg_script.core
 {
     public class PrintVisitor : IVisitor<string>
     {
+        private int Depth { get; set; } = 0;
+
         public string Print(Stmt stmt)
         {
             return stmt.Accept(this);
@@ -51,6 +53,13 @@ namespace fg_script.core
             return string.Format("({0}:{1} => {2})", datatype, name, Print(value));
         }
 
+        public string VisitArgExpr(ArgExpr expr)
+        {
+            string name = expr.Name.Lexeme;
+            string datatype = expr.DataType.Lexeme;
+            return string.Format("{0}:{1}", datatype, name);
+        }
+
         public string VisitFuncCall(FuncCall expr)
         {
             string callee = expr.Callee.Lexeme;
@@ -70,7 +79,21 @@ namespace fg_script.core
 
         public string VisitBlock(Block stmt)
         {
-            throw new NotImplementedException();
+            Depth++;
+
+            string indent = "";
+            for (int i = 0; i < Depth; i++, indent += "  ");
+
+            string all = indent + "block:\n";
+            List<string> lines = stmt
+                .Statements
+                .ConvertAll<string>(item => indent + indent + Print(item));
+
+            all += string.Join("\n", lines);
+
+            all += "\n}";
+            Depth--;
+            return all;
         }
 
         public string VisitFuncCallDirect(FuncCallDirect stmt)
@@ -115,7 +138,15 @@ namespace fg_script.core
 
         public string VisitFunc(Func stmt)
         {
-            throw new NotImplementedException();
+            string name = stmt.Name.Lexeme;
+            string ret_type = stmt.ReturnType.Lexeme;
+            List<string> args = new();
+            foreach (var arg in stmt.Args)
+            {
+                args.Add(Print(arg));
+            }
+            string all_args = string.Join(", ", args);
+            return string.Format("(!declared_func {0} ({1}) -> {2})\n{3}", name, all_args, ret_type, Print(stmt.Body));
         }
 
 

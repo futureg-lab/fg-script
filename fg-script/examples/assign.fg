@@ -1,3 +1,10 @@
 ﻿num x = 1 * (2 + some_func(4 * zzz / 1, 2, x));
 
 some_call();
+
+
+fn someFunc(num one, str two, tup four) -> num
+{
+	num x = 1 * (2 + some_func(4 * zzz / 1, 2, x));
+	bool y = false and true or false;
+}

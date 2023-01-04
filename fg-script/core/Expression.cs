@@ -49,14 +49,18 @@
 
     public class ArgExpr : Expr
     {
-        public string DataType { get; }
-        public string Name { get; }
+        public Token DataType { get; }
+        public Token Name { get; }
 
-        public ArgExpr(string datatype, string name)
+        public ArgExpr(Token datatype, Token name)
             : base(ExprType.ARG)
         {
             DataType = datatype;
             Name = name;
+        }
+        override public T Accept<T>(IVisitor<T> visitor)
+        {
+            return visitor.VisitArgExpr(this);
         }
     }
 
