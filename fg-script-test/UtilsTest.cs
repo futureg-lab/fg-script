@@ -10,7 +10,7 @@ namespace fg_script_test
         {
             string initString = "Hello, World!";
             string expectedString = "Hello, World!" +
-                                  "\n___^^^^______\n";
+                                  "\n---^^^^------\n";
             string resultString = Utils
                 .UnderlineText(initString, 3, 7);
 

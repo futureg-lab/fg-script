@@ -26,6 +26,7 @@
 
     public class SyntaxErrorException : FGScriptException
     {
+        public CursorPosition Cursor { get; }
         public SyntaxErrorException(string reason, CursorPosition cursor, string filename, string full_description = "")
             : base(
                   "parsing",
@@ -37,6 +38,7 @@
                     full_description
                 )
         {
+            Cursor = cursor;
         }
     }
 }

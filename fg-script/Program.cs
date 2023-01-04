@@ -1,8 +1,12 @@
 ﻿using fg_script.core;
 using fg_script.utils;
 
+
+string source = "";
+
 try
 {
+    /*
     string filePath = "../../../examples/fn_decl.fg";
     string source = Utils.ReadTextFile(filePath);
     Console.WriteLine(source);
@@ -26,13 +30,28 @@ try
             }
         }
         Console.WriteLine(stmt);
+    }*/
+    string filePath = "../../../examples/assign.fg";
+    source = Utils.ReadTextFile(filePath);
+
+    Lexer lexer = new(source, "");
+    List<Token> list = lexer.Tokenize();
+
+    Parser parser = new(filePath, ref list);
+    List<Stmt> stmts = parser.Run();
+
+    PrintVisitor printer = new PrintVisitor();
+    foreach (Stmt stmt in stmts)
+    {
+        Console.WriteLine(printer.Print(stmt));
     }
+}
+catch (SyntaxErrorException syntax_excp)
+{
+    Console.Error.Write(syntax_excp.Message);
+    Console.Error.WriteLine(Utils.UnderlineTextLine(source, syntax_excp.Cursor, 1));
 }
 catch (FGScriptException fgexception)
 {
     Console.Error.WriteLine(fgexception.Message);
-}
-catch (Exception exception)
-{
-    throw exception;
 }

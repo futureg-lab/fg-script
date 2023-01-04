@@ -38,15 +38,17 @@
             if (Match(TokenType.LEFT_BRACE)) return StateBlock();
             if (Match(TokenType.WHILE)) return StateWhile();
             if (Match(TokenType.FOR)) return StateFor();
+            if (Match(TokenType.KEYWORD_OR_NAME)) return StateFuncCallRoot();
 
-            // if (Match(TokenType.RETURN)) return StateReturn();
+            if (Match(TokenType.RETURN)) return StateReturn();
+            if (Match(TokenType.ERROR)) return StateError();
+
             // if (Match(TokenType.BREAK)) return StateBreak();
             // if (Match(TokenType.CONTINUE)) return StateContinue();
 
-            if (HasEnded())  
+            if (HasEnded())
                 return null;
-            else
-                throw Error("unexpected symbol");
+            throw Error("unexpected token");
         }
 
         protected Func StateFuncDeclaration()
@@ -56,46 +58,70 @@
             Consume(TokenType.LEFT_PARENTH, "( was expected");
 
             List<ArgExpr> args = new();
-            while(true)
+            while(!Match(TokenType.RIGHT_PARENTH))
             {
-                Token arg_type = Consume(TokenType.TYPE, "type was expected");
+                Token arg_type = Consume(TokenType.TYPE, "valid return type was expected");
                 Token arg_name = Consume(TokenType.KEYWORD_OR_NAME, "invalid arg name");
-                ArgExpr arg = new(arg_type.Lexeme, arg_name.Lexeme);
+                ArgExpr arg = new(arg_type, arg_name);
                 args.Add(arg);
 
-                // ignore
-                if (Match(TokenType.COMMA) || Match(TokenType.RIGHT_PARENTH))
-                {
-                    if (Match(TokenType.COMMA)) Consume(TokenType.COMMA);
-                    if (Match(TokenType.RIGHT_PARENTH))
-                    {
-                        Consume(TokenType.RIGHT_PARENTH);
-                        break;
-                    }
-                } else
-                {
-                   throw Error(") was expected");
-                }
+                if (Match(TokenType.COMMA))
+                    Consume(TokenType.COMMA);
+                else
+                    break;
             }
+            Consume(TokenType.RIGHT_PARENTH, ") was expected");
+            Consume(TokenType.RET_OP, "-> was expeceted");
+            
+            Token ret_type = Consume(TokenType.TYPE, "valid return type was expected");
+
             Block body = StateBlock();
-            return new Func(name.Lexeme, args, body);
+            return new Func(name, args, body, ret_type);
         }
 
         protected Assign StateAssignDeclaration()
         {
-            throw new Exception("todo");
+            Token type = Consume(TokenType.TYPE, "type was expected");
+            Token v_name = Consume(TokenType.KEYWORD_OR_NAME, "variable name was expected");
+            Expr? value = null;
+            if (Match(TokenType.ASSIGN) || Match(TokenType.SEMICOLUMN))
+            {
+                if (Match(TokenType.ASSIGN))
+                {
+                    Consume(TokenType.ASSIGN);
+                    value = ConsumeExpr();
+                    Consume(TokenType.SEMICOLUMN, "; was expected");
+                }
+            }
+            else
+            {
+                throw Error("= or ; was expected");
+            }
+
+            if (value == null)
+                throw Error(v_name.Lexeme + " is unitialized");
+
+            VarExpr expr = new(type, v_name, value);
+            return new(expr);
         }
+
+        // statements
         protected Define StateDefineType()
         {
             throw new Exception("todo");
         }
         protected Expose StateExposeDeclaration()
         {
-            throw new Exception("todo");
+            Consume(TokenType.EXPOSE, "expose was expected");
+            Func func = StateFuncDeclaration();
+            return new(func);
         }
+
         protected Expose StateExternDeclaration()
         {
-            throw new Exception("todo");
+            Consume(TokenType.EXPOSE, "expose was expected");
+            Func func = StateFuncDeclaration();
+            return new(func);
         }
 
         protected If StateIf ()
@@ -129,6 +155,155 @@
             return block;
         }
 
+        protected FuncCallDirect StateFuncCallRoot()
+        {
+            FuncCall fcall = ConsumeFuncCall();
+            Consume(TokenType.SEMICOLUMN, "; was expected");
+            return new FuncCallDirect(fcall);
+        }
+
+        protected Return StateReturn()
+        {
+            Consume(TokenType.RETURN, "ret was expected");
+            Expr returned = ConsumeExpr();
+            Consume(TokenType.SEMICOLUMN, "; was expected");
+            return new(returned);
+        }
+
+        protected Error StateError()
+        {
+            Consume(TokenType.ERROR, "err was expected");
+            Expr thrown = ConsumeExpr();
+            Consume(TokenType.SEMICOLUMN, "; was expected");
+            return new(thrown);
+        }
+
+        // Expressions
+        // Ex: 1+x*(1-2), "some strings", ...etc
+        // expr     ::= term (+| - | or) expr | term
+        // term     ::= factor (* | / | and) term | factor
+        // factor   ::= (expr) | unary
+        // unary    ::= literal | func_call | var_name
+
+        // expr     ::= term (+| - | or) expr | term
+        protected Expr ConsumeExpr()
+        {
+            Expr expr = ConsumeTerm();
+
+            List<TokenType> bin = new()
+            {
+                TokenType.PLUS,
+                TokenType.MINUS,
+                TokenType.OR
+            };
+
+            foreach (var op in bin)
+            {
+                if (Match(op))
+                {
+                    Token op_token = Consume(op);
+                    Expr right = ConsumeExpr();
+                    expr = new BinaryExpr(op_token, expr, right);
+                    break;
+                }
+            }
+
+            return expr;
+        }
+
+        // term     ::= factor (* | / | and) term | factor
+        protected Expr ConsumeTerm()
+        {
+            Expr expr = ConsumeFactor();
+
+            List<TokenType> bin = new()
+            {
+                TokenType.MULT,
+                TokenType.DIV,
+                TokenType.AND
+            };
+
+            foreach (var op in bin)
+            {
+                if (Match(op))
+                {
+                    Token op_token = Consume(op);
+                    Expr right = ConsumeTerm();
+                    expr = new BinaryExpr(op_token, expr, right);
+                    break;
+                }
+            }
+
+            return expr;
+        }
+
+        // factor   ::= (expr) | unary
+        protected Expr ConsumeFactor()
+        {
+            if (Match(TokenType.LEFT_PARENTH))
+            {
+                Consume(TokenType.LEFT_PARENTH);
+                Expr expr = ConsumeExpr();
+                Consume(TokenType.RIGHT_PARENTH, ") was expected");
+                return expr;
+            }
+            return ConsumeUnary();
+        }
+
+        // unary    ::= literal | func_call | var_name | monoadic_op
+        protected Expr ConsumeUnary()
+        {
+            if (Match(TokenType.MINUS) || Match(TokenType.NOT))
+            {
+                Token op = Match(TokenType.MINUS) ? 
+                    Consume(TokenType.MINUS) : Consume(TokenType.NOT);
+                Expr expr = ConsumeUnary();
+                return new UnaryExpr(op, expr);
+            }
+
+            // Literals
+            if (Match(TokenType.STRING))
+                return new LiteralExpr(Consume(TokenType.STRING));
+            if (Match(TokenType.NUMBER))
+                return new LiteralExpr(Consume(TokenType.NUMBER));
+            if (Match(TokenType.BOOL))
+                return new LiteralExpr(Consume(TokenType.BOOL));
+
+            // var call
+            if (Match(TokenType.KEYWORD_OR_NAME)) 
+            {
+                if (MatchNext(TokenType.LEFT_PARENTH))
+                    return ConsumeFuncCall();
+                else
+                    return new VarCall(Consume(TokenType.KEYWORD_OR_NAME));
+            }
+
+            throw Error("invalid expression");
+        }
+
+        protected FuncCall ConsumeFuncCall()
+        {
+            Token callee = Consume(TokenType.KEYWORD_OR_NAME, "callee name expected");
+            Consume(TokenType.LEFT_PARENTH, "( was expected");
+
+            List<Expr> args = new();
+            while(!Match(TokenType.RIGHT_PARENTH))
+            {
+                Expr expr = ConsumeExpr();
+                args.Add(expr);
+
+                if (Match(TokenType.COMMA))
+                    Consume(TokenType.COMMA);
+                else
+                    break;
+            }
+
+            Consume(TokenType.RIGHT_PARENTH, ") was expected");
+
+            FuncCall res = new(callee, args);
+            return res;
+        }
+
         protected Token Consume(TokenType type, string err_message = "")
         {
             Token current = CurrentToken();
@@ -144,6 +319,10 @@
         {
             return CurrentToken().Type == type;
         }
+        protected bool MatchNext(TokenType type)
+        {
+            return PeekNextToken().Type == type;
+        }
 
         protected bool HasEnded()
         {
@@ -152,25 +331,29 @@
 
         protected Token TokenAt(int pos) 
         {
-            if (pos < 0)
-                throw new FGScriptException("out of bound", "Cursor has invalid value", "");
-            if (pos >= Tokens.Count)
-                pos = Tokens.Count - 1; // always EOF
+            if (pos < 0) pos = 0;
+            if (pos >= Tokens.Count) pos = Tokens.Count - 1;
             return Tokens[pos];
         }
 
-        protected Token? PeekNextToken()
+        protected Token PeekNextToken()
         {
-            if (Position == Tokens.Count)
-            {
-                return null;
-            }
             return TokenAt(Position + 1);
+        }
+
+        protected Token PeekPrevToken()
+        {
+            return TokenAt(Position - 1);
         }
 
         protected Token NextToken() 
         {
             return TokenAt(Position++);
+        }
+
+        protected Token PrevToken()
+        {
+            return TokenAt(Position--);
         }
 
         public SyntaxErrorException Error(string message)

@@ -6,14 +6,14 @@
  */
 
 // example external function
-extern kron(num) -> bool
+extern kron(num) -> bool;
 
 // now let's expose our api
 expose fn piececIsBlack(num x, num y) -> bool {
 	bool res = null
 	if kron (x, y) {
-		res = true
+		res = true;
 	}
-	res = false
-	ret res
+	res = false;
+	ret res;
 }
