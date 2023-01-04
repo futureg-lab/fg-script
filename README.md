@@ -15,8 +15,8 @@ The project solution is located at the root directory
 
 ```rust
 // import function from csharp to a fg-script
-extern requestHtml(str) -> str;
-extern requestHttpJSON(str) -> tup;
+extern requestHtml(str url) -> str;
+extern requestHttpJSON(str url) -> tup;
 
 // expose a function to the host language
 expose fn sayHello(name) -> str {
@@ -89,8 +89,7 @@ fn fibo (num n) -> num {
 	if n <= 2 {
 		ret 1;
 	}
-	// ret fibo (n - 1) + fibo (n - 2)
-	fibo (n - 1) + fibo (n - 2)
+	ret fibo (n - 1) + fibo (n - 2);
 }
 
 fn main -> void {
