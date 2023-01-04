@@ -27,11 +27,6 @@ namespace fg_script.core
         {
             Statements.Add(stmt);
         }
-
-        public override string ToString()
-        {
-            return string.Format("Block [stmts_count = {0}]", Statements.Count);
-        }
     }
 
     public class Func : Stmt
@@ -51,10 +46,19 @@ namespace fg_script.core
         {
             return vistor.VisitFunc(this);
         }
+    }
 
-        public override string ToString()
+    public class FuncCallDirect : Stmt
+    {
+        public FuncCall Fcall { get; }
+        public FuncCallDirect(FuncCall fcall)
         {
-            return string.Format("Func [name = {0}, argc = {1}]", Name, Args.Count);
+            Fcall = fcall;
+        }
+
+        override public T Accept<T>(IVisitor<T> vistor)
+        {
+            return vistor.VisitFuncCallDirect(this);
         }
     }
 
@@ -77,10 +81,6 @@ namespace fg_script.core
         {
             return vistor.VisitFor(this);
         }
-        public override string ToString()
-        {
-            return "For";
-        }
     }
 
     public class While : Stmt
@@ -88,10 +88,6 @@ namespace fg_script.core
         override public T Accept<T>(IVisitor<T> vistor)
         {
             return vistor.VisitWhile(this);
-        }
-        public override string ToString()
-        {
-            return "While";
         }
     }
 
@@ -108,10 +104,6 @@ namespace fg_script.core
         {
             return vistor.VisitAssign(this);
         }
-        public override string ToString()
-        {
-            return "Assign";
-        }
     }
 
     public class Return : Stmt
@@ -119,10 +111,6 @@ namespace fg_script.core
         override public T Accept<T>(IVisitor<T> vistor)
         {
             return vistor.VisitReturn(this);
-        }
-        public override string ToString()
-        {
-            return "Return [<todo_literal_type>]";
         }
     }
 
@@ -132,10 +120,6 @@ namespace fg_script.core
         {
             return vistor.VisitBreak(this);
         }
-        public override string ToString()
-        {
-            return "Break";
-        }
     }
 
     public class Continue : Stmt
@@ -143,10 +127,6 @@ namespace fg_script.core
         override public T Accept<T>(IVisitor<T> vistor)
         {
             return vistor.VisitContinue(this);
-        }
-        public override string ToString()
-        {
-            return "If";
         }
     }
     public class Define : Stmt
@@ -163,10 +143,6 @@ namespace fg_script.core
         {
             return vistor.VisitExpose(this);
         }
-        public override string ToString()
-        {
-            return "Expose [<todo_func_name>]";
-        }
     }
 
     public class Extern : Stmt
@@ -174,10 +150,6 @@ namespace fg_script.core
         override public T Accept<T>(IVisitor<T> vistor)
         {
             return vistor.VisitExtern(this);
-        }
-        public override string ToString()
-        {
-            return "Extern [<todo_func_name>]";
         }
     }
 }

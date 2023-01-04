@@ -51,22 +51,12 @@ try
     foreach (Stmt stmt in stmts)
     {
         Console.WriteLine(printer.Print(stmt));
-
-        if (stmt is Func)
-        {
-            foreach (var arg in ((Func)stmt).Args)
-            {
-                Console.WriteLine(String.Format("** {0} => {1}", arg.Name, arg.DataType));
-            }
-        }
-        // Console.WriteLine(stmt);
     }
 }
 catch (SyntaxErrorException syntax_excp)
 {
-    int min = syntax_excp.Cursor.Pos;
-    Console.Error.WriteLine(syntax_excp);
-    Console.Error.WriteLine("\n" + Utils.UnderlineText(source, min - 1, min));
+    Console.Error.Write(syntax_excp.Message);
+    Console.Error.WriteLine(Utils.UnderlineTextLine(source, syntax_excp.Cursor, 1));
 }
 catch (FGScriptException fgexception)
 {

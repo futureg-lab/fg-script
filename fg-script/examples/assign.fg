@@ -1,3 +1,6 @@
-﻿num x = 1 + 2 * 3;
-num y = 1 * 2 + 3;
-bool z = false and true or false;
+﻿num x = 1 * (2 + some_func(4 * 3 + 1, 2, x));
+
+
+
+
+some_call()

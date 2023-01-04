@@ -30,6 +30,8 @@
         protected Stmt? ProcessStatement()
         {
             if (Match(TokenType.FUN_DECL)) return StateFuncDeclaration();
+            // fcall on the root
+            if (Match(TokenType.KEYWORD_OR_NAME)) return StateFuncCallRoot();
             if (Match(TokenType.TYPE)) return StateAssignDeclaration();
             if (Match(TokenType.DEFINE)) return StateDefineType();
             if (Match(TokenType.EXPOSE)) return StateExposeDeclaration();
@@ -38,6 +40,7 @@
             if (Match(TokenType.LEFT_BRACE)) return StateBlock();
             if (Match(TokenType.WHILE)) return StateWhile();
             if (Match(TokenType.FOR)) return StateFor();
+
 
             // if (Match(TokenType.RETURN)) return StateReturn();
             // if (Match(TokenType.BREAK)) return StateBreak();
@@ -56,19 +59,15 @@
             Consume(TokenType.LEFT_PARENTH, "( was expected");
 
             List<ArgExpr> args = new();
-            while(true)
+            while(!Match(TokenType.RIGHT_PARENTH))
             {
                 Token arg_type = Consume(TokenType.TYPE, "type was expected");
                 Token arg_name = Consume(TokenType.KEYWORD_OR_NAME, "invalid arg name");
                 ArgExpr arg = new(arg_type.Lexeme, arg_name.Lexeme);
                 args.Add(arg);
 
-                if (Match(TokenType.COMMA) || Match(TokenType.RIGHT_PARENTH))
-                {
-                    if (Match(TokenType.COMMA)) Consume(TokenType.COMMA);
-                    if (Match(TokenType.RIGHT_PARENTH))
-                        break;
-                }
+                if (Match(TokenType.COMMA))
+                    Consume(TokenType.COMMA);
                 else
                     break;
             }
@@ -148,28 +147,24 @@
             return block;
         }
 
+        protected FuncCallDirect StateFuncCallRoot()
+        {
+            FuncCall fcall = ConsumeFuncCall();
+            Consume(TokenType.SEMICOLUMN, "; was expected");
+            return new FuncCallDirect(fcall);
+        }
+
         // Expressions
         // Ex: 1+x*(1-2), "some strings", ...etc
         // expr     ::= term (+| - | or) expr | term
         // term     ::= factor (* | / | and) term | factor
-        // factor   ::= (expr) | item
-        // item     ::= literal | func_call | var_name
+        // factor   ::= (expr) | unary
+        // unary    ::= literal | func_call | var_name
 
+        // expr     ::= term (+| - | or) expr | term
         protected Expr ConsumeExpr()
         {
-            if (Match(TokenType.LEFT_PARENTH))
-            {
-                Consume(TokenType.LEFT_PARENTH);
-                Expr expr = ConsumeExpr();
-                Consume(TokenType.RIGHT_PARENTH, ") was expected");
-                return expr;
-            }
-            return ConsumeTerm();
-        }
-
-        protected Expr ConsumeTerm()
-        {
-            Expr expr = ConsumeFactor();
+            Expr expr = ConsumeTerm();
 
             List<TokenType> bin = new()
             {
@@ -192,9 +187,10 @@
             return expr;
         }
 
-        protected Expr ConsumeFactor()
+        // term     ::= factor (* | / | and) term | factor
+        protected Expr ConsumeTerm()
         {
-            Expr expr = ConsumeUnary();
+            Expr expr = ConsumeFactor();
 
             List<TokenType> bin = new()
             {
@@ -208,7 +204,7 @@
                 if (Match(op))
                 {
                     Token op_token = Consume(op);
-                    Expr right = ConsumeExpr();
+                    Expr right = ConsumeTerm();
                     expr = new BinaryExpr(op_token, expr, right);
                     break;
                 }
@@ -217,6 +213,20 @@
             return expr;
         }
 
+        // factor   ::= (expr) | unary
+        protected Expr ConsumeFactor()
+        {
+            if (Match(TokenType.LEFT_PARENTH))
+            {
+                Consume(TokenType.LEFT_PARENTH);
+                Expr expr = ConsumeExpr();
+                Consume(TokenType.RIGHT_PARENTH, ") was expected");
+                return expr;
+            }
+            return ConsumeUnary();
+        }
+
+        // unary    ::= literal | func_call | var_name | monoadic_op
         protected Expr ConsumeUnary()
         {
             if (Match(TokenType.MINUS) || Match(TokenType.NOT))
@@ -253,24 +263,21 @@
             Consume(TokenType.LEFT_PARENTH, "( was expected");
 
             List<Expr> args = new();
-            while(Match(TokenType.RIGHT_PARENTH))
+            while(!Match(TokenType.RIGHT_PARENTH))
             {
                 Expr expr = ConsumeExpr();
                 args.Add(expr);
 
-                if (Match(TokenType.COMMA) || Match(TokenType.RIGHT_PARENTH))
-                {
-                    if (Match(TokenType.COMMA)) Consume(TokenType.COMMA);
-                    if (Match(TokenType.RIGHT_PARENTH))
-                        break;
-                }
+                if (Match(TokenType.COMMA))
+                    Consume(TokenType.COMMA);
                 else
                     break;
             }
 
             Consume(TokenType.RIGHT_PARENTH, ") was expected");
 
-            return new(callee, args);
+            FuncCall res = new(callee, args);
+            return res;
         }
 
         protected Token Consume(TokenType type, string err_message = "")

@@ -40,7 +40,7 @@ namespace fg_script.core
 
         public string VisitVarCall(VarCall expr)
         {
-            return string.Format("({0})", expr.Callee.Lexeme);
+            return string.Format("{0}", expr.Callee.Lexeme);
         }
 
         public string VisitVarExpr(VarExpr expr)
@@ -51,6 +51,18 @@ namespace fg_script.core
             return string.Format("({0}:{1} => {2})", datatype, name, Print(value));
         }
 
+        public string VisitFuncCall(FuncCall expr)
+        {
+            string callee = expr.Callee.Lexeme;
+            List<string> args = new();
+            foreach(var arg in expr.Args)
+            {
+                args.Add(Print(arg));
+            }
+            string all_args = string.Join(", ", args);
+            return string.Format("{0}({1})", callee, all_args);
+        }
+
         public string VisitLiteralExpr(LiteralExpr expr)
         {
             return expr.Value.Lexeme;
@@ -59,6 +71,11 @@ namespace fg_script.core
         public string VisitBlock(Block stmt)
         {
             throw new NotImplementedException();
+        }
+
+        public string VisitFuncCallDirect(FuncCallDirect stmt)
+        {
+            return Print(stmt.Fcall);
         }
 
         public string VisitBreak(Break stmt)
@@ -101,10 +118,6 @@ namespace fg_script.core
             throw new NotImplementedException();
         }
 
-        public string VisitFuncCall(FuncCall expr)
-        {
-            throw new NotImplementedException();
-        }
 
         public string VisitIf(If stmt)
         {
