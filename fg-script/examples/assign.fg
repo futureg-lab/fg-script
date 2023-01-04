@@ -1,6 +1,3 @@
-﻿num x = 1 * (2 + some_func(4 * 3 + 1, 2, x));
+﻿num x = 1 * (2 + some_func(4 * zzz / 1, 2, x));
 
-
-
-
-some_call()
+some_call();

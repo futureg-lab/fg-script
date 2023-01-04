@@ -30,8 +30,6 @@
         protected Stmt? ProcessStatement()
         {
             if (Match(TokenType.FUN_DECL)) return StateFuncDeclaration();
-            // fcall on the root
-            if (Match(TokenType.KEYWORD_OR_NAME)) return StateFuncCallRoot();
             if (Match(TokenType.TYPE)) return StateAssignDeclaration();
             if (Match(TokenType.DEFINE)) return StateDefineType();
             if (Match(TokenType.EXPOSE)) return StateExposeDeclaration();
@@ -40,7 +38,8 @@
             if (Match(TokenType.LEFT_BRACE)) return StateBlock();
             if (Match(TokenType.WHILE)) return StateWhile();
             if (Match(TokenType.FOR)) return StateFor();
-
+            // fcall on the root
+            if (Match(TokenType.KEYWORD_OR_NAME)) return StateFuncCallRoot();
 
             // if (Match(TokenType.RETURN)) return StateReturn();
             // if (Match(TokenType.BREAK)) return StateBreak();
@@ -109,8 +108,11 @@
         }
         protected Expose StateExposeDeclaration()
         {
-            throw new Exception("todo");
+            Consume(TokenType.EXPOSE, "expose was expected");
+            Func func = StateFuncDeclaration();
+            return new(func);
         }
+
         protected Expose StateExternDeclaration()
         {
             throw new Exception("todo");

@@ -139,6 +139,12 @@ namespace fg_script.core
 
     public class Expose : Stmt
     {
+        public Func ExposedFunc { get; }
+        public Expose(Func exposedFunc)
+        {
+            ExposedFunc = exposedFunc;
+        }
+
         override public T Accept<T>(IVisitor<T> vistor)
         {
             return vistor.VisitExpose(this);
