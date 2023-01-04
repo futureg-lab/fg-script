@@ -16,7 +16,7 @@ namespace fg_script.core
 
     public class Block : Stmt
     {
-        List<Stmt> Statements { get; } = new();
+        public List<Stmt> Statements { get; } = new();
 
         override public T Accept<T>(IVisitor<T> vistor)
         {
@@ -36,11 +36,11 @@ namespace fg_script.core
 
     public class Func : Stmt
     {
-        public string Name { get; }
+        public Token Name { get; }
         public List<ArgExpr> Args { get; }
         public Block Body { get; }
 
-        public Func(string name, List<ArgExpr> args, Block body)
+        public Func(Token name, List<ArgExpr> args, Block body)
         {
             Name = name;
             Args = args;
@@ -97,6 +97,13 @@ namespace fg_script.core
 
     public class Assign : Stmt
     {
+        public VarExpr Variable { get;  }
+
+        public Assign(VarExpr variable)
+        {
+            Variable = variable;
+        }
+
         override public T Accept<T>(IVisitor<T> vistor)
         {
             return vistor.VisitAssign(this);

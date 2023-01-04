@@ -63,28 +63,47 @@
                 ArgExpr arg = new(arg_type.Lexeme, arg_name.Lexeme);
                 args.Add(arg);
 
-                // ignore
                 if (Match(TokenType.COMMA) || Match(TokenType.RIGHT_PARENTH))
                 {
                     if (Match(TokenType.COMMA)) Consume(TokenType.COMMA);
                     if (Match(TokenType.RIGHT_PARENTH))
-                    {
-                        Consume(TokenType.RIGHT_PARENTH);
                         break;
-                    }
-                } else
-                {
-                   throw Error(") was expected");
                 }
+                else
+                    break;
             }
+            Consume(TokenType.RIGHT_PARENTH, ") was expected");
             Block body = StateBlock();
-            return new Func(name.Lexeme, args, body);
+            return new Func(name, args, body);
         }
 
         protected Assign StateAssignDeclaration()
         {
-            throw new Exception("todo");
+            Token type = Consume(TokenType.TYPE, "type was expected");
+            Token v_name = Consume(TokenType.KEYWORD_OR_NAME, "variable name was expected");
+            Expr? value = null;
+            if (Match(TokenType.ASSIGN) || Match(TokenType.SEMICOLUMN))
+            {
+                if (Match(TokenType.ASSIGN))
+                {
+                    Consume(TokenType.ASSIGN);
+                    value = ConsumeExpr();
+                    Consume(TokenType.SEMICOLUMN, "; was expected");
+                }
+            }
+            else
+            {
+                throw Error("= or ; was expected");
+            }
+
+            if (value == null)
+                throw Error(v_name.Lexeme + " is unitialized");
+
+            VarExpr expr = new(type, v_name, value);
+            return new(expr);
         }
+
+        // statements
         protected Define StateDefineType()
         {
             throw new Exception("todo");
@@ -129,6 +148,131 @@
             return block;
         }
 
+        // Expressions
+        // Ex: 1+x*(1-2), "some strings", ...etc
+        // expr     ::= term (+| - | or) expr | term
+        // term     ::= factor (* | / | and) term | factor
+        // factor   ::= (expr) | item
+        // item     ::= literal | func_call | var_name
+
+        protected Expr ConsumeExpr()
+        {
+            if (Match(TokenType.LEFT_PARENTH))
+            {
+                Consume(TokenType.LEFT_PARENTH);
+                Expr expr = ConsumeExpr();
+                Consume(TokenType.RIGHT_PARENTH, ") was expected");
+                return expr;
+            }
+            return ConsumeTerm();
+        }
+
+        protected Expr ConsumeTerm()
+        {
+            Expr expr = ConsumeFactor();
+
+            List<TokenType> bin = new()
+            {
+                TokenType.PLUS,
+                TokenType.MINUS,
+                TokenType.OR
+            };
+
+            foreach (var op in bin)
+            {
+                if (Match(op))
+                {
+                    Token op_token = Consume(op);
+                    Expr right = ConsumeExpr();
+                    expr = new BinaryExpr(op_token, expr, right);
+                    break;
+                }
+            }
+
+            return expr;
+        }
+
+        protected Expr ConsumeFactor()
+        {
+            Expr expr = ConsumeUnary();
+
+            List<TokenType> bin = new()
+            {
+                TokenType.MULT,
+                TokenType.DIV,
+                TokenType.AND
+            };
+
+            foreach (var op in bin)
+            {
+                if (Match(op))
+                {
+                    Token op_token = Consume(op);
+                    Expr right = ConsumeExpr();
+                    expr = new BinaryExpr(op_token, expr, right);
+                    break;
+                }
+            }
+
+            return expr;
+        }
+
+        protected Expr ConsumeUnary()
+        {
+            if (Match(TokenType.MINUS) || Match(TokenType.NOT))
+            {
+                Token op = Match(TokenType.MINUS) ? 
+                    Consume(TokenType.MINUS) : Consume(TokenType.NOT);
+                Expr expr = ConsumeUnary();
+                return new UnaryExpr(op, expr);
+            }
+
+            // Literals
+            if (Match(TokenType.STRING))
+                return new LiteralExpr(Consume(TokenType.STRING));
+            if (Match(TokenType.NUMBER))
+                return new LiteralExpr(Consume(TokenType.NUMBER));
+            if (Match(TokenType.BOOL))
+                return new LiteralExpr(Consume(TokenType.BOOL));
+
+            // var call
+            if (Match(TokenType.KEYWORD_OR_NAME)) 
+            {
+                if (MatchNext(TokenType.LEFT_PARENTH))
+                    return ConsumeFuncCall();
+                else
+                    return new VarCall(Consume(TokenType.KEYWORD_OR_NAME));
+            }
+
+            throw Error("invalid expression");
+        }
+
+        protected FuncCall ConsumeFuncCall()
+        {
+            Token callee = Consume(TokenType.KEYWORD_OR_NAME, "callee name expected");
+            Consume(TokenType.LEFT_PARENTH, "( was expected");
+
+            List<Expr> args = new();
+            while(Match(TokenType.RIGHT_PARENTH))
+            {
+                Expr expr = ConsumeExpr();
+                args.Add(expr);
+
+                if (Match(TokenType.COMMA) || Match(TokenType.RIGHT_PARENTH))
+                {
+                    if (Match(TokenType.COMMA)) Consume(TokenType.COMMA);
+                    if (Match(TokenType.RIGHT_PARENTH))
+                        break;
+                }
+                else
+                    break;
+            }
+
+            Consume(TokenType.RIGHT_PARENTH, ") was expected");
+
+            return new(callee, args);
+        }
+
         protected Token Consume(TokenType type, string err_message = "")
         {
             Token current = CurrentToken();
@@ -144,6 +288,10 @@
         {
             return CurrentToken().Type == type;
         }
+        protected bool MatchNext(TokenType type)
+        {
+            return PeekNextToken().Type == type;
+        }
 
         protected bool HasEnded()
         {
@@ -152,25 +300,29 @@
 
         protected Token TokenAt(int pos) 
         {
-            if (pos < 0)
-                throw new FGScriptException("out of bound", "Cursor has invalid value", "");
-            if (pos >= Tokens.Count)
-                pos = Tokens.Count - 1; // always EOF
+            if (pos < 0) pos = 0;
+            if (pos >= Tokens.Count) pos = Tokens.Count - 1;
             return Tokens[pos];
         }
 
-        protected Token? PeekNextToken()
+        protected Token PeekNextToken()
         {
-            if (Position == Tokens.Count)
-            {
-                return null;
-            }
             return TokenAt(Position + 1);
+        }
+
+        protected Token PeekPrevToken()
+        {
+            return TokenAt(Position - 1);
         }
 
         protected Token NextToken() 
         {
             return TokenAt(Position++);
+        }
+
+        protected Token PrevToken()
+        {
+            return TokenAt(Position--);
         }
 
         public SyntaxErrorException Error(string message)

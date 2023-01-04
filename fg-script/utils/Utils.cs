@@ -18,10 +18,12 @@ namespace fg_script.utils
 
         public static string UnderlineText(string text, int start, int end)
         {
+            start = Math.Max(0, start);
+            end = Math.Min(text.Length, end);
             int initialLength = text.Length;
             text += "\n";
             for (int i = 0; i < initialLength; i++)
-                text += (i >= start && i < end ? "^" : "_");
+                text += (i >= start && i < end ? "^" : " ");
             return text + "\n";
         }
     }

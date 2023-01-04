@@ -8,6 +8,7 @@ namespace fg_script.core
 {
     public interface IVisitor<T>
     {
+        // Statements
         public T VisitStmt(Stmt stmt);
         public T VisitBlock(Block stmt);
         public T VisitFunc(Func stmt);
@@ -21,6 +22,15 @@ namespace fg_script.core
         public T VisitDefine(Define stmt);
         public T VisitExpose(Expose stmt);
         public T VisitExtern(Extern stmt);
+
+        // Expressions
+        public T VisitExpr(Expr expr);
+        public T VisitVarExpr(VarExpr expr);
+        public T VisitLiteralExpr(LiteralExpr expr);
+        public T VisitUnaryExpr(UnaryExpr expr);
+        public T VisitBinaryExpr(BinaryExpr expr);
+        public T VisitFuncCall(FuncCall expr);
+        public T VisitVarCall(VarCall expr);
     }
 
     public interface INode

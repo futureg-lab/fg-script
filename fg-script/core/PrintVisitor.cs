@@ -1,0 +1,129 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace fg_script.core
+{
+    public class PrintVisitor : IVisitor<string>
+    {
+        public string Print(Stmt stmt)
+        {
+            return stmt.Accept(this);
+        }
+
+        public string Print(Expr expr)
+        {
+            return expr.Accept(this);
+        }
+
+        public string VisitAssign(Assign stmt)
+        {
+            return VisitVarExpr(stmt.Variable);
+        }
+
+        public string VisitBinaryExpr(BinaryExpr expr)
+        {
+            string op = expr.OpSymbol.Lexeme;
+            string left = Print(expr.Left);
+            string right = Print(expr.Right);
+            return string.Format("({0} {1} {2})", op, left, right);
+        }
+
+        public string VisitUnaryExpr(UnaryExpr expr)
+        {
+            string op = expr.OpSymbol.Lexeme;
+            string left = Print(expr.Operand);
+            return string.Format("({0} {1})", op, left);
+        }
+
+        public string VisitVarCall(VarCall expr)
+        {
+            return string.Format("({0})", expr.Callee.Lexeme);
+        }
+
+        public string VisitVarExpr(VarExpr expr)
+        {
+            string name = expr.Name.Lexeme;
+            string datatype = expr.DataType.Lexeme;
+            Expr value = expr.Value;
+            return string.Format("({0}:{1} => {2})", datatype, name, Print(value));
+        }
+
+        public string VisitLiteralExpr(LiteralExpr expr)
+        {
+            return expr.Value.Lexeme;
+        }
+
+        public string VisitBlock(Block stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string VisitBreak(Break stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string VisitContinue(Continue stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string VisitDefine(Define stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string VisitExpose(Expose stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string VisitExpr(Expr expr)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string VisitExtern(Extern stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string VisitFor(For stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string VisitFunc(Func stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string VisitFuncCall(FuncCall expr)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string VisitIf(If stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string VisitReturn(Return stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string VisitStmt(Stmt stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string VisitWhile(While stmt)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
