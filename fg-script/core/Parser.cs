@@ -51,14 +51,15 @@
             throw Error("unexpected token");
         }
 
-        protected Func StateFuncDeclaration()
+
+        protected Func StateBodyLessFunction()
         {
             Consume(TokenType.FUN_DECL, "fn was expected");
             Token name = Consume(TokenType.KEYWORD_OR_NAME, "invalid function name");
-            Consume(TokenType.LEFT_PARENTH, "( was expected");
 
+            Consume(TokenType.LEFT_PARENTH, "( was expected");
             List<ArgExpr> args = new();
-            while(!Match(TokenType.RIGHT_PARENTH))
+            while (!Match(TokenType.RIGHT_PARENTH))
             {
                 Token arg_type = Consume(TokenType.TYPE, "valid return type was expected");
                 Token arg_name = Consume(TokenType.KEYWORD_OR_NAME, "invalid arg name");
@@ -71,12 +72,18 @@
                     break;
             }
             Consume(TokenType.RIGHT_PARENTH, ") was expected");
+
             Consume(TokenType.RET_OP, "-> was expeceted");
-            
             Token ret_type = Consume(TokenType.TYPE, "valid return type was expected");
 
-            Block body = StateBlock();
-            return new Func(name, args, body, ret_type);
+            return new Func(name, args, ret_type, null);
+        }
+
+        protected Func StateFuncDeclaration()
+        {
+            Func func = StateBodyLessFunction();
+            func.Body = StateBlock();
+            return func;
         }
 
         protected Assign StateAssignDeclaration()
@@ -89,7 +96,10 @@
                 if (Match(TokenType.ASSIGN))
                 {
                     Consume(TokenType.ASSIGN);
-                    value = ConsumeExpr();
+                    if (Match(TokenType.NULL))
+                        value = new LiteralExpr(Consume(TokenType.NULL));
+                    else
+                        value = ConsumeExpr();
                     Consume(TokenType.SEMICOLUMN, "; was expected");
                 }
             }
@@ -110,6 +120,7 @@
         {
             throw new Exception("todo");
         }
+
         protected Expose StateExposeDeclaration()
         {
             Consume(TokenType.EXPOSE, "expose was expected");
@@ -117,10 +128,11 @@
             return new(func);
         }
 
-        protected Expose StateExternDeclaration()
+        protected Extern StateExternDeclaration()
         {
-            Consume(TokenType.EXPOSE, "expose was expected");
-            Func func = StateFuncDeclaration();
+            Consume(TokenType.EXTERN, "extern was expected");
+            Func func = StateBodyLessFunction();
+            Consume(TokenType.SEMICOLUMN, "; was expected");
             return new(func);
         }
 

@@ -41,6 +41,7 @@
             ReservedWords.Add("bool", TokenType.TYPE);
             ReservedWords.Add("num", TokenType.TYPE);
             ReservedWords.Add("str", TokenType.TYPE);
+            ReservedWords.Add("void", TokenType.TYPE);
             ReservedWords.Add("tup", TokenType.TYPE);
 
             // other

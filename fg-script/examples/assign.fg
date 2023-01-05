@@ -3,7 +3,13 @@
 some_call(4, 5 , z);
 
 
-fn someFunc(num one, str two, tup four) -> num
+num z = 3 * 4 / 2;
+
+
+bool x = null;
+
+
+fn someFunc(num one, str two, tup x) -> num
 {
 	num x = 1 * (2 + some_func(4 * zzz / 1, 2, x));
 	bool y = false and true or false;
@@ -11,6 +17,11 @@ fn someFunc(num one, str two, tup four) -> num
 	ret y and false or true;
 }
 
+extern fn someExternalFunc(str url, num param) -> str;
+
+expose fn sayHello() -> str {
+	ret "Hello World";
+}
 
 fn someFuncError(num one, str two, tup four) -> num
 {

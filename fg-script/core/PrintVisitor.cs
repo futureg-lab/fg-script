@@ -10,9 +10,12 @@ namespace fg_script.core
     {
         private int Depth { get; set; } = 0;
 
-        public string Print(Stmt stmt)
+        public string Print(Stmt? stmt)
         {
-            return stmt.Accept(this);
+            if (stmt == null)
+                return "";
+            else
+                return stmt.Accept(this);
         }
 
         public string Print(Expr expr)
@@ -117,7 +120,7 @@ namespace fg_script.core
 
         public string VisitExpose(Expose stmt)
         {
-            throw new NotImplementedException();
+            return string.Format("(#expose {0})", Print(stmt.ExposedFunc));
         }
 
         public string VisitExpr(Expr expr)
@@ -127,7 +130,7 @@ namespace fg_script.core
 
         public string VisitExtern(Extern stmt)
         {
-            throw new NotImplementedException();
+            return string.Format("(#extern {0})", Print(stmt.ExternalFunc));
         }
 
         public string VisitFor(For stmt)
