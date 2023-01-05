@@ -1,16 +1,31 @@
 ﻿num x = 1 * (2 + some_func(4 * zzz / 1, 2, x));
 
-some_call(4, 5 , z);
+// numbers
+num a = 1 * 2 + 3;
 
+someFuncCall();
+anotherFuncCall(5, 1 * 2 + 4, false);
+num x = null;
+bool y = true or false;
+ret 1 + 1;
+err "some error";
 
-fn someFunc(num one, str two, tup four) -> num
+bool x = null;
+
+fn someFunc(num one, str two, tup x) -> num
 {
 	num x = 1 * (2 + some_func(4 * zzz / 1, 2, x));
 	bool y = false and true or false;
 
-	ret y and false or true;
+	ret not y and false or true;
 }
 
+extern fn someExternalFunc(str url, num param) -> str;
+
+expose fn sayHelloMaj(str name) -> str {
+    str res = upperCase("Hello " + name);
+    ret res + "!";
+}
 
 fn someFuncError(num one, str two, tup four) -> num
 {

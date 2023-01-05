@@ -34,9 +34,9 @@ namespace fg_script.core
         public Token Name { get; }
         public Token ReturnType { get; }
         public List<ArgExpr> Args { get; }
-        public Block Body { get; }
+        public Block? Body { get; set; }
 
-        public Func(Token name, List<ArgExpr> args, Block body, Token ret_type)
+        public Func(Token name, List<ArgExpr> args, Token ret_type, Block? body)
         {
             Name = name;
             Args = args;
@@ -49,7 +49,7 @@ namespace fg_script.core
             return vistor.VisitFunc(this);
         }
     }
-
+    
     public class FuncCallDirect : Stmt
     {
         public FuncCall Fcall { get; }
@@ -172,6 +172,11 @@ namespace fg_script.core
 
     public class Extern : Stmt
     {
+        public Func ExternalFunc { get; }
+        public Extern(Func exposedFunc)
+        {
+            ExternalFunc = exposedFunc;
+        }
         override public T Accept<T>(IVisitor<T> vistor)
         {
             return vistor.VisitExtern(this);

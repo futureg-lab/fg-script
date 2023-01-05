@@ -51,14 +51,15 @@
             throw Error("unexpected token");
         }
 
-        protected Func StateFuncDeclaration()
+
+        protected Func StateBodyLessFunction()
         {
             Consume(TokenType.FUN_DECL, "fn was expected");
             Token name = Consume(TokenType.KEYWORD_OR_NAME, "invalid function name");
-            Consume(TokenType.LEFT_PARENTH, "( was expected");
 
+            Consume(TokenType.LEFT_PARENTH, "( was expected");
             List<ArgExpr> args = new();
-            while(!Match(TokenType.RIGHT_PARENTH))
+            while (!Match(TokenType.RIGHT_PARENTH))
             {
                 Token arg_type = Consume(TokenType.TYPE, "valid return type was expected");
                 Token arg_name = Consume(TokenType.KEYWORD_OR_NAME, "invalid arg name");
@@ -71,12 +72,18 @@
                     break;
             }
             Consume(TokenType.RIGHT_PARENTH, ") was expected");
+
             Consume(TokenType.RET_OP, "-> was expeceted");
-            
             Token ret_type = Consume(TokenType.TYPE, "valid return type was expected");
 
-            Block body = StateBlock();
-            return new Func(name, args, body, ret_type);
+            return new Func(name, args, ret_type, null);
+        }
+
+        protected Func StateFuncDeclaration()
+        {
+            Func func = StateBodyLessFunction();
+            func.Body = StateBlock();
+            return func;
         }
 
         protected Assign StateAssignDeclaration()
@@ -89,7 +96,10 @@
                 if (Match(TokenType.ASSIGN))
                 {
                     Consume(TokenType.ASSIGN);
-                    value = ConsumeExpr();
+                    if (Match(TokenType.NULL))
+                        value = new LiteralExpr(Consume(TokenType.NULL));
+                    else
+                        value = ConsumeGenExpr();
                     Consume(TokenType.SEMICOLUMN, "; was expected");
                 }
             }
@@ -110,6 +120,7 @@
         {
             throw new Exception("todo");
         }
+
         protected Expose StateExposeDeclaration()
         {
             Consume(TokenType.EXPOSE, "expose was expected");
@@ -117,10 +128,11 @@
             return new(func);
         }
 
-        protected Expose StateExternDeclaration()
+        protected Extern StateExternDeclaration()
         {
-            Consume(TokenType.EXPOSE, "expose was expected");
-            Func func = StateFuncDeclaration();
+            Consume(TokenType.EXTERN, "extern was expected");
+            Func func = StateBodyLessFunction();
+            Consume(TokenType.SEMICOLUMN, "; was expected");
             return new(func);
         }
 
@@ -165,7 +177,7 @@
         protected Return StateReturn()
         {
             Consume(TokenType.RETURN, "ret was expected");
-            Expr returned = ConsumeExpr();
+            Expr returned = ConsumeGenExpr();
             Consume(TokenType.SEMICOLUMN, "; was expected");
             return new(returned);
         }
@@ -173,30 +185,87 @@
         protected Error StateError()
         {
             Consume(TokenType.ERROR, "err was expected");
-            Expr thrown = ConsumeExpr();
+            Expr thrown = ConsumeGenExpr();
             Consume(TokenType.SEMICOLUMN, "; was expected");
             return new(thrown);
         }
 
+        // Idea :
         // Expressions
-        // Ex: 1+x*(1-2), "some strings", ...etc
-        // expr     ::= term (+| - | or) expr | term
-        // term     ::= factor (* | / | and) term | factor
-        // factor   ::= (expr) | unary
-        // unary    ::= literal | func_call | var_name
+        // Ex: 1+x*(1-2) and 3 <= 3, "some strings", ...etc
 
-        // expr     ::= term (+| - | or) expr | term
+        // A general expression can be thought like this :
+        // gen_expr  ::= and_expr (or) or_expr | and_expr
+        // and_expr  ::= comp_expr (and) and_expr | expr
+
+        // comp_expr ::= expr (== | >= | == | >= | != | < | >) comp_expr | expr
+        // expr     ::= term (+| -) expr | term
+        // term     ::= factor (* | /) term | factor
+        // factor   ::= (gen_expr) | unary
+        // unary    ::= <literal> | <func_call> | <var_name> | <monoadic_operation>
+
+
+        // gen_expr ::= expr (== | >= | == | >= | != | < | >) gen_expr
+        protected Expr ConsumeGenExpr()
+        {
+            Expr expr = ConsumeAndExpr();
+            if (Match(TokenType.OR))
+            {
+                Token op_token = Consume(TokenType.OR);
+                Expr right = ConsumeGenExpr();
+                return new BinaryExpr(op_token, expr, right);
+            }
+            return expr;
+        }
+
+        // and_expr ::= expr (and) and_expr | expr
+        protected Expr ConsumeAndExpr()
+        {
+            Expr expr = ConsumeComparisonExpr();
+            if (Match(TokenType.AND))
+            {
+                Token op_token = Consume(TokenType.AND);
+                Expr right = ConsumeAndExpr();
+                return new BinaryExpr(op_token, expr, right);
+            }
+            return expr;
+        }
+
+        // comp_expr ::= expr (== | >= | == | >= | != | < | >) comp_expr | expr
+        protected Expr ConsumeComparisonExpr()
+        {
+            Expr expr = ConsumeExpr();
+            List<TokenType> bin = new()
+            {
+                TokenType.EQ,   // ==
+                TokenType.NEQ,  // !=
+                TokenType.LT,   // <
+                TokenType.GT,   // >
+                TokenType.LE,   // <=
+                TokenType.GE    // >=
+            };
+            foreach (var op in bin)
+            {
+                if (Match(op))
+                {
+                    Token op_token = Consume(op);
+                    Expr right = ConsumeGenExpr();
+                    expr = new BinaryExpr(op_token, expr, right);
+                    break;
+                }
+            }
+            return expr;
+        }
+
+        // expr     ::= term (+| - | or ) expr | term
         protected Expr ConsumeExpr()
         {
             Expr expr = ConsumeTerm();
-
             List<TokenType> bin = new()
             {
                 TokenType.PLUS,
-                TokenType.MINUS,
-                TokenType.OR
+                TokenType.MINUS
             };
-
             foreach (var op in bin)
             {
                 if (Match(op))
@@ -207,9 +276,9 @@
                     break;
                 }
             }
-
             return expr;
         }
+
 
         // term     ::= factor (* | / | and) term | factor
         protected Expr ConsumeTerm()
@@ -219,10 +288,8 @@
             List<TokenType> bin = new()
             {
                 TokenType.MULT,
-                TokenType.DIV,
-                TokenType.AND
+                TokenType.DIV
             };
-
             foreach (var op in bin)
             {
                 if (Match(op))
@@ -233,24 +300,23 @@
                     break;
                 }
             }
-
             return expr;
         }
 
-        // factor   ::= (expr) | unary
+        // factor   ::= (gen_expr) | unary
         protected Expr ConsumeFactor()
         {
             if (Match(TokenType.LEFT_PARENTH))
             {
                 Consume(TokenType.LEFT_PARENTH);
-                Expr expr = ConsumeExpr();
+                Expr expr = ConsumeGenExpr();
                 Consume(TokenType.RIGHT_PARENTH, ") was expected");
                 return expr;
             }
             return ConsumeUnary();
         }
 
-        // unary    ::= literal | func_call | var_name | monoadic_op
+        // unary    ::= <literal> | <func_call> | <var_name> | <monoadic_operation>
         protected Expr ConsumeUnary()
         {
             if (Match(TokenType.MINUS) || Match(TokenType.NOT))
@@ -289,7 +355,7 @@
             List<Expr> args = new();
             while(!Match(TokenType.RIGHT_PARENTH))
             {
-                Expr expr = ConsumeExpr();
+                Expr expr = ConsumeGenExpr();
                 args.Add(expr);
 
                 if (Match(TokenType.COMMA))
