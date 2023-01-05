@@ -4,6 +4,11 @@
 num a = 1 * 2 + 3;
 num b = 1 + 2 * 3;
 
+num x = 1 + 2 * 3;
+num y = 1 * 2 + 3;
+
+num q = 2 * (1 + 2) * 3 <= 3 and 4 != 8;
+
 // booleans
 bool c = x and y or z;
 bool z = x or y and z;
