@@ -2,11 +2,13 @@
 
 // numbers
 num a = 1 * 2 + 3;
-num b = 1 + 2 * 3;
-num c = (1 + 2) * 3;
 
-bool f = x and y or z;
-
+someFuncCall();
+anotherFuncCall(5, 1 * 2 + 4, false);
+num x = null;
+bool y = true or false;
+ret 1 + 1;
+err "some error";
 
 bool x = null;
 
@@ -20,8 +22,9 @@ fn someFunc(num one, str two, tup x) -> num
 
 extern fn someExternalFunc(str url, num param) -> str;
 
-expose fn sayHello() -> str {
-	ret "Hello World";
+expose fn sayHelloMaj(str name) -> str {
+    str res = upperCase("Hello " + name);
+    ret res + "!";
 }
 
 fn someFuncError(num one, str two, tup four) -> num
