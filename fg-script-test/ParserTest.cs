@@ -173,7 +173,7 @@ namespace fg_script_test
             string source = @"
                 // extern always expects the statement to end
                 // with a ; after the ret type
-                extern fn someFunc(str x, num y, tup z) -> void {
+                extern fn someFunc(str x, num y, tup z) -> str {
                     ret ""some stuff"";
                 }
             ";
@@ -182,7 +182,6 @@ namespace fg_script_test
             List<Token> tokens = lexer.Tokenize();
             Assert.ThrowsException<SyntaxErrorException>(() =>
             {
-
                 Parser parser = new("<test>", ref tokens);
                 parser.Run();
             });
