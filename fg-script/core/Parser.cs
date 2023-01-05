@@ -190,31 +190,60 @@
             return new(thrown);
         }
 
+        // Idea :
         // Expressions
         // Ex: 1+x*(1-2) and 3 <= 3, "some strings", ...etc
 
-        // gen_expr ::= expr (== | >= | == | >= | != | < | >) gen_expr
-        // expr     ::= term (+| - | or ) expr | term
-        // term     ::= factor (* | / | and) term | factor
+        // A general expression can be thought like this :
+        // gen_expr  ::= and_expr (or) or_expr | and_expr
+        // and_expr  ::= comp_expr (and) and_expr | expr
+
+        // comp_expr ::= expr (== | >= | == | >= | != | < | >) comp_expr | expr
+        // expr     ::= term (+| -) expr | term
+        // term     ::= factor (* | /) term | factor
         // factor   ::= (gen_expr) | unary
         // unary    ::= <literal> | <func_call> | <var_name> | <monoadic_operation>
 
+
         // gen_expr ::= expr (== | >= | == | >= | != | < | >) gen_expr
-        // example : 1 <= 3 and 4 <= x or 5 >= 6 + 6
         protected Expr ConsumeGenExpr()
         {
+            Expr expr = ConsumeAndExpr();
+            if (Match(TokenType.OR))
+            {
+                Token op_token = Consume(TokenType.OR);
+                Expr right = ConsumeGenExpr();
+                return new BinaryExpr(op_token, expr, right);
+            }
+            return expr;
+        }
+
+        // and_expr ::= expr (and) and_expr | expr
+        protected Expr ConsumeAndExpr()
+        {
+            Expr expr = ConsumeComparisonExpr();
+            if (Match(TokenType.AND))
+            {
+                Token op_token = Consume(TokenType.AND);
+                Expr right = ConsumeAndExpr();
+                return new BinaryExpr(op_token, expr, right);
+            }
+            return expr;
+        }
+
+        // comp_expr ::= expr (== | >= | == | >= | != | < | >) comp_expr | expr
+        protected Expr ConsumeComparisonExpr()
+        {
             Expr expr = ConsumeExpr();
-
             List<TokenType> bin = new()
-            {   
-                TokenType.EQ, // ==
-                TokenType.NEQ, // !=
-                TokenType.LT, // <
-                TokenType.GT, // >
-                TokenType.LE, // <=
-                TokenType.GE // >=
+            {
+                TokenType.EQ,   // ==
+                TokenType.NEQ,  // !=
+                TokenType.LT,   // <
+                TokenType.GT,   // >
+                TokenType.LE,   // <=
+                TokenType.GE    // >=
             };
-
             foreach (var op in bin)
             {
                 if (Match(op))
@@ -225,23 +254,18 @@
                     break;
                 }
             }
-
             return expr;
         }
 
         // expr     ::= term (+| - | or ) expr | term
-        // example : 3 + (4 * 6 - 7) * 2 / 3 or true and false
         protected Expr ConsumeExpr()
         {
             Expr expr = ConsumeTerm();
-
             List<TokenType> bin = new()
             {
                 TokenType.PLUS,
-                TokenType.MINUS,
-                TokenType.OR
+                TokenType.MINUS
             };
-
             foreach (var op in bin)
             {
                 if (Match(op))
@@ -252,13 +276,11 @@
                     break;
                 }
             }
-
             return expr;
         }
 
 
         // term     ::= factor (* | / | and) term | factor
-        // example : 3 * 4 and false
         protected Expr ConsumeTerm()
         {
             Expr expr = ConsumeFactor();
@@ -266,10 +288,8 @@
             List<TokenType> bin = new()
             {
                 TokenType.MULT,
-                TokenType.DIV,
-                TokenType.AND
+                TokenType.DIV
             };
-
             foreach (var op in bin)
             {
                 if (Match(op))
@@ -280,12 +300,10 @@
                     break;
                 }
             }
-
             return expr;
         }
 
         // factor   ::= (gen_expr) | unary
-        // example : 1 <= 3 and (4 <= x or 5) >= 6 + 6
         protected Expr ConsumeFactor()
         {
             if (Match(TokenType.LEFT_PARENTH))

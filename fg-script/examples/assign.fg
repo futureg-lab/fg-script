@@ -3,31 +3,9 @@
 // numbers
 num a = 1 * 2 + 3;
 num b = 1 + 2 * 3;
+num c = (1 + 2) * 3;
 
-num x = 1 + 2 * 3;
-num y = 1 * 2 + 3;
-
-num q = 2 * (1 + 2) * 3 <= 3 and 4 != 8;
-
-// booleans
-bool c = x and y or z;
-bool z = x or y and z;
-
-bool q = x == y and y >= 3 or y < 2;
-bool h = 1 <= 3 and (4 <= x or 5) >= 6 + 6;
-
-// should be interpreted as
-// (2 + 3) <= 4
-bool z = 2 + 3 <= 4;
-
-// should be interpreted as
-// ((2*3)+3) != 4
-bool z = 2 * 3 + 3 != 4;
-
-some_call(4, 5 , z);
-
-
-num z = 3 * 4 / 2;
+bool f = x and y or z;
 
 
 bool x = null;
