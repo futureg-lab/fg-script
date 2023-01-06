@@ -143,11 +143,6 @@ namespace fg_script.core
             return string.Format("(#extern {0})", Print(stmt.ExternalFunc));
         }
 
-        public string VisitFor(For stmt)
-        {
-            throw new NotImplementedException();
-        }
-
         public string VisitFunc(Func stmt)
         {
             string name = stmt.Name.Lexeme;
@@ -199,12 +194,22 @@ namespace fg_script.core
 
         public string VisitStmt(Stmt stmt)
         {
-            throw new NotImplementedException();
+            return Print(stmt);
+        }
+        public string VisitFor(For stmt)
+        {
+            string key = "";
+            if (stmt.KeyAlias != null)
+                key = stmt.KeyAlias.Lexeme;
+            string value = stmt.ValueAlias.Lexeme;
+            string expr = Print(stmt.ExprIterable);
+            string body = Print(stmt.Body);
+            return string.Format("(#for ({0}, {1}) #in {2}\n{3})", key, value, expr, body);
         }
 
         public string VisitWhile(While stmt)
         {
-            throw new NotImplementedException();
+            return string.Format("(#while {0}\n{1})", Print(stmt.Condition), Print(stmt.Body)); 
         }
     }
 }

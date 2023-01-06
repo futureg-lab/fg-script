@@ -3,7 +3,6 @@
 num x = 1 * (2 + some_func(4 * zzz / 1, 2, x));
 
 // nested tuple
-/*
 tup z = [1, 2] * [
 	1, 2, 3, 
 	[4, 5],
@@ -16,7 +15,6 @@ tup k = [
 	a : 3, c : 4, "hh" : [1, 2],
 	4 : 5
 ];
-*/
 
 tup example_dic = [
 	a : 6,
@@ -28,6 +26,18 @@ tup example_dic = [
 	]
 ];
 
+while x and y {
+	num z = random();
+	print(z + "yay!");
+}
+
+for x in [1, 2, 3] {
+	print("hello world!");
+}
+
+for (k, v) in [1, 2, 3] * 2 + 3 {
+	print("hello world!");
+}
 
 // numbers
 num a = 1 * 2 + 3;
