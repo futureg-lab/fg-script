@@ -39,6 +39,15 @@ for (k, v) in [1, 2, 3] * 2 + 3 {
 	print("hello world!");
 }
 
+for x in 1 .. 10 {
+	print(i);
+	if x >= 3 and x < 5 {
+		continue;
+	} elif x < 9 {
+		break;
+	}
+}
+
 // numbers
 num a = 1 * 2 + 3;
 

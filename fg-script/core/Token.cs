@@ -67,6 +67,8 @@ namespace fg_script.core
         WHILE,              // while
         ERROR,              // err
         RETURN,             // ret
+        BREAK,              // break
+        CONTINUE,           // continue
     }
 
     public class CursorPosition

@@ -82,7 +82,7 @@ namespace fg_script_test
             {
                 "(bool:a => (<= (+ 2 3) 4))",
                 "(bool:b => (!= (+ (* 2 3) 3) 4))",
-                "(bool:q => (<= (* 2 (* (+ 1 2) 3)) (and 3 (!= 4 8))))",
+                "(bool:q => (and (<= (* 2 (* (+ 1 2) 3)) 3) (!= 4 8)))",
             };
             TestSetFrom(source, tests);
         }
@@ -229,6 +229,15 @@ namespace fg_script_test
                 for (k, v) in [1, 2, 3] * 2 + 3 {
 	                print(""hello world!"");
                 }
+
+                for x in 1 .. 10 {
+	                print(x);
+	                if x >= 3 and x < 5 {
+		                continue;
+	                } elif x < 9 {
+		                break;
+	                }
+                }
             ";
             List<string> tests = new()
             {
@@ -241,7 +250,14 @@ namespace fg_script_test
                     (#root_call print(""hello world!"")))",
                 @"
                 (#for (k, v) #in (+ (* [0:1, 1:2, 2:3] 2) 3)
-                    (#root_call print(""hello world!"")))"
+                    (#root_call print(""hello world!"")))",
+                @"
+                (#for (, x) #in (#enum_from 1 #to 10)
+                    (#root_call print(x))
+                    (#if (and (>= x 3) (< x 5)) =>
+                        (#continue)
+                    (#branch (< x 9) =>
+                        (#break))))"
             };
             TestSetFrom(source, tests, true);
         }

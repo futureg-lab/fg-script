@@ -115,12 +115,12 @@ namespace fg_script.core
 
         public string VisitBreak(Break stmt)
         {
-            throw new NotImplementedException();
+            return "(#break)";
         }
 
         public string VisitContinue(Continue stmt)
         {
-            throw new NotImplementedException();
+            return "(#continue)";
         }
 
         public string VisitDefine(Define stmt)

@@ -42,15 +42,32 @@
 
             if (Match(TokenType.RETURN)) return StateReturn();
             if (Match(TokenType.ERROR)) return StateError();
-
-            // if (Match(TokenType.BREAK)) return StateBreak();
-            // if (Match(TokenType.CONTINUE)) return StateContinue();
+            if (Match(TokenType.BREAK) || Match(TokenType.CONTINUE))
+                return StateBreakOrContinue();
 
             if (HasEnded())
                 return null;
             throw Error("unexpected token");
         }
 
+        protected Stmt StateBreakOrContinue()
+        {
+            Stmt stmt;
+            if (Match(TokenType.BREAK))
+            {
+                Consume(TokenType.BREAK);
+                stmt = new Break();
+            }
+            else if (Match(TokenType.CONTINUE))
+            {
+                Consume(TokenType.CONTINUE);
+                stmt = new Continue();
+            }
+            else
+                throw Error("unexpected token");
+            Consume(TokenType.SEMICOLON, "; was expected");
+            return stmt;
+        }
 
         protected Func StateBodyLessFunction()
         {
@@ -185,7 +202,7 @@
 
             Consume(TokenType.IN, "in was expected");
 
-            Expr expr_iter = ConsumeExpr();
+            Expr expr_iter = ConsumeGenExpr();
             Block body = StateBlock();
 
             return new(body, KeyAlias, KeyValue, expr_iter);
@@ -310,7 +327,7 @@
                 if (Match(op))
                 {
                     Token op_token = Consume(op);
-                    Expr right = ConsumeGenExpr();
+                    Expr right = ConsumeComparisonExpr();
                     expr = new BinaryExpr(op_token, expr, right);
                     break;
                 }
