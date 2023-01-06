@@ -116,7 +116,7 @@ namespace fg_script_test
         [TestMethod]
         public void TestReservedSymbolsAndOperators()
         {
-            string source = "+ \n\n  -   *  /  =   % ==  !=  >=   <= < >  ! \n  ->  () {}[] , . .. ;";
+            string source = "+ \n\n  - :  *  /  =   % ==  !=  >=   <= < >  ! \n  ->  () {}[] , . .. ;";
 
             Lexer lexer = new(source, "<test>");
             List<Token> list = lexer.Tokenize();
@@ -124,12 +124,12 @@ namespace fg_script_test
             List<TokenType> expected = new()
             {
                 TokenType.PLUS, TokenType.NEW_LINE, TokenType.NEW_LINE,
-                TokenType.MINUS, TokenType.MULT, TokenType.DIV, TokenType.ASSIGN,
+                TokenType.MINUS, TokenType.COLON, TokenType.MULT, TokenType.DIV, TokenType.ASSIGN,
                 TokenType.MOD, TokenType.EQ, TokenType.NEQ, TokenType.GE, TokenType.LE,
                 TokenType.LT, TokenType.GT, TokenType.NOT, TokenType.NEW_LINE, TokenType.RET_OP, 
                 TokenType.LEFT_PARENTH, TokenType.RIGHT_PARENTH, TokenType.LEFT_BRACE, TokenType.RIGHT_BRACE,
                 TokenType.LEFT_BRACKET, TokenType.RIGHT_BRACKET, TokenType.COMMA, TokenType.DOT, TokenType.DBL_DOT,
-                TokenType.SEMICOLUMN,
+                TokenType.SEMICOLON,
                 TokenType.EOF
             };
 

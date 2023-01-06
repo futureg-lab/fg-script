@@ -91,7 +91,7 @@
             Token type = Consume(TokenType.TYPE, "type was expected");
             Token v_name = Consume(TokenType.KEYWORD_OR_NAME, "variable name was expected");
             Expr? value = null;
-            if (Match(TokenType.ASSIGN) || Match(TokenType.SEMICOLUMN))
+            if (Match(TokenType.ASSIGN) || Match(TokenType.SEMICOLON))
             {
                 if (Match(TokenType.ASSIGN))
                 {
@@ -100,7 +100,7 @@
                         value = new LiteralExpr(Consume(TokenType.NULL));
                     else
                         value = ConsumeGenExpr();
-                    Consume(TokenType.SEMICOLUMN, "; was expected");
+                    Consume(TokenType.SEMICOLON, "; was expected");
                 }
             }
             else
@@ -132,13 +132,34 @@
         {
             Consume(TokenType.EXTERN, "extern was expected");
             Func func = StateBodyLessFunction();
-            Consume(TokenType.SEMICOLUMN, "; was expected");
+            Consume(TokenType.SEMICOLON, "; was expected");
             return new(func);
         }
 
         protected If StateIf ()
         {
-            throw new Exception("todo");
+            Consume(TokenType.IF, "if was expected");
+            Expr cond = ConsumeGenExpr();
+            Block body = StateBlock();
+
+            If ifstmt = new(cond, body);
+
+            while (Match(TokenType.ELSE_IF))
+            {
+                Consume(TokenType.ELSE_IF);
+                Expr elseif_cond = ConsumeGenExpr();
+                Block elseif_body = StateBlock();
+                Branch elseif_branch = new(elseif_cond, elseif_body);
+                ifstmt.Branches.Add(elseif_branch);
+            }
+
+            if (Match(TokenType.ELSE))
+            {
+                Consume(TokenType.ELSE, "else was expected");
+                ifstmt.ElseBody = StateBlock();
+            }
+
+            return ifstmt;
         }
 
         protected For StateFor()
@@ -170,15 +191,15 @@
         protected FuncCallDirect StateFuncCallRoot()
         {
             FuncCall fcall = ConsumeFuncCall();
-            Consume(TokenType.SEMICOLUMN, "; was expected");
-            return new FuncCallDirect(fcall);
+            Consume(TokenType.SEMICOLON, "; was expected");
+            return new(fcall);
         }
 
         protected Return StateReturn()
         {
             Consume(TokenType.RETURN, "ret was expected");
             Expr returned = ConsumeGenExpr();
-            Consume(TokenType.SEMICOLUMN, "; was expected");
+            Consume(TokenType.SEMICOLON, "; was expected");
             return new(returned);
         }
 
@@ -186,39 +207,52 @@
         {
             Consume(TokenType.ERROR, "err was expected");
             Expr thrown = ConsumeGenExpr();
-            Consume(TokenType.SEMICOLUMN, "; was expected");
+            Consume(TokenType.SEMICOLON, "; was expected");
             return new(thrown);
         }
+
 
         // Idea :
         // Expressions
         // Ex: 1+x*(1-2) and 3 <= 3, "some strings", ...etc
 
-        // A general expression can be thought like this :
-        // gen_expr  ::= and_expr (or) or_expr | and_expr
+        // 1. A general expression can be thought like this :
+        // gen_expr  ::= or_expr (..) gen_expr | or_expr
+        // or_expr   ::= and_expr (or) or_expr | and_expr
         // and_expr  ::= comp_expr (and) and_expr | expr
-
         // comp_expr ::= expr (== | >= | == | >= | != | < | >) comp_expr | expr
-        // expr     ::= term (+| -) expr | term
-        // term     ::= factor (* | /) term | factor
-        // factor   ::= (gen_expr) | unary
-        // unary    ::= <literal> | <func_call> | <var_name> | <monoadic_operation>
+        // expr      ::= term (+| -) expr | term
+        // term      ::= factor (* | /) term | factor
+        // factor    ::= (gen_expr) | unary
+        // unary     ::= <literal> | <func_call> | <var_name> | <monoadic_operation> | <tuple>
 
-
-        // gen_expr ::= expr (== | >= | == | >= | != | < | >) gen_expr
+        // gen_expr  ::= or_expr (..) gen_expr | or_expr
         protected Expr ConsumeGenExpr()
+        {
+            Expr expr = ConsumeOrExpr();
+            if (Match(TokenType.DBL_DOT))
+            {
+                Consume(TokenType.DBL_DOT);
+                Expr right = ConsumeGenExpr();
+                return new EnumExpr(expr, right);
+            }
+            return expr;
+        }
+
+        // or_expr   ::= and_expr (or) or_expr | and_expr
+        protected Expr ConsumeOrExpr()
         {
             Expr expr = ConsumeAndExpr();
             if (Match(TokenType.OR))
             {
                 Token op_token = Consume(TokenType.OR);
-                Expr right = ConsumeGenExpr();
+                Expr right = ConsumeOrExpr();
                 return new BinaryExpr(op_token, expr, right);
             }
             return expr;
         }
 
-        // and_expr ::= expr (and) and_expr | expr
+        // and_expr  ::= comp_expr (and) and_expr | expr
         protected Expr ConsumeAndExpr()
         {
             Expr expr = ConsumeComparisonExpr();
@@ -308,6 +342,7 @@
         {
             if (Match(TokenType.LEFT_PARENTH))
             {
+                // try making an expression
                 Consume(TokenType.LEFT_PARENTH);
                 Expr expr = ConsumeGenExpr();
                 Consume(TokenType.RIGHT_PARENTH, ") was expected");
@@ -316,7 +351,7 @@
             return ConsumeUnary();
         }
 
-        // unary    ::= <literal> | <func_call> | <var_name> | <monoadic_operation>
+        // unary    ::= <literal> | <func_call> | <var_name> | <monoadic_operation> | <tuple>
         protected Expr ConsumeUnary()
         {
             if (Match(TokenType.MINUS) || Match(TokenType.NOT))
@@ -326,6 +361,9 @@
                 Expr expr = ConsumeUnary();
                 return new UnaryExpr(op, expr);
             }
+
+            if (Match(TokenType.LEFT_BRACKET))
+                return ConsumeTuple();
 
             // Literals
             if (Match(TokenType.STRING))
@@ -345,6 +383,91 @@
             }
 
             throw Error("invalid expression");
+        }
+
+        protected TupleExpr ConsumeTuple()
+        {
+            var FetchKey = () =>
+            {
+                string key = "";
+                if (Match(TokenType.STRING))
+                    key = Consume(TokenType.STRING, "string expected").Lexeme;
+                else if (Match(TokenType.KEYWORD_OR_NAME))
+                    key = Consume(TokenType.KEYWORD_OR_NAME, "name expected").Lexeme;
+                else if (Match(TokenType.NUMBER))
+                    key = Consume(TokenType.NUMBER, "number expected").Lexeme;
+                return key;
+            };
+
+            var IsKeyable = () => Match(TokenType.STRING) 
+                || Match(TokenType.KEYWORD_OR_NAME) 
+                || Match(TokenType.NUMBER);
+
+            Consume(TokenType.LEFT_BRACKET, "[ was expected");
+
+
+            TupleExpr tuple = new();
+            bool auto_keys = true;
+
+            // empty tuple
+            if (Match(TokenType.RIGHT_BRACKET)) 
+            { 
+                Consume(TokenType.RIGHT_BRACKET);
+                return tuple;
+            }
+
+            // tup ::= [ (string | word | number) : tup (, string | word | number : tup)* ]
+
+            // first item decides the key type
+            string current = CurrentToken().Lexeme;
+            bool keyable = IsKeyable();
+            if (MatchNext(TokenType.COLON) && keyable) {
+                // disable autokeys
+                auto_keys = false;
+                string key = FetchKey();
+                Consume(TokenType.COLON);
+                if (Match(TokenType.LEFT_BRACKET))
+                    tuple.Set(key, ConsumeTuple());
+                else
+                    tuple.Set(key, ConsumeGenExpr());
+            }
+            else
+            {
+                // auto_keys is true
+                if (Match(TokenType.LEFT_BRACKET))
+                    tuple.Append(ConsumeTuple());
+                else
+                    tuple.Append(ConsumeGenExpr());
+            }
+
+
+            while (!Match(TokenType.RIGHT_BRACKET))
+            {
+                Consume(TokenType.COMMA, ", was expected");
+                if (!auto_keys)
+                {
+                    string key = FetchKey();
+                    Consume(TokenType.COLON, ": was expected");
+                    if (Match(TokenType.LEFT_BRACKET))
+                        tuple.Set(key, ConsumeTuple());
+                    else
+                        tuple.Set(key, ConsumeGenExpr());
+                }
+                else
+                {
+                    if (Match(TokenType.LEFT_BRACKET))
+                        tuple.Append(ConsumeTuple());
+                    else
+                        tuple.Append(ConsumeGenExpr());
+                }
+
+                if (Match(TokenType.RIGHT_BRACKET))
+                    break;
+            }
+
+            Consume(TokenType.RIGHT_BRACKET, "] was expected");
+
+            return tuple;
         }
 
         protected FuncCall ConsumeFuncCall()
@@ -377,6 +500,21 @@
             {
                 NextToken();
                 return current;
+            }
+            throw new SyntaxErrorException(err_message, current.Cursor, Filepath);
+        }
+
+        protected Token ConsumeAny(string err_message, params TokenType[] types)
+        {
+            Token current = CurrentToken();
+
+            foreach (TokenType type in types)
+            {
+                if (current.Type == type)
+                {
+                    NextToken();
+                    return current;
+                }
             }
             throw new SyntaxErrorException(err_message, current.Cursor, Filepath);
         }

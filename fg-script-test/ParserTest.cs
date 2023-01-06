@@ -115,10 +115,9 @@ namespace fg_script_test
             ";
 
             string expected = @"
-                (#expose (#declare sayHelloMaj (str:name) -> str)
-                  block:
+                (#expose (#declare sayHelloMaj (str:name) -> str
                     (str:res => upperCase((+ ""Hello "" name)))
-                    (#return (+ res ""!"")))
+                    (#return (+ res ""!""))))
             ";
 
             Lexer lexer = new(source);
@@ -173,7 +172,7 @@ namespace fg_script_test
             string source = @"
                 // extern always expects the statement to end
                 // with a ; after the ret type
-                extern fn someFunc(str x, num y, tup z) -> void {
+                extern fn someFunc(str x, num y, tup z) -> str {
                     ret ""some stuff"";
                 }
             ";
@@ -182,10 +181,30 @@ namespace fg_script_test
             List<Token> tokens = lexer.Tokenize();
             Assert.ThrowsException<SyntaxErrorException>(() =>
             {
-
                 Parser parser = new("<test>", ref tokens);
                 parser.Run();
             });
+        }
+
+        [TestMethod]
+        public void TupleExprShouldParse()
+        {
+            string source = @"
+                tup a = [1, 2, 3];
+                tup b = [1, 2, [4, 5], 6, [7, 8], [], 9];
+                tup c = [a : 1, b : 4, ""x"" : [3, 4], z : [8 : 3, 4 : 9]];
+                tup d = [45 : ""some value"", hello: world, x: some_func(), z: (1 + 3) * 4];
+                tup e = [1, 2, 3, [2, [3, [x : 4]]]];
+            ";
+            List<string> tests = new()
+            {
+                "(tup:a => [0:1, 1:2, 2:3])",
+                "(tup:b => [0:1, 1:2, 2:[0:4, 1:5], 3:6, 4:[0:7, 1:8], 5:[], 6:9])",
+                "(tup:c => [a:1, b:4, \"x\":[0:3, 1:4], z:[8:3, 4:9]])",
+                "(tup:d => [45:\"some value\", hello:world, x:some_func(), z:(* (+ 1 3) 4)])",
+                "(tup:e => [0:1, 1:2, 2:3, 3:[0:2, 1:[0:3, 1:[x:4]]]])"
+            };
+            TestSetFrom(source, tests);
         }
     }
 }

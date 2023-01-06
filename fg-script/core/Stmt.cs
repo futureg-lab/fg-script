@@ -66,9 +66,38 @@ namespace fg_script.core
 
     public class If : Stmt
     {
+        public Expr IfCondition { get; }
+        public Block IfBody { get; }
+        public Block? ElseBody { get; set; }
+
+        public List<Branch> Branches { get; }
+
+        public If(Expr condition, Block body)
+        {
+            IfCondition = condition;
+            IfBody = body;
+            Branches = new();
+        }
+
         override public T Accept<T>(IVisitor<T> vistor)
         {
             return vistor.VisitIf(this);
+        }
+    }
+
+    public class Branch : Stmt
+    {
+        public Expr Condition { get; }
+        public Block Body { get; }
+        public Branch (Expr condition, Block body)
+        {
+            Condition = condition;
+            Body = body;
+        }
+
+        override public T Accept<T>(IVisitor<T> vistor)
+        {
+            return vistor.VisitBranch(this);
         }
     }
 

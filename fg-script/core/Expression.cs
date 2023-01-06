@@ -6,11 +6,13 @@
         UNARY,
         BINARY,
         LITERAL,
+        LITERAL_TUPLE,
         VAR,
         ARG,
         FUNC_CALL,
         VAR_CALL,
-        GENERIC
+        GENERIC,
+        ENUMERATION
     }
 
     public class Expr : INode
@@ -24,6 +26,22 @@
         public virtual T Accept<T>(IVisitor<T> visitor)
         {
             return visitor.VisitExpr(this);
+        }
+    }
+
+    public class EnumExpr : Expr
+    {
+        public Expr Start { get;  }
+        public Expr End { get;  }
+        public EnumExpr(Expr start, Expr end)
+            : base(ExprType.ENUMERATION)
+        {
+            Start = start;
+            End = end;
+        }
+        override public T Accept<T>(IVisitor<T> visitor)
+        {
+            return visitor.VisitEnumExpr(this);
         }
     }
 
@@ -78,6 +96,34 @@
             return visitor.VisitLiteralExpr(this);
         }
     }
+
+    public class TupleExpr : Expr
+    {
+        private int Count { get; set; } = 0;
+        public Dictionary<string, Expr> Map { get; }
+        public TupleExpr() 
+            : base(ExprType.LITERAL_TUPLE)
+        {
+            Map = new Dictionary<string, Expr>();
+        }
+
+        public void Set(string key, Expr value)
+        {
+            Map.Add(key, value);
+            Count++;
+        }
+
+        public void Append(Expr value)
+        {
+            Map.Add(Count.ToString(), value);
+            Count++;
+        }
+        override public T Accept<T>(IVisitor<T> visitor)
+        {
+            return visitor.VisitTupleExpr(this);
+        }
+    }
+
 
     public class UnaryExpr : Expr
     {

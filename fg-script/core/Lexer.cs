@@ -70,7 +70,8 @@
 
             ReservedSymbols.Add(",", TokenType.COMMA);
             ReservedSymbols.Add(".", TokenType.DOT);
-            ReservedSymbols.Add(";", TokenType.SEMICOLUMN);
+            ReservedSymbols.Add(";", TokenType.SEMICOLON);
+            ReservedSymbols.Add(":", TokenType.COLON);
 
 
             // 2 chars
@@ -322,7 +323,7 @@
             if (character == null)
                 return false;
 
-            string symbols = "=+-*/%><!,.;";
+            string symbols = "=+-*/%><!,.;:";
             return symbols.Contains((char) character);
         }
 

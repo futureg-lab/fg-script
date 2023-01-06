@@ -13,10 +13,12 @@ namespace fg_script.core
         public T VisitBlock(Block stmt);
         public T VisitFunc(Func stmt);
         public T VisitIf(If stmt);
+        public T VisitBranch(Branch stmt);
         public T VisitFor(For stmt);
         public T VisitWhile(While stmt);
         public T VisitAssign(Assign stmt);
         public T VisitReturn(Return stmt);
+
         public T VisitError(Error stmt);
         public T VisitBreak(Break stmt);
         public T VisitContinue(Continue stmt);
@@ -29,9 +31,12 @@ namespace fg_script.core
         // Expressions
         public T VisitExpr(Expr expr);
         public T VisitVarExpr(VarExpr expr);
+        public T VisitEnumExpr(EnumExpr expr);
         public T VisitArgExpr(ArgExpr expr);
         public T VisitLiteralExpr(LiteralExpr expr);
         public T VisitUnaryExpr(UnaryExpr expr);
+        public T VisitTupleExpr(TupleExpr expr);
+
         public T VisitBinaryExpr(BinaryExpr expr);
         public T VisitFuncCall(FuncCall expr);
         public T VisitVarCall(VarCall expr);

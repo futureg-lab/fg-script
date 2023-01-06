@@ -19,7 +19,8 @@ namespace fg_script.core
         GT,                 // >
         NOT,                // ! or not
         COMMA,              // ,
-        SEMICOLUMN,         // ;
+        SEMICOLON,          // ;
+        COLON,              // :
         DOT,                // .
 
         COMMENT,            // //
