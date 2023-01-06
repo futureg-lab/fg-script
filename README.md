@@ -26,8 +26,8 @@ expose fn sayHello(name) -> str {
 // Native types : str, num (double representation), tup
 // a value, a tuple, an array, a dictionary, everything is a tuple !
 
-tup tuple = (1, 2, 3, 4, 5, (1, 2 ("something", 2)));
-tup tup_empt = ();
+tup tuple = [1, 2, 3, 4, 5, [1, 2 ["something", 2]]];
+tup tup_empt = [];
 push(tup_empt, 1);
 push(tup_empt, 2);
 push(tup_empt, "3");
@@ -56,8 +56,8 @@ tup as_tup_again = tup(as_tup); // still (5)
 tup as_tup_again = tup(as_str); // ("5")
 
 // operation with tuples with the same dimension*
-tup vec1 = (1, 2, 3);
-tup vec2 = (4, "5", 6);
+tup vec1 = [1, 2, 3];
+tup vec2 = [4, "5", 6];
 tup res1 = vec1 + vec2; // (1, "52", 9)
 tup res2 = vec1 * vec2; // error : "*" operator is undefined for operands (num, str)
 tup res3 = vec1 - vec2; // error : "-" operator is undefined for operands (num, str)
@@ -68,15 +68,15 @@ define cust_tup = (name : str, age : num, attr : (str, str, num));
 cust_tup someone = (name : "Rakoto", age : 17, attr : ("foo", "bar", 42));
 
 // a dic is a tuple, with a label on each item
-tup example_dic = (
+tup example_dic = [
 	a : 6,
 	b : 8,
-	c : (
+	c :  [
 		e : "Some text",
 		h : 3,
-		q : (1, 2, 3, 4, 5)
-	)
-);
+		q : [1, 2, 3, 4, 5]
+	]
+];
 
 // In this example (3) should be labeled as it is couter-intuitive to assign (3) a generic label 
 tup example = (a : 1, b : 2, (3)); // throws an error
