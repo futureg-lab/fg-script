@@ -84,6 +84,15 @@ namespace fg_script.core
         {
             return expr.Value.Lexeme;
         }
+        public string VisitTupleExpr(TupleExpr expr)
+        {
+            List<string> list = new();
+            foreach(var item in expr.Map)
+                list.Add(item.Key + ":" + Print(item.Value));
+            string list_str = string.Join(", ", list);
+            return String.Format("[{0}]", list_str);
+        }
+
 
         public string VisitBlock(Block stmt)
         {

@@ -6,6 +6,7 @@
         UNARY,
         BINARY,
         LITERAL,
+        LITERAL_TUPLE,
         VAR,
         ARG,
         FUNC_CALL,
@@ -95,6 +96,34 @@
             return visitor.VisitLiteralExpr(this);
         }
     }
+
+    public class TupleExpr : Expr
+    {
+        private int Count { get; set; } = 0;
+        public Dictionary<string, Expr> Map { get; }
+        public TupleExpr() 
+            : base(ExprType.LITERAL_TUPLE)
+        {
+            Map = new Dictionary<string, Expr>();
+        }
+
+        public void Set(string key, Expr value)
+        {
+            Map.Add(key, value);
+            Count++;
+        }
+
+        public void Append(Expr value)
+        {
+            Map.Add(Count.ToString(), value);
+            Count++;
+        }
+        override public T Accept<T>(IVisitor<T> visitor)
+        {
+            return visitor.VisitTupleExpr(this);
+        }
+    }
+
 
     public class UnaryExpr : Expr
     {
