@@ -162,14 +162,41 @@
             return ifstmt;
         }
 
+        // for_loop ::= for name | (name, name) in expr 
         protected For StateFor()
         {
-            throw new Exception("todo");
+            Consume(TokenType.FOR, "for was expected");
+            
+            Token? KeyAlias, KeyValue;
+
+            if (Match(TokenType.LEFT_PARENTH))
+            {
+                Consume(TokenType.LEFT_PARENTH, "( was expected");
+                KeyAlias = Consume(TokenType.KEYWORD_OR_NAME, "key alias expected");
+                Consume(TokenType.COMMA, ", expected");
+                KeyValue = Consume(TokenType.KEYWORD_OR_NAME, "key value expected");
+                Consume(TokenType.RIGHT_PARENTH, ") was expected");
+            }
+            else
+            {
+                KeyAlias = null;
+                KeyValue = Consume(TokenType.KEYWORD_OR_NAME, "key value expected");
+            }
+
+            Consume(TokenType.IN, "in was expected");
+
+            Expr expr_iter = ConsumeExpr();
+            Block body = StateBlock();
+
+            return new(body, KeyAlias, KeyValue, expr_iter);
         }
 
         protected While StateWhile()
         {
-            throw new Exception("todo");
+            Consume(TokenType.WHILE, "while was expected");
+            Expr cond = ConsumeGenExpr();
+            Block body = StateBlock();
+            return new(body, cond);
         }
 
         protected Block StateBlock()
@@ -291,7 +318,7 @@
             return expr;
         }
 
-        // expr     ::= term (+| - | or ) expr | term
+        // expr      ::= term (+| -) expr | term
         protected Expr ConsumeExpr()
         {
             Expr expr = ConsumeTerm();
@@ -314,7 +341,7 @@
         }
 
 
-        // term     ::= factor (* | / | and) term | factor
+        // term      ::= factor (* | /) term | factor
         protected Expr ConsumeTerm()
         {
             Expr expr = ConsumeFactor();
@@ -419,9 +446,8 @@
             // tup ::= [ (string | word | number) : tup (, string | word | number : tup)* ]
 
             // first item decides the key type
-            string current = CurrentToken().Lexeme;
-            bool keyable = IsKeyable();
-            if (MatchNext(TokenType.COLON) && keyable) {
+            if (MatchNext(TokenType.COLON) && IsKeyable()) 
+            {
                 // disable autokeys
                 auto_keys = false;
                 string key = FetchKey();

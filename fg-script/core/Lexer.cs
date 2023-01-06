@@ -46,6 +46,7 @@
 
             // other
             ReservedWords.Add("is", TokenType.IS);
+            ReservedWords.Add("in", TokenType.IN);
             ReservedWords.Add("and", TokenType.AND);
             ReservedWords.Add("or", TokenType.OR);
             ReservedWords.Add("not", TokenType.NOT);

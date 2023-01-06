@@ -5,7 +5,16 @@ namespace fg_script_test
     [TestClass]
     public class ParserTest
     {
-        public void TestSetFrom(string source, List<string> tests)
+        public string Compress(string str)
+        {
+            return str
+                .Replace("\n", "")
+                .Replace("\t", "")
+                .Replace("\r", "")
+                .Replace(" ", "");
+        }
+
+        public void TestSetFrom(string source, List<string> tests, bool compress = false)
         {
 
             Lexer lexer = new(source);
@@ -16,16 +25,14 @@ namespace fg_script_test
 
             Assert.AreEqual(tests.Count, stmts.Count);
             for (int i = 0; i < tests.Count; i++)
-                Assert.AreEqual(printer.Print(stmts[i]), tests[i]);
-        }
-
-        public string Compress(string str)
-        {
-            return str
-                .Replace("\n", "")
-                .Replace("\t", "")
-                .Replace("\r", "")
-                .Replace(" ", "");
+            {
+                string expected = tests[i];
+                string got = printer.Print(stmts[i]);
+                if (!compress)
+                    Assert.AreEqual(expected, got);
+                else
+                    Assert.AreEqual(Compress(expected), Compress(got));
+            }
         }
 
         [TestMethod]
@@ -205,6 +212,38 @@ namespace fg_script_test
                 "(tup:e => [0:1, 1:2, 2:3, 3:[0:2, 1:[0:3, 1:[x:4]]]])"
             };
             TestSetFrom(source, tests);
+        }
+        [TestMethod]
+        public void ForAndWhileLoopTest()
+        {
+            string source = @"
+                while x and y {
+	                num z = random();
+	                print(z + ""yay!"");
+                }
+                
+                for x in [1, 2, 3] {
+	                print(""hello world!"");
+                }
+
+                for (k, v) in [1, 2, 3] * 2 + 3 {
+	                print(""hello world!"");
+                }
+            ";
+            List<string> tests = new()
+            {
+                @"
+                (#while (and x y)
+                    (num:z => random())
+                    (#root_call print((+ z ""yay!""))))",
+                @"
+                (#for (, x) #in [0:1, 1:2, 2:3]
+                    (#root_call print(""hello world!"")))",
+                @"
+                (#for (k, v) #in (+ (* [0:1, 1:2, 2:3] 2) 3)
+                    (#root_call print(""hello world!"")))"
+            };
+            TestSetFrom(source, tests, true);
         }
     }
 }

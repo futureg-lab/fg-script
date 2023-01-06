@@ -103,6 +103,20 @@ namespace fg_script.core
 
     public class For : Stmt
     {
+        // for x in 0 .. 10 => (key, value) => (_, x) 
+        public Block Body { get; }
+        public Token? KeyAlias { get; }
+        public Token ValueAlias { get; }
+        public Expr ExprIterable { get; }
+
+        public For(Block body, Token? keyAlias, Token valueAlias, Expr exprIterable)
+        {
+            Body = body;
+            KeyAlias = keyAlias;
+            ValueAlias = valueAlias;
+            ExprIterable = exprIterable;
+        }
+
         override public T Accept<T>(IVisitor<T> vistor)
         {
             return vistor.VisitFor(this);
@@ -111,6 +125,15 @@ namespace fg_script.core
 
     public class While : Stmt
     {
+        public Expr Condition { get; }
+        public Block Body { get; }
+
+        public While(Block body, Expr condition)
+        {
+            Body = body;
+            Condition = condition;
+        }
+
         override public T Accept<T>(IVisitor<T> vistor)
         {
             return vistor.VisitWhile(this);
