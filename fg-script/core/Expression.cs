@@ -10,7 +10,8 @@
         ARG,
         FUNC_CALL,
         VAR_CALL,
-        GENERIC
+        GENERIC,
+        ENUMERATION
     }
 
     public class Expr : INode
@@ -24,6 +25,22 @@
         public virtual T Accept<T>(IVisitor<T> visitor)
         {
             return visitor.VisitExpr(this);
+        }
+    }
+
+    public class EnumExpr : Expr
+    {
+        public Expr Start { get;  }
+        public Expr End { get;  }
+        public EnumExpr(Expr start, Expr end)
+            : base(ExprType.ENUMERATION)
+        {
+            Start = start;
+            End = end;
+        }
+        override public T Accept<T>(IVisitor<T> visitor)
+        {
+            return visitor.VisitEnumExpr(this);
         }
     }
 

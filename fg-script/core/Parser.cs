@@ -211,35 +211,51 @@
             return new(thrown);
         }
 
+
         // Idea :
         // Expressions
         // Ex: 1+x*(1-2) and 3 <= 3, "some strings", ...etc
 
-        // A general expression can be thought like this :
-        // gen_expr  ::= and_expr (or) or_expr | and_expr
+        // 1. A general expression can be thought like this :
+        // gen_expr  ::= or_expr (..) gen_expr | or_expr
+        // or_expr   ::= and_expr (or) or_expr | and_expr
         // and_expr  ::= comp_expr (and) and_expr | expr
-
         // comp_expr ::= expr (== | >= | == | >= | != | < | >) comp_expr | expr
-        // expr     ::= term (+| -) expr | term
-        // term     ::= factor (* | /) term | factor
-        // factor   ::= (gen_expr) | unary
-        // unary    ::= <literal> | <func_call> | <var_name> | <monoadic_operation>
+        // expr      ::= term (+| -) expr | term
+        // term      ::= factor (* | /) term | factor
+        // factor    ::= (gen_expr) | unary
+        // unary     ::= <literal> | <func_call> | <var_name> | <monoadic_operation>
+
+        // 2. An enumeration expression can be thought like this
 
 
-        // gen_expr ::= expr (== | >= | == | >= | != | < | >) gen_expr
+        // gen_expr  ::= or_expr (..) gen_expr | or_expr
         protected Expr ConsumeGenExpr()
+        {
+            Expr expr = ConsumeOrExpr();
+            if (Match(TokenType.DBL_DOT))
+            {
+                Consume(TokenType.DBL_DOT);
+                Expr right = ConsumeGenExpr();
+                return new EnumExpr(expr, right);
+            }
+            return expr;
+        }
+
+        // or_expr   ::= and_expr (or) or_expr | and_expr
+        protected Expr ConsumeOrExpr()
         {
             Expr expr = ConsumeAndExpr();
             if (Match(TokenType.OR))
             {
                 Token op_token = Consume(TokenType.OR);
-                Expr right = ConsumeGenExpr();
+                Expr right = ConsumeOrExpr();
                 return new BinaryExpr(op_token, expr, right);
             }
             return expr;
         }
 
-        // and_expr ::= expr (and) and_expr | expr
+        // and_expr  ::= comp_expr (and) and_expr | expr
         protected Expr ConsumeAndExpr()
         {
             Expr expr = ConsumeComparisonExpr();

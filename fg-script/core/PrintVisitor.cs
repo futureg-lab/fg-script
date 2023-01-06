@@ -11,10 +11,6 @@ namespace fg_script.core
             for (int i = 0; i < Depth; i++, indent += "    ") ;
             return indent + text;
         }
-        private string DbIndent(string text)
-        {
-            return Indent(Indent(text));
-        }
 
         public string Print(Stmt? stmt)
         {
@@ -32,6 +28,11 @@ namespace fg_script.core
         public string VisitAssign(Assign stmt)
         {
             return VisitVarExpr(stmt.Variable);
+        }
+
+        public string VisitEnumExpr(EnumExpr expr)
+        {
+            return string.Format("(#enum_from {0} #to {1})", Print(expr.Start), Print(expr.End));
         }
 
         public string VisitBinaryExpr(BinaryExpr expr)
@@ -74,9 +75,7 @@ namespace fg_script.core
             string callee = expr.Callee.Lexeme;
             List<string> args = new();
             foreach(var arg in expr.Args)
-            {
                 args.Add(Print(arg));
-            }
             string all_args = string.Join(", ", args);
             return string.Format("{0}({1})", callee, all_args);
         }

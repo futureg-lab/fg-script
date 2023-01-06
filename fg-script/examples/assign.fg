@@ -1,4 +1,6 @@
-﻿num x = 1 * (2 + some_func(4 * zzz / 1, 2, x));
+﻿tup x = 58 .. x .. 3 + 4 * 3 and 5;
+
+num x = 1 * (2 + some_func(4 * zzz / 1, 2, x));
 
 // numbers
 num a = 1 * 2 + 3;
@@ -11,6 +13,7 @@ ret 1 + 1;
 err "some error";
 
 bool x = null;
+
 
 fn someFunc(num one, str two, tup x) -> num
 {

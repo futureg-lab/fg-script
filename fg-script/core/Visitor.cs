@@ -30,6 +30,7 @@ namespace fg_script.core
         // Expressions
         public T VisitExpr(Expr expr);
         public T VisitVarExpr(VarExpr expr);
+        public T VisitEnumExpr(EnumExpr expr);
         public T VisitArgExpr(ArgExpr expr);
         public T VisitLiteralExpr(LiteralExpr expr);
         public T VisitUnaryExpr(UnaryExpr expr);
