@@ -52,6 +52,8 @@
             ReservedWords.Add("not", TokenType.NOT);
             ReservedWords.Add("ret", TokenType.RETURN);
             ReservedWords.Add("err", TokenType.ERROR);
+            ReservedWords.Add("break", TokenType.BREAK);
+            ReservedWords.Add("continue", TokenType.CONTINUE);
         }
 
         private void InitReservedSymbols()

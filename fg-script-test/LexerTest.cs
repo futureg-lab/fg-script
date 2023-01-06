@@ -88,7 +88,7 @@ namespace fg_script_test
         public void TestReservedKeywords()
         {
             string source = "num define  bool  tup   if else elif for   true  false    and or is fn" +
-                 "  extern expose ret somethingThatMeansNothing  err in";
+                 "  extern expose ret somethingThatMeansNothing  err in break continue";
 
 
             Lexer lexer = new(source, "<test>");
@@ -101,7 +101,7 @@ namespace fg_script_test
                 TokenType.BOOL, TokenType.BOOL, 
                 TokenType.AND, TokenType.OR, TokenType.IS, TokenType.FUN_DECL,
                 TokenType.EXTERN, TokenType.EXPOSE, TokenType.RETURN, TokenType.KEYWORD_OR_NAME,
-                TokenType.ERROR, TokenType.IN,
+                TokenType.ERROR, TokenType.IN, TokenType.BREAK, TokenType.CONTINUE,
                 TokenType.EOF
             };
 
