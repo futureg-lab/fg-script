@@ -13,6 +13,7 @@ namespace fg_script.core
         public T VisitBlock(Block stmt);
         public T VisitFunc(Func stmt);
         public T VisitIf(If stmt);
+        public T VisitBranch(Branch stmt);
         public T VisitFor(For stmt);
         public T VisitWhile(While stmt);
         public T VisitAssign(Assign stmt);

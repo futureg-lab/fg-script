@@ -138,7 +138,28 @@
 
         protected If StateIf ()
         {
-            throw new Exception("todo");
+            Consume(TokenType.IF, "if was expected");
+            Expr cond = ConsumeGenExpr();
+            Block body = StateBlock();
+
+            If ifstmt = new(cond, body);
+
+            while (Match(TokenType.ELSE_IF))
+            {
+                Consume(TokenType.ELSE_IF);
+                Expr elseif_cond = ConsumeGenExpr();
+                Block elseif_body = StateBlock();
+                Branch elseif_branch = new(elseif_cond, elseif_body);
+                ifstmt.Branches.Add(elseif_branch);
+            }
+
+            if (Match(TokenType.ELSE))
+            {
+                Consume(TokenType.ELSE, "else was expected");
+                ifstmt.ElseBody = StateBlock();
+            }
+
+            return ifstmt;
         }
 
         protected For StateFor()
@@ -171,7 +192,7 @@
         {
             FuncCall fcall = ConsumeFuncCall();
             Consume(TokenType.SEMICOLUMN, "; was expected");
-            return new FuncCallDirect(fcall);
+            return new(fcall);
         }
 
         protected Return StateReturn()

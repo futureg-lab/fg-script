@@ -16,6 +16,36 @@ fn someFunc(num one, str two, tup x) -> num
 {
 	num x = 1 * (2 + some_func(4 * zzz / 1, 2, x));
 	bool y = false and true or false;
+	if (x > 0) {
+		ret 1;
+	} elif (x > 0 and x < 3) {
+		ret 2;
+	} elif (x >= 4 and x < 6) {
+		if (x > 0) {
+			ret 1;
+		} elif (x > 0 and x < 3) {
+			ret 2;
+		} elif (x >= 4 and x < 6) {
+			if (x > 2) {
+				ret 4;
+			} else {
+				ret 5;
+			}
+			ret 3;
+		} elif (x >= 4 and x < 6) {
+			// some stuff
+			num z = 3;
+			num x = 2 * (4 + x) * y;
+			ret 5;
+		} else {
+			ret 4;
+		}
+		ret 3;
+	} elif (x >= 4 and x < 6) {
+		ret 5;
+	} else {
+		ret 4;
+	}
 
 	ret not y and false or true;
 }

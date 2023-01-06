@@ -115,10 +115,9 @@ namespace fg_script_test
             ";
 
             string expected = @"
-                (#expose (#declare sayHelloMaj (str:name) -> str)
-                  block:
+                (#expose (#declare sayHelloMaj (str:name) -> str
                     (str:res => upperCase((+ ""Hello "" name)))
-                    (#return (+ res ""!"")))
+                    (#return (+ res ""!""))))
             ";
 
             Lexer lexer = new(source);

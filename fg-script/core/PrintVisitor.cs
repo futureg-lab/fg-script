@@ -1,14 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace fg_script.core
 {
     public class PrintVisitor : IVisitor<string>
     {
         private int Depth { get; set; } = 0;
+
+        private string Indent(string text)
+        {
+            string indent = "";
+            for (int i = 0; i < Depth; i++, indent += "    ") ;
+            return indent + text;
+        }
+        private string DbIndent(string text)
+        {
+            return Indent(Indent(text));
+        }
 
         public string Print(Stmt? stmt)
         {
@@ -84,14 +90,10 @@ namespace fg_script.core
         {
             Depth++;
 
-            string indent = "";
-            for (int i = 0; i < Depth; i++, indent += "  ");
-
-            string all = indent + "block:\n";
+            string all = "";
             List<string> lines = stmt
                 .Statements
-                .ConvertAll<string>(item => indent + indent + Print(item));
-
+                .ConvertAll<string>(item => Indent(Print(item)));
             all += string.Join("\n", lines);
 
             Depth--;
@@ -144,17 +146,35 @@ namespace fg_script.core
             string ret_type = stmt.ReturnType.Lexeme;
             List<string> args = new();
             foreach (var arg in stmt.Args)
-            {
                 args.Add(Print(arg));
-            }
             string all_args = string.Join(", ", args);
-            return string.Format("(#declare {0} ({1}) -> {2})\n{3}", name, all_args, ret_type, Print(stmt.Body));
+            return string.Format("(#declare {0} ({1}) -> {2}\n{3})", name, all_args, ret_type, Print(stmt.Body));
         }
-
 
         public string VisitIf(If stmt)
         {
-            throw new NotImplementedException();
+            string if_str = "\n" + Print(stmt.IfBody);
+            string else_str = "";
+            if (stmt.ElseBody != null)
+            {
+                string tmp = string.Format("(#else \n{0})", Print(stmt.ElseBody));
+                else_str = "\n" + Indent(tmp);
+            }
+
+            List<string> branch_strs = stmt
+                .Branches
+                .ConvertAll(branch => "\n" + Indent(Print(branch)));
+
+            string branch_str = string.Join("", branch_strs);
+            string cond_str = Print(stmt.IfCondition);
+            return string.Format("(#if {0} => {1}{2}{3})", cond_str, if_str, branch_str, else_str);
+        }
+
+        public string VisitBranch(Branch stmt)
+        {
+            string cond_str = Print(stmt.Condition);
+            string body_str = Print(stmt.Body);
+            return string.Format("(#branch {0} => \n{1})", cond_str, body_str);
         }
 
         public string VisitReturn(Return stmt)
