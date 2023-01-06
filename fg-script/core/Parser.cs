@@ -419,9 +419,8 @@
             // tup ::= [ (string | word | number) : tup (, string | word | number : tup)* ]
 
             // first item decides the key type
-            string current = CurrentToken().Lexeme;
-            bool keyable = IsKeyable();
-            if (MatchNext(TokenType.COLON) && keyable) {
+            if (MatchNext(TokenType.COLON) && IsKeyable()) 
+            {
                 // disable autokeys
                 auto_keys = false;
                 string key = FetchKey();
