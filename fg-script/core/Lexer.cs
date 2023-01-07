@@ -25,7 +25,6 @@
             ReservedWords.Add("fn", TokenType.FUN_DECL);
             ReservedWords.Add("extern", TokenType.EXTERN);
             ReservedWords.Add("expose", TokenType.EXPOSE);
-            ReservedWords.Add("define", TokenType.DEFINE);
             ReservedWords.Add("false", TokenType.BOOL);
             ReservedWords.Add("true", TokenType.BOOL);
             ReservedWords.Add("null", TokenType.NULL);
@@ -107,7 +106,7 @@
                     NextChar();
                     continue;
                 }
-                
+
                 if (IsNewLine(CurrentChar))
                 {
                     string str = "\\n";
@@ -127,6 +126,7 @@
                     continue;
                 }
 
+                // "//" or "/*"
                 if (CurrentChar == '/' && (PeekNextChar() == '/' || PeekNextChar() == '*'))
                 {
                     string str = PeekNextChar() == '*' ? MakeMultiLineComment() : MakeComment();
@@ -219,12 +219,26 @@
             {
                 str += CurrentChar;
                 NextChar();
+                if (IsNewLine(CurrentChar))
+                {
+                    // at this point str + '\r'
+                    // '\n' remains
+                    if (CurrentChar == '\n')
+                        str += '\n';
+                    // else
+                    //    there is no \r sò \n has been already consumed
+
+                    NextChar(); // skip next \n
+                    // update cursor position
+                    Cursor.Col = 0;
+                    Cursor.Line++;
+                }
                 if (HasEnded())
                     throw new SyntaxErrorException("interminated comment", Cursor.Copy(), Filepath);
             }
+            NextChar();
+            NextChar();
             str += "*/";
-            NextChar();
-            NextChar();
             return str;
         }
 

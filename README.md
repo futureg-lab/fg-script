@@ -58,14 +58,10 @@ tup as_tup_again = tup(as_str); // ("5")
 // operation with tuples with the same dimension*
 tup vec1 = [1, 2, 3];
 tup vec2 = [4, "5", 6];
-tup res1 = vec1 + vec2; // (1, "52", 9)
+tup res1 = vec1 + vec2; // [1, "52", 9]
 tup res2 = vec1 * vec2; // error : "*" operator is undefined for operands (num, str)
 tup res3 = vec1 - vec2; // error : "-" operator is undefined for operands (num, str)
 tup res4 = vec1 / vec2; // error : "/" operator is undefined for operands (num, str)
-
-// you can create a custom tuple !
-define cust_tup = [name : str, age : num, attr : [str, str, num]];
-cust_tup someone = [name : "Rakoto", age : 17, attr : ["foo", "bar", 42]);
 
 // a dic is a tuple, with a label on each item
 tup example_dic = [

@@ -1,28 +1,7 @@
 ﻿namespace fg_script.core
 {
-    public enum ExprType
-    {
-        PROGRAM,
-        UNARY,
-        BINARY,
-        LITERAL,
-        LITERAL_TUPLE,
-        VAR,
-        ARG,
-        FUNC_CALL,
-        VAR_CALL,
-        GENERIC,
-        ENUMERATION
-    }
-
     public class Expr : INode
     {
-        public ExprType Type { get; } = ExprType.GENERIC;
-        public Expr(ExprType type)
-        {
-            Type = type;
-        }
-
         public virtual T Accept<T>(IVisitor<T> visitor)
         {
             return visitor.VisitExpr(this);
@@ -34,7 +13,6 @@
         public Expr Start { get;  }
         public Expr End { get;  }
         public EnumExpr(Expr start, Expr end)
-            : base(ExprType.ENUMERATION)
         {
             Start = start;
             End = end;
@@ -52,7 +30,6 @@
         public Expr Value { get; }
 
         public VarExpr(Token datatype, Token name, Expr value)
-            : base(ExprType.VAR)
         {
             DataType = datatype;
             Name = name;
@@ -71,7 +48,6 @@
         public Token Name { get; }
 
         public ArgExpr(Token datatype, Token name)
-            : base(ExprType.ARG)
         {
             DataType = datatype;
             Name = name;
@@ -86,7 +62,6 @@
     {
         public Token Value { get; }
         public LiteralExpr(Token value)
-            : base(ExprType.LITERAL)
         {
             Value = value;
         }
@@ -102,7 +77,6 @@
         private int Count { get; set; } = 0;
         public Dictionary<string, Expr> Map { get; }
         public TupleExpr() 
-            : base(ExprType.LITERAL_TUPLE)
         {
             Map = new Dictionary<string, Expr>();
         }
@@ -130,7 +104,6 @@
         public Token OpSymbol { get; }
         public Expr Operand { get; }
         public UnaryExpr(Token op, Expr operand)
-            : base(ExprType.UNARY)
         {
             this.OpSymbol = op;
             this.Operand = operand;
@@ -148,7 +121,6 @@
         public Expr Left { get; }
         public Expr Right { get; }
         public BinaryExpr(Token op, Expr left, Expr right)
-            : base(ExprType.BINARY)
         {
             this.OpSymbol = op;
             this.Left = left;
@@ -165,7 +137,6 @@
         public Token Callee { get;  }
         public List<Expr> Args { get; }
         public FuncCall(Token callee, List<Expr> args)
-            : base(ExprType.FUNC_CALL)
         {
             Callee = callee;
             Args = args;
@@ -180,13 +151,27 @@
     {
         public Token Callee { get; }
         public VarCall(Token callee)
-            : base(ExprType.VAR_CALL)
         {
             Callee = callee;
         }
         override public T Accept<T>(IVisitor<T> visitor)
         {
             return visitor.VisitVarCall(this);
+        }
+    }
+
+    public class ArrayAccessCall : Expr
+    {
+        public Token Callee { get; }
+        public Expr Index { get; }
+        public ArrayAccessCall(Token callee, Expr index)
+        {
+            Callee = callee;
+            Index = index;
+        }
+        override public T Accept<T>(IVisitor<T> visitor)
+        {
+            return visitor.VisitArrayAccessCall(this);
         }
     }
 }

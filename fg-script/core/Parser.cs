@@ -31,7 +31,6 @@
         {
             if (Match(TokenType.FUN_DECL)) return StateFuncDeclaration();
             if (Match(TokenType.TYPE)) return StateAssignDeclaration();
-            if (Match(TokenType.DEFINE)) return StateDefineType();
             if (Match(TokenType.EXPOSE)) return StateExposeDeclaration();
             if (Match(TokenType.EXTERN)) return StateExternDeclaration();
             if (Match(TokenType.IF)) return StateIf();
@@ -65,17 +64,17 @@
             }
             else
                 throw Error("unexpected token");
-            Consume(TokenType.SEMICOLON, "; was expected");
+            Consume(TokenType.SEMICOLON, @""";"" was expected");
             return stmt;
         }
 
         protected Func StateBodyLessFunction()
         {
-            Consume(TokenType.FUN_DECL, "fn was expected");
+            Consume(TokenType.FUN_DECL, @"""fn"" was expected");
             Token name = Consume(TokenType.KEYWORD_OR_NAME, "invalid function name");
 
-            Consume(TokenType.LEFT_PARENTH, "( was expected");
-            List<ArgExpr> args = new();
+            Consume(TokenType.LEFT_PARENTH, @"""("" was expected");
+            List <ArgExpr> args = new();
             while (!Match(TokenType.RIGHT_PARENTH))
             {
                 Token arg_type = Consume(TokenType.TYPE, "valid return type was expected");
@@ -88,9 +87,9 @@
                 else
                     break;
             }
-            Consume(TokenType.RIGHT_PARENTH, ") was expected");
+            Consume(TokenType.RIGHT_PARENTH, @""")"" was expected");
 
-            Consume(TokenType.RET_OP, "-> was expeceted");
+            Consume(TokenType.RET_OP, @"""->"" was expeceted");
             Token ret_type = Consume(TokenType.TYPE, "valid return type was expected");
 
             return new Func(name, args, ret_type, null);
@@ -117,12 +116,12 @@
                         value = new LiteralExpr(Consume(TokenType.NULL));
                     else
                         value = ConsumeGenExpr();
-                    Consume(TokenType.SEMICOLON, "; was expected");
+                    Consume(TokenType.SEMICOLON, @""";"" was expected");
                 }
             }
             else
             {
-                throw Error("= or ; was expected");
+                throw Error(@"""="" or "";"" was expected");
             }
 
             if (value == null)
@@ -132,30 +131,24 @@
             return new(expr);
         }
 
-        // statements
-        protected Define StateDefineType()
-        {
-            throw new Exception("todo");
-        }
-
         protected Expose StateExposeDeclaration()
         {
-            Consume(TokenType.EXPOSE, "expose was expected");
+            Consume(TokenType.EXPOSE, @"""expose"" was expected");
             Func func = StateFuncDeclaration();
             return new(func);
         }
 
         protected Extern StateExternDeclaration()
         {
-            Consume(TokenType.EXTERN, "extern was expected");
+            Consume(TokenType.EXTERN, @"""extern"" was expected");
             Func func = StateBodyLessFunction();
-            Consume(TokenType.SEMICOLON, "; was expected");
+            Consume(TokenType.SEMICOLON, @""";"" was expected");
             return new(func);
         }
 
         protected If StateIf ()
         {
-            Consume(TokenType.IF, "if was expected");
+            Consume(TokenType.IF, @"""if"" was expected");
             Expr cond = ConsumeGenExpr();
             Block body = StateBlock();
 
@@ -172,7 +165,7 @@
 
             if (Match(TokenType.ELSE))
             {
-                Consume(TokenType.ELSE, "else was expected");
+                Consume(TokenType.ELSE, @"""else"" was expected");
                 ifstmt.ElseBody = StateBlock();
             }
 
@@ -182,17 +175,18 @@
         // for_loop ::= for name | (name, name) in expr 
         protected For StateFor()
         {
-            Consume(TokenType.FOR, "for was expected");
-            
-            Token? KeyAlias, KeyValue;
+            Consume(TokenType.FOR, @"""for"" was expected");
+
+
+            Token ? KeyAlias, KeyValue;
 
             if (Match(TokenType.LEFT_PARENTH))
             {
-                Consume(TokenType.LEFT_PARENTH, "( was expected");
+                Consume(TokenType.LEFT_PARENTH, @"""("" was expected");
                 KeyAlias = Consume(TokenType.KEYWORD_OR_NAME, "key alias expected");
-                Consume(TokenType.COMMA, ", expected");
+                Consume(TokenType.COMMA, @""","" expected");
                 KeyValue = Consume(TokenType.KEYWORD_OR_NAME, "key value expected");
-                Consume(TokenType.RIGHT_PARENTH, ") was expected");
+                Consume(TokenType.RIGHT_PARENTH, @""")"" was expected");
             }
             else
             {
@@ -200,7 +194,7 @@
                 KeyValue = Consume(TokenType.KEYWORD_OR_NAME, "key value expected");
             }
 
-            Consume(TokenType.IN, "in was expected");
+            Consume(TokenType.IN, @"""in"" was expected");
 
             Expr expr_iter = ConsumeGenExpr();
             Block body = StateBlock();
@@ -210,7 +204,7 @@
 
         protected While StateWhile()
         {
-            Consume(TokenType.WHILE, "while was expected");
+            Consume(TokenType.WHILE, @"""while"" was expected");
             Expr cond = ConsumeGenExpr();
             Block body = StateBlock();
             return new(body, cond);
@@ -218,40 +212,40 @@
 
         protected Block StateBlock()
         {
-            Consume(TokenType.LEFT_BRACE, "{ was expected");
+            Consume(TokenType.LEFT_BRACE, @"""{"" was expected");
             Block block = new();
             while (!Match(TokenType.RIGHT_BRACE))
             {
                 if (HasEnded())
-                    throw Error("} was expected");
-                Stmt? stmt = ProcessStatement();
+                    throw Error(@"""}"" was expected");
+                Stmt ? stmt = ProcessStatement();
                 if (stmt != null)
                     block.Add(stmt);
             }
-            Consume(TokenType.RIGHT_BRACE, "} was expected");
+            Consume(TokenType.RIGHT_BRACE, @"""}"" was expected");
             return block;
         }
 
         protected FuncCallDirect StateFuncCallRoot()
         {
             FuncCall fcall = ConsumeFuncCall();
-            Consume(TokenType.SEMICOLON, "; was expected");
+            Consume(TokenType.SEMICOLON, @""";"" was expected");
             return new(fcall);
         }
 
         protected Return StateReturn()
         {
-            Consume(TokenType.RETURN, "ret was expected");
+            Consume(TokenType.RETURN, @"""ret"" was expected");
             Expr returned = ConsumeGenExpr();
-            Consume(TokenType.SEMICOLON, "; was expected");
+            Consume(TokenType.SEMICOLON, @""";"" was expected");
             return new(returned);
         }
 
         protected Error StateError()
         {
-            Consume(TokenType.ERROR, "err was expected");
+            Consume(TokenType.ERROR, @"""err"" was expected");
             Expr thrown = ConsumeGenExpr();
-            Consume(TokenType.SEMICOLON, "; was expected");
+            Consume(TokenType.SEMICOLON, @""";"" was expected");
             return new(thrown);
         }
 
@@ -389,7 +383,7 @@
                 // try making an expression
                 Consume(TokenType.LEFT_PARENTH);
                 Expr expr = ConsumeGenExpr();
-                Consume(TokenType.RIGHT_PARENTH, ") was expected");
+                Consume(TokenType.RIGHT_PARENTH, @""")"" was expected");
                 return expr;
             }
             return ConsumeUnary();
@@ -422,6 +416,8 @@
             {
                 if (MatchNext(TokenType.LEFT_PARENTH))
                     return ConsumeFuncCall();
+                else if (MatchNext(TokenType.LEFT_BRACKET))
+                    return ConsumeArrayAccessCall();
                 else
                     return new VarCall(Consume(TokenType.KEYWORD_OR_NAME));
             }
@@ -447,7 +443,7 @@
                 || Match(TokenType.KEYWORD_OR_NAME) 
                 || Match(TokenType.NUMBER);
 
-            Consume(TokenType.LEFT_BRACKET, "[ was expected");
+            Consume(TokenType.LEFT_BRACKET, @"""["" was expected");
 
 
             TupleExpr tuple = new();
@@ -486,11 +482,11 @@
 
             while (!Match(TokenType.RIGHT_BRACKET))
             {
-                Consume(TokenType.COMMA, ", was expected");
+                Consume(TokenType.COMMA, @""","" was expected");
                 if (!auto_keys)
                 {
                     string key = FetchKey();
-                    Consume(TokenType.COLON, ": was expected");
+                    Consume(TokenType.COLON, @""":"" was expected");
                     if (Match(TokenType.LEFT_BRACKET))
                         tuple.Set(key, ConsumeTuple());
                     else
@@ -508,7 +504,7 @@
                     break;
             }
 
-            Consume(TokenType.RIGHT_BRACKET, "] was expected");
+            Consume(TokenType.RIGHT_BRACKET, @"""]"" was expected");
 
             return tuple;
         }
@@ -516,9 +512,9 @@
         protected FuncCall ConsumeFuncCall()
         {
             Token callee = Consume(TokenType.KEYWORD_OR_NAME, "callee name expected");
-            Consume(TokenType.LEFT_PARENTH, "( was expected");
+            Consume(TokenType.LEFT_PARENTH, @"""("" was expected");
 
-            List<Expr> args = new();
+            List <Expr> args = new();
             while(!Match(TokenType.RIGHT_PARENTH))
             {
                 Expr expr = ConsumeGenExpr();
@@ -530,10 +526,21 @@
                     break;
             }
 
-            Consume(TokenType.RIGHT_PARENTH, ") was expected");
+            Consume(TokenType.RIGHT_PARENTH, @""")"" was expected");
 
             FuncCall res = new(callee, args);
             return res;
+        }
+
+        protected ArrayAccessCall ConsumeArrayAccessCall()
+        {
+            Token callee = Consume(TokenType.KEYWORD_OR_NAME, "tuple name expected");
+            Consume(TokenType.LEFT_BRACKET, @"""["" was expected");
+
+            Expr index = ConsumeGenExpr();
+            
+            Consume(TokenType.RIGHT_BRACKET, @"""]"" was expected");
+            return new(callee, index);
         }
 
         protected Token Consume(TokenType type, string err_message = "")

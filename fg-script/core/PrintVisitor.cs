@@ -93,6 +93,10 @@ namespace fg_script.core
             return String.Format("[{0}]", list_str);
         }
 
+        public string VisitArrayAccessCall(ArrayAccessCall expr)
+        {
+            return string.Format("{0}[{1}]", expr.Callee.Lexeme, Print(expr.Index));
+        }
 
         public string VisitBlock(Block stmt)
         {
@@ -121,11 +125,6 @@ namespace fg_script.core
         public string VisitContinue(Continue stmt)
         {
             return "(#continue)";
-        }
-
-        public string VisitDefine(Define stmt)
-        {
-            throw new NotImplementedException();
         }
 
         public string VisitExpose(Expose stmt)
