@@ -76,13 +76,13 @@ namespace fg_script_test
                 // ((2*3)+3) != 4
                 bool b = 2 * 3 + 3 != 4;
             
-                bool q = 2 * (1 + 2) * 3 <= 3 and 4 != 8;
+                bool q = someArray[2 * (1 + 2)] * 3 <= 3 and 4 != 8;
             ";
             List<string> tests = new()
             {
                 "(bool:a => (<= (+ 2 3) 4))",
                 "(bool:b => (!= (+ (* 2 3) 3) 4))",
-                "(bool:q => (and (<= (* 2 (* (+ 1 2) 3)) 3) (!= 4 8)))",
+                "(bool:q => (and (<= (* someArray[(* 2 (+ 1 2))] 3) 3) (!= 4 8)))",
             };
             TestSetFrom(source, tests);
         }

@@ -35,10 +35,10 @@ namespace fg_script.core
         public T VisitLiteralExpr(LiteralExpr expr);
         public T VisitUnaryExpr(UnaryExpr expr);
         public T VisitTupleExpr(TupleExpr expr);
-
         public T VisitBinaryExpr(BinaryExpr expr);
         public T VisitFuncCall(FuncCall expr);
         public T VisitVarCall(VarCall expr);
+        public T VisitArrayAccessCall(ArrayAccessCall expr);
     }
 
     public interface INode

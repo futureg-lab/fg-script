@@ -92,6 +92,12 @@ namespace fg_script.core
             string list_str = string.Join(", ", list);
             return String.Format("[{0}]", list_str);
         }
+
+        public string VisitArrayAccessCall(ArrayAccessCall expr)
+        {
+            return string.Format("{0}[{1}]", expr.Callee.Lexeme, Print(expr.Index));
+        }
+
         public string VisitBlock(Block stmt)
         {
             Depth++;

@@ -416,6 +416,8 @@
             {
                 if (MatchNext(TokenType.LEFT_PARENTH))
                     return ConsumeFuncCall();
+                else if (MatchNext(TokenType.LEFT_BRACKET))
+                    return ConsumeArrayAccessCall();
                 else
                     return new VarCall(Consume(TokenType.KEYWORD_OR_NAME));
             }
@@ -528,6 +530,17 @@
 
             FuncCall res = new(callee, args);
             return res;
+        }
+
+        protected ArrayAccessCall ConsumeArrayAccessCall()
+        {
+            Token callee = Consume(TokenType.KEYWORD_OR_NAME, "tuple name expected");
+            Consume(TokenType.LEFT_BRACKET, @"""["" was expected");
+
+            Expr index = ConsumeGenExpr();
+            
+            Consume(TokenType.RIGHT_BRACKET, @"""]"" was expected");
+            return new(callee, index);
         }
 
         protected Token Consume(TokenType type, string err_message = "")
