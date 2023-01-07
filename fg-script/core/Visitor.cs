@@ -22,7 +22,6 @@ namespace fg_script.core
         public T VisitError(Error stmt);
         public T VisitBreak(Break stmt);
         public T VisitContinue(Continue stmt);
-        public T VisitDefine(Define stmt);
         public T VisitExpose(Expose stmt);
         public T VisitExtern(Extern stmt);
         public T VisitFuncCallDirect(FuncCallDirect stmt);

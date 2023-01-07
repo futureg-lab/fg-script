@@ -87,7 +87,7 @@ namespace fg_script_test
         [TestMethod]
         public void TestReservedKeywords()
         {
-            string source = "num define  bool  tup   if else elif for   true  false    and or is fn" +
+            string source = "num  bool  tup   if else elif for   true  false    and or is fn" +
                  "  extern expose ret somethingThatMeansNothing  err in break continue";
 
 
@@ -96,7 +96,7 @@ namespace fg_script_test
 
             List<TokenType> expected = new()
             {
-                TokenType.TYPE, TokenType.DEFINE, TokenType.TYPE, TokenType.TYPE,
+                TokenType.TYPE, TokenType.TYPE, TokenType.TYPE,
                 TokenType.IF, TokenType.ELSE, TokenType.ELSE_IF, TokenType.FOR, 
                 TokenType.BOOL, TokenType.BOOL, 
                 TokenType.AND, TokenType.OR, TokenType.IS, TokenType.FUN_DECL,

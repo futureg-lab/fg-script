@@ -200,13 +200,6 @@ namespace fg_script.core
             return vistor.VisitContinue(this);
         }
     }
-    public class Define : Stmt
-    {
-        override public T Accept<T>(IVisitor<T> vistor)
-        {
-            return vistor.VisitDefine(this);
-        }
-    }
 
     public class Expose : Stmt
     {

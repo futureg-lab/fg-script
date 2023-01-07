@@ -31,7 +31,6 @@
         {
             if (Match(TokenType.FUN_DECL)) return StateFuncDeclaration();
             if (Match(TokenType.TYPE)) return StateAssignDeclaration();
-            if (Match(TokenType.DEFINE)) return StateDefineType();
             if (Match(TokenType.EXPOSE)) return StateExposeDeclaration();
             if (Match(TokenType.EXTERN)) return StateExternDeclaration();
             if (Match(TokenType.IF)) return StateIf();
@@ -130,12 +129,6 @@
 
             VarExpr expr = new(type, v_name, value);
             return new(expr);
-        }
-
-        // statements
-        protected Define StateDefineType()
-        {
-            throw new Exception("todo");
         }
 
         protected Expose StateExposeDeclaration()

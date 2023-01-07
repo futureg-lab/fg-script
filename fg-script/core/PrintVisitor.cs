@@ -92,8 +92,6 @@ namespace fg_script.core
             string list_str = string.Join(", ", list);
             return String.Format("[{0}]", list_str);
         }
-
-
         public string VisitBlock(Block stmt)
         {
             Depth++;
@@ -121,11 +119,6 @@ namespace fg_script.core
         public string VisitContinue(Continue stmt)
         {
             return "(#continue)";
-        }
-
-        public string VisitDefine(Define stmt)
-        {
-            throw new NotImplementedException();
         }
 
         public string VisitExpose(Expose stmt)
