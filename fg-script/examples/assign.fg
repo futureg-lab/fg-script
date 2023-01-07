@@ -26,16 +26,18 @@ tup example_dic = [
 	]
 ];
 
-while x and y {
-	num z = random();
-	print(z + "yay!");
-}
+//
+//
+// while x and y {
+//	num z = random();
+//	print(z + "yay!");
+// }
 
 for x in [1, 2, 3] {
 	print("hello world!");
 }
 
-for (k, v) in [1, 2, 3] * 2 + 3 {
+for (x, y) in [1, 2, 3] * 2 + 3 {
 	print("hello world!");
 }
 
