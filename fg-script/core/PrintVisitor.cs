@@ -112,9 +112,9 @@ namespace fg_script.core
             return all;
         }
 
-        public string VisitFuncCallDirect(FuncCallDirect stmt)
+        public string VisitRootExpression(RootExpression stmt)
         {
-            return string.Format("(#root_call {0})", Print(stmt.Fcall));
+            return string.Format("(#root {0})", Print(stmt.Expr));
         }
 
         public string VisitBreak(Break stmt)

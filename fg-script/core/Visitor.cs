@@ -24,7 +24,7 @@ namespace fg_script.core
         public T VisitContinue(Continue stmt);
         public T VisitExpose(Expose stmt);
         public T VisitExtern(Extern stmt);
-        public T VisitFuncCallDirect(FuncCallDirect stmt);
+        public T VisitRootExpression(RootExpression stmt);
         
 
         // Expressions

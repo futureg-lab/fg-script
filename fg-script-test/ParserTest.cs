@@ -97,15 +97,17 @@ namespace fg_script_test
                 bool y = true or false;
                 ret 1 + 1;
                 err ""some error"";
+                2 * 4 + x * (someCall() + z[1 + 1]);
             ";
             List<string> tests = new()
             {
-                "(#root_call someFuncCall())",
-                "(#root_call anotherFuncCall(5, (+ (* 1 2) 4), false))",
+                "(#root someFuncCall())",
+                "(#root anotherFuncCall(5, (+ (* 1 2) 4), false))",
                 "(num:x => null)",
                 "(bool:y => (or true false))",
                 "(#return (+ 1 1))",
-                "(#error \"some error\")"
+                "(#error \"some error\")",
+                "(#root (+ (* 2 4) (* x (+ someCall() z[(+ 1 1)]))))"
             };
             TestSetFrom(source, tests);
         }
@@ -244,16 +246,16 @@ namespace fg_script_test
                 @"
                 (#while (and x y)
                     (num:z => random())
-                    (#root_call print((+ z ""yay!""))))",
+                    (#root print((+ z ""yay!""))))",
                 @"
                 (#for (, x) #in [0:1, 1:2, 2:3]
-                    (#root_call print(""hello world!"")))",
+                    (#root print(""hello world!"")))",
                 @"
                 (#for (k, v) #in (+ (* [0:1, 1:2, 2:3] 2) 3)
-                    (#root_call print(""hello world!"")))",
+                    (#root print(""hello world!"")))",
                 @"
                 (#for (, x) #in (#enum_from 1 #to 10)
-                    (#root_call print(x))
+                    (#root print(x))
                     (#if (and (>= x 3) (< x 5)) =>
                         (#continue)
                     (#branch (< x 9) =>
