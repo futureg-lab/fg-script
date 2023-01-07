@@ -50,17 +50,17 @@ namespace fg_script.core
         }
     }
     
-    public class FuncCallDirect : Stmt
+    public class RootExpression : Stmt
     {
-        public FuncCall Fcall { get; }
-        public FuncCallDirect(FuncCall fcall)
+        public Expr Expr { get; }
+        public RootExpression(Expr expr)
         {
-            Fcall = fcall;
+            Expr = expr;
         }
 
         override public T Accept<T>(IVisitor<T> vistor)
         {
-            return vistor.VisitFuncCallDirect(this);
+            return vistor.VisitRootExpression(this);
         }
     }
 

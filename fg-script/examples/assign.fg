@@ -2,6 +2,10 @@
 
 num x = 1 * (2 + some_func(4 * zzz / 1, 2, x));
 
+
+3 * 4 * 2;
+ 2 * 4 + x * (someCall() + z[1 + 1]);
+
 // nested tuple
 tup z = [1, 2] * [
 	1, 2, 3, 

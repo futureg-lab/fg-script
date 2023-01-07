@@ -37,7 +37,6 @@
             if (Match(TokenType.LEFT_BRACE)) return StateBlock();
             if (Match(TokenType.WHILE)) return StateWhile();
             if (Match(TokenType.FOR)) return StateFor();
-            if (Match(TokenType.KEYWORD_OR_NAME)) return StateFuncCallRoot();
 
             if (Match(TokenType.RETURN)) return StateReturn();
             if (Match(TokenType.ERROR)) return StateError();
@@ -46,7 +45,7 @@
 
             if (HasEnded())
                 return null;
-            throw Error("unexpected token");
+            return StateRootExpression();
         }
 
         protected Stmt StateBreakOrContinue()
@@ -226,11 +225,11 @@
             return block;
         }
 
-        protected FuncCallDirect StateFuncCallRoot()
+        protected RootExpression StateRootExpression()
         {
-            FuncCall fcall = ConsumeFuncCall();
+            Expr expr = ConsumeGenExpr();
             Consume(TokenType.SEMICOLON, @""";"" was expected");
-            return new(fcall);
+            return new(expr);
         }
 
         protected Return StateReturn()
