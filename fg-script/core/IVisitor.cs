@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace fg_script.core
 {
-    public interface IVisitor<T>
+    public interface IVisitorSTmt<T>
     {
         // Statements
         public T VisitStmt(Stmt stmt);
@@ -25,8 +25,10 @@ namespace fg_script.core
         public T VisitExpose(Expose stmt);
         public T VisitExtern(Extern stmt);
         public T VisitRootExpression(RootExpression stmt);
-        
+    }
 
+    public interface IVisitorExpr<T>
+    {
         // Expressions
         public T VisitExpr(Expr expr);
         public T VisitVarExpr(VarExpr expr);
@@ -41,8 +43,13 @@ namespace fg_script.core
         public T VisitArrayAccessCall(ArrayAccessCall expr);
     }
 
-    public interface INode
+    public interface INodeStmt
     {
-        public T Accept<T>(IVisitor<T> vistor);
+        public T Accept<T>(IVisitorSTmt<T> vistor);
+    }
+
+    public interface INodeExpr
+    {
+        public T Accept<T>(IVisitorExpr<T> vistor);
     }
 }

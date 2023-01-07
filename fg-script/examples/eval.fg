@@ -1,0 +1,17 @@
+﻿str z = "hello = " + (3 + 4 * 5);
+
+
+num q = (3 * 5 + 2 - (4 / 6) * 3);
+
+
+{
+ {
+   num b = 4;
+   {
+		num b = 4; // this should override the lastest b
+   }
+ }
+ {
+	num c = 8;
+ }
+}

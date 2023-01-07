@@ -1,8 +1,8 @@
 ﻿namespace fg_script.core
 {
-    public class Expr : INode
+    public class Expr : INodeExpr
     {
-        public virtual T Accept<T>(IVisitor<T> visitor)
+        public virtual T Accept<T>(IVisitorExpr<T> visitor)
         {
             return visitor.VisitExpr(this);
         }
@@ -17,7 +17,7 @@
             Start = start;
             End = end;
         }
-        override public T Accept<T>(IVisitor<T> visitor)
+        override public T Accept<T>(IVisitorExpr<T> visitor)
         {
             return visitor.VisitEnumExpr(this);
         }
@@ -36,7 +36,7 @@
             Value = value;
         }
 
-        override public T Accept<T>(IVisitor<T> visitor)
+        override public T Accept<T>(IVisitorExpr<T> visitor)
         {
             return visitor.VisitVarExpr(this);
         }
@@ -52,7 +52,7 @@
             DataType = datatype;
             Name = name;
         }
-        override public T Accept<T>(IVisitor<T> visitor)
+        override public T Accept<T>(IVisitorExpr<T> visitor)
         {
             return visitor.VisitArgExpr(this);
         }
@@ -66,7 +66,7 @@
             Value = value;
         }
 
-        override public T Accept<T>(IVisitor<T> visitor)
+        override public T Accept<T>(IVisitorExpr<T> visitor)
         {
             return visitor.VisitLiteralExpr(this);
         }
@@ -92,7 +92,7 @@
             Map.Add(Count.ToString(), value);
             Count++;
         }
-        override public T Accept<T>(IVisitor<T> visitor)
+        override public T Accept<T>(IVisitorExpr<T> visitor)
         {
             return visitor.VisitTupleExpr(this);
         }
@@ -109,7 +109,7 @@
             this.Operand = operand;
         }
 
-        override public T Accept<T>(IVisitor<T> visitor)
+        override public T Accept<T>(IVisitorExpr<T> visitor)
         {
             return visitor.VisitUnaryExpr(this);
         }
@@ -126,7 +126,7 @@
             this.Left = left;
             this.Right = right;
         }
-        override public T Accept<T>(IVisitor<T> visitor)
+        override public T Accept<T>(IVisitorExpr<T> visitor)
         {
             return visitor.VisitBinaryExpr(this);
         }
@@ -141,7 +141,7 @@
             Callee = callee;
             Args = args;
         }
-        override public T Accept<T>(IVisitor<T> visitor)
+        override public T Accept<T>(IVisitorExpr<T> visitor)
         {
             return visitor.VisitFuncCall(this);
         }
@@ -154,7 +154,7 @@
         {
             Callee = callee;
         }
-        override public T Accept<T>(IVisitor<T> visitor)
+        override public T Accept<T>(IVisitorExpr<T> visitor)
         {
             return visitor.VisitVarCall(this);
         }
@@ -169,7 +169,7 @@
             Callee = callee;
             Index = index;
         }
-        override public T Accept<T>(IVisitor<T> visitor)
+        override public T Accept<T>(IVisitorExpr<T> visitor)
         {
             return visitor.VisitArrayAccessCall(this);
         }
