@@ -51,7 +51,7 @@ for x in 1 .. 10 {
 }
 
 // numbers
-num a = 1 * 2 + 3;
+num a = 1 * 2 + 3.65;
 
 someFuncCall();
 anotherFuncCall(5, 1 * 2 + 4, false);
