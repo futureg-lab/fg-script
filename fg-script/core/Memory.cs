@@ -15,7 +15,7 @@
         public Stack<Dictionary<string, Result>> MemStack { get; }
         public Stack<FuncCall> CallStack { get; }
 
-        public VM()
+        public Memory()
         {
             MemStack = new Stack<Dictionary<string, Result>>();
             CallStack = new Stack<FuncCall>();
