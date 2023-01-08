@@ -10,7 +10,7 @@
         NONE
     }
 
-    public class VM
+    public class Memory
     {
         public Stack<Dictionary<string, Result>> MemStack { get; }
         public Stack<FuncCall> CallStack { get; }

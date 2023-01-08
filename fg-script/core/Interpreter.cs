@@ -1,15 +1,15 @@
 ﻿namespace fg_script.core
 {
-    public class Interpreter : IVisitorSTmt<object?>, IVisitorExpr<VM.Result>
+    public class Interpreter : IVisitorSTmt<object?>, IVisitorExpr<Memory.Result>
     {
-        public VM Machine { get; } = new();
+        public Memory Machine { get; } = new();
 
         public void Run(Stmt stmt)
         {
             stmt.Accept(this);
         }
 
-        public VM.Result Eval(Expr expr)
+        public Memory.Result Eval(Expr expr)
         {
             return expr.Accept(this);
         }
@@ -64,7 +64,7 @@
         {
             if (!AreSameType(raw_lexeme, reduced))
             {
-                string got = "";
+                string got;
                 switch(reduced)
                 {
                     case ResultType.BOOLEAN:
@@ -89,7 +89,7 @@
         // statements
         public object? VisitAssign(Assign stmt)
         {
-            VM.Result value = Eval(stmt.Variable.Value);
+            Memory.Result value = Eval(stmt.Variable.Value);
 
             TypeMismatchCheck(stmt.Variable.DataType.Lexeme, value.Type);
 
@@ -177,28 +177,28 @@
 
         // expressions
 
-        public VM.Result VisitExpr(Expr expr)
+        public Memory.Result VisitExpr(Expr expr)
         {
             throw new NotImplementedException();
         }
 
-        public VM.Result VisitVarExpr(VarExpr expr)
+        public Memory.Result VisitVarExpr(VarExpr expr)
         {
             throw new NotImplementedException();
         }
 
-        public VM.Result VisitEnumExpr(EnumExpr expr)
+        public Memory.Result VisitEnumExpr(EnumExpr expr)
         {
             throw new NotImplementedException();
         }
 
-        public VM.Result VisitArgExpr(ArgExpr expr)
+        public Memory.Result VisitArgExpr(ArgExpr expr)
         {
             throw new NotImplementedException();
         }
 
         // numbers, booleans, strings
-        public VM.Result VisitLiteralExpr(LiteralExpr expr)
+        public Memory.Result VisitLiteralExpr(LiteralExpr expr)
         {
             object value;
             ResultType type;
@@ -223,13 +223,13 @@
             return new(value, type);
         }
 
-        public VM.Result VisitUnaryExpr(UnaryExpr expr)
+        public Memory.Result VisitUnaryExpr(UnaryExpr expr)
         {
             // like a function call
             Token symbol = expr.OpSymbol;
             // reduced to a point
-            VM.Result eval_operand = Eval(expr.Operand);
-            VM.Result result;
+            Memory.Result eval_operand = Eval(expr.Operand);
+            Memory.Result result;
 
             string not_supp_msg = eval_operand.Type + " is not supported by \"" + symbol.Lexeme + "\" operator";
 
@@ -255,11 +255,11 @@
 
             return result;
         }
-        public VM.Result VisitBinaryExpr(BinaryExpr expr)
+        public Memory.Result VisitBinaryExpr(BinaryExpr expr)
         {
             Token symbol = expr.OpSymbol;
-            VM.Result eval_left = Eval(expr.Left);
-            VM.Result eval_right = Eval(expr.Right);
+            Memory.Result eval_left = Eval(expr.Left);
+            Memory.Result eval_right = Eval(expr.Right);
 
             var BothSidesAre = (ResultType type) =>
             {
@@ -341,23 +341,23 @@
         }
 
 
-        public VM.Result VisitTupleExpr(TupleExpr expr)
+        public Memory.Result VisitTupleExpr(TupleExpr expr)
         {
             throw new NotImplementedException();
         }
 
 
-        public VM.Result VisitFuncCall(FuncCall expr)
+        public Memory.Result VisitFuncCall(FuncCall expr)
         {
             throw new NotImplementedException();
         }
 
-        public VM.Result VisitVarCall(VarCall expr)
+        public Memory.Result VisitVarCall(VarCall expr)
         {
             throw new NotImplementedException();
         }
 
-        public VM.Result VisitArrayAccessCall(ArrayAccessCall expr)
+        public Memory.Result VisitArrayAccessCall(ArrayAccessCall expr)
         {
             throw new NotImplementedException();
         }
