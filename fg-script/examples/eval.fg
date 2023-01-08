@@ -1,12 +1,12 @@
 ﻿{
 	num first = 1;
-	// __mem_debug__();
+	__mem_debug__();
 	{
 		num second = 2;
-		// __mem_debug__();
+		__mem_debug__();
 		{
 			num third = 3;
-			// __mem_debug();
+			__mem_debug();
 			println("Result is {0}", first + second + third);
 		}
 		// this should trigger an error
@@ -14,10 +14,29 @@
 	}
 }
 
-// __mem_debug__();
+__mem_debug__();
 
 
 num x = 16;
 num y = 4;
 
 println("Min {0}, Max {1}, x^y = {2}, sqrt(x) = {3}", min(x, y), max(x, y), pow(x, y), sqrt(x));
+
+
+
+num x = x - 1;
+
+println(x);
+
+
+bool temp = true;
+
+
+while temp {
+	num x = x - 1;
+	bool temp = false;
+	println("Hello " + temp);
+
+	println();
+	__mem_debug__();
+}

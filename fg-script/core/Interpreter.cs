@@ -90,6 +90,12 @@
                 List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
                 throw FuncSignatureError("sqrt", expected, cargs);
             }));
+
+            ImportFunction(new("rand", 0, (Memory.Result[] args) =>
+            {
+                Random random = new();
+                return new(random.NextDouble(), ResultType.NUMBER);
+            }));
         }
 
         public FGRuntimeException FuncSignatureError(string name, List<ResultType> expected, List<ResultType> got)
@@ -248,7 +254,32 @@
 
         public object? VisitWhile(While stmt)
         {
-            throw new NotImplementedException();
+            Memory.Result cond = Eval(stmt.Condition);
+            if (cond.Type != ResultType.BOOLEAN)
+                throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", ResultType.BOOLEAN, cond.Type));
+            
+            Machine.MemPush(); // start new scope for the condition variable
+            
+            string temp_name = "__while__var__";
+            Machine.Store(temp_name, cond);
+
+
+            Boolean value = (Boolean) cond.Value;
+
+            while (value)
+            {
+                Run(stmt.Body);
+
+                Memory.Result? current = Machine.GetValue(temp_name);
+                if (current != null)
+                    // eval again
+                    value = (Boolean) current.Value;
+                else
+                    throw new FGRuntimeException(Fmt("internal error, temp reference {} was not found", temp_name));
+            }
+
+            Machine.MemPop();
+            return null;
         }
 
         public object? VisitReturn(Return stmt)
