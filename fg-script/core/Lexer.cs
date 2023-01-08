@@ -153,7 +153,7 @@
                     continue;
                 }
 
-                if (IsAlpha(CurrentChar))
+                if (IsStandardExpression(CurrentChar))
                 {
                     string str = MakeStandardExpression();
                     TokenType type = TokenType.KEYWORD_OR_NAME;

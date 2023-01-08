@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace fg_script.core
 {
-    public class Stmt : INode
+    public class Stmt : INodeStmt
     {
-        public virtual T Accept<T>(IVisitor<T> vistor)
+        public virtual T Accept<T>(IVisitorSTmt<T> vistor)
         {
             return vistor.VisitStmt(this);
         }
@@ -18,7 +18,7 @@ namespace fg_script.core
     {
         public List<Stmt> Statements { get; } = new();
 
-        override public T Accept<T>(IVisitor<T> vistor)
+        override public T Accept<T>(IVisitorSTmt<T> vistor)
         {
             return vistor.VisitBlock(this);
         }
@@ -44,7 +44,7 @@ namespace fg_script.core
             ReturnType = ret_type;
         }
 
-        override public T Accept<T>(IVisitor<T> vistor)
+        override public T Accept<T>(IVisitorSTmt<T> vistor)
         {
             return vistor.VisitFunc(this);
         }
@@ -58,7 +58,7 @@ namespace fg_script.core
             Expr = expr;
         }
 
-        override public T Accept<T>(IVisitor<T> vistor)
+        override public T Accept<T>(IVisitorSTmt<T> vistor)
         {
             return vistor.VisitRootExpression(this);
         }
@@ -79,7 +79,7 @@ namespace fg_script.core
             Branches = new();
         }
 
-        override public T Accept<T>(IVisitor<T> vistor)
+        override public T Accept<T>(IVisitorSTmt<T> vistor)
         {
             return vistor.VisitIf(this);
         }
@@ -95,7 +95,7 @@ namespace fg_script.core
             Body = body;
         }
 
-        override public T Accept<T>(IVisitor<T> vistor)
+        override public T Accept<T>(IVisitorSTmt<T> vistor)
         {
             return vistor.VisitBranch(this);
         }
@@ -117,7 +117,7 @@ namespace fg_script.core
             ExprIterable = exprIterable;
         }
 
-        override public T Accept<T>(IVisitor<T> vistor)
+        override public T Accept<T>(IVisitorSTmt<T> vistor)
         {
             return vistor.VisitFor(this);
         }
@@ -134,7 +134,7 @@ namespace fg_script.core
             Condition = condition;
         }
 
-        override public T Accept<T>(IVisitor<T> vistor)
+        override public T Accept<T>(IVisitorSTmt<T> vistor)
         {
             return vistor.VisitWhile(this);
         }
@@ -149,7 +149,7 @@ namespace fg_script.core
             Variable = variable;
         }
 
-        override public T Accept<T>(IVisitor<T> vistor)
+        override public T Accept<T>(IVisitorSTmt<T> vistor)
         {
             return vistor.VisitAssign(this);
         }
@@ -164,7 +164,7 @@ namespace fg_script.core
             ReturnValue = returnValue;
         }
 
-        override public T Accept<T>(IVisitor<T> vistor)
+        override public T Accept<T>(IVisitorSTmt<T> vistor)
         {
             return vistor.VisitReturn(this);
         }
@@ -179,7 +179,7 @@ namespace fg_script.core
             ThrownValue = thrown;
         }
 
-        override public T Accept<T>(IVisitor<T> vistor)
+        override public T Accept<T>(IVisitorSTmt<T> vistor)
         {
             return vistor.VisitError(this);
         }
@@ -187,7 +187,7 @@ namespace fg_script.core
 
     public class Break : Stmt
     {
-        override public T Accept<T>(IVisitor<T> vistor)
+        override public T Accept<T>(IVisitorSTmt<T> vistor)
         {
             return vistor.VisitBreak(this);
         }
@@ -195,7 +195,7 @@ namespace fg_script.core
 
     public class Continue : Stmt
     {
-        override public T Accept<T>(IVisitor<T> vistor)
+        override public T Accept<T>(IVisitorSTmt<T> vistor)
         {
             return vistor.VisitContinue(this);
         }
@@ -209,7 +209,7 @@ namespace fg_script.core
             ExposedFunc = exposedFunc;
         }
 
-        override public T Accept<T>(IVisitor<T> vistor)
+        override public T Accept<T>(IVisitorSTmt<T> vistor)
         {
             return vistor.VisitExpose(this);
         }
@@ -222,7 +222,7 @@ namespace fg_script.core
         {
             ExternalFunc = exposedFunc;
         }
-        override public T Accept<T>(IVisitor<T> vistor)
+        override public T Accept<T>(IVisitorSTmt<T> vistor)
         {
             return vistor.VisitExtern(this);
         }

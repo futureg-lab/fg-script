@@ -16,9 +16,9 @@
         }
     }
 
-    public class RuntimeException : FGScriptException
+    public class FGRuntimeException : FGScriptException
     {
-        public RuntimeException(string reason, string full_description = "") 
+        public FGRuntimeException(string reason, string full_description = "") 
             : base("runtime", reason, full_description)
         {
         }

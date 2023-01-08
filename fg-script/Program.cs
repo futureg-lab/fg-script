@@ -31,7 +31,7 @@ try
         }
         Console.WriteLine(stmt);
     }*/
-    string filePath = "../../../examples/assign.fg";
+    string filePath = "../../../examples/eval.fg";
     source = Utils.ReadTextFile(filePath);
 
     Lexer lexer = new(source, "");
@@ -41,10 +41,13 @@ try
     List<Stmt> stmts = parser.Run();
 
     PrintVisitor printer = new PrintVisitor();
+    Interpreter engine = new Interpreter();
     foreach (Stmt stmt in stmts)
     {
-        Console.WriteLine(printer.Print(stmt));
+        // Console.WriteLine(printer.Print(stmt));
+        engine.Run(stmt);
     }
+    // engine.Machine.DebugStackMemory();
 }
 catch (SyntaxErrorException syntax_excp)
 {

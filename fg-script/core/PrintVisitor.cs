@@ -1,7 +1,7 @@
 ﻿
 namespace fg_script.core
 {
-    public class PrintVisitor : IVisitor<string>
+    public class PrintVisitor : IVisitorSTmt<string>, IVisitorExpr<string>
     {
         private int Depth { get; set; } = 0;
 
