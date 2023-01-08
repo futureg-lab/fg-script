@@ -10,8 +10,14 @@
 			println("Result is {0}", first + second + third);
 		}
 		// this should trigger an error
-		println("Result is {0}", first + second + third);
+		// println("Result is {0}", first + second + third);
 	}
 }
 
 // __mem_debug__();
+
+
+num x = 16;
+num y = 4;
+
+println("Min {0}, Max {1}, x^y = {2}, sqrt(x) = {3}", min(x, y), max(x, y), pow(x, y), sqrt(x));
