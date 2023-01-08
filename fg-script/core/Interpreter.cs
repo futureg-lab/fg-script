@@ -364,11 +364,15 @@
             if (callee.Equals("print") || callee.Equals("println"))
             {
                 string total = "";
-                foreach(var arg in expr.Args)
+
+                List<object> all_values = expr.Args.ConvertAll(x => Eval(x).Value);
+                if (all_values.Count > 1)
                 {
-                    Memory.Result res = Eval(arg);
-                    total += res.Value;
+                    total = Fmt("" + all_values.First(), all_values.Skip(1).ToArray());
                 }
+                else
+                    total += all_values.Count == 0 ? "" : all_values.First();
+
                 if (callee.EndsWith("ln"))
                     Console.WriteLine(total);
                 else
@@ -379,7 +383,11 @@
 
         public Memory.Result VisitVarCall(VarCall expr)
         {
-            throw new NotImplementedException();
+            string var_name = expr.Callee.Lexeme;
+            Memory.Result? result = Machine.GetValue(var_name);
+            if (result == null)
+                throw new FGRuntimeException(Fmt("reference error {0} is undefined", var_name));
+            return result;
         }
 
         public Memory.Result VisitArrayAccessCall(ArrayAccessCall expr)

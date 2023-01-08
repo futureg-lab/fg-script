@@ -36,7 +36,19 @@
 
         public void Store(string key, Result result)
         {
-            MemStack.Last()[key] = result;
+            MemStack.Peek()[key] = result;
+        }
+
+        public Result? GetValue(string var_name)
+        {
+            // current scope
+            if (MemStack.Peek().ContainsKey(var_name))
+                return MemStack.Peek()[var_name];
+            // higher scope
+            foreach (var scope in MemStack)
+                if (scope.ContainsKey(var_name))
+                    return scope[var_name];
+            return null;
         }
 
         public class Result
@@ -78,7 +90,7 @@
                     Result value = variable.Value;
                     Console.WriteLine("{0}::{1} => {2}", name, value.Type, value.Value);
                 }
-                Console.WriteLine("------- depth ----- {0} {1}", depth, MemStack.Count);
+                Console.WriteLine("------- depth ----- {0} --- var_count {1}", depth, MemStack.Count);
             }
         }
     }

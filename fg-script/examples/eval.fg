@@ -1,25 +1,17 @@
-﻿str z = "hello = " + (3 + 4 * 5);
-
-
-num q = (3 * 5 + 2 - (4 / 6) * 3);
-
-println("Should start here");
-
-__mem_debug__();
-
-println("Should end here");
-
-{
+﻿{
 	num first = 1;
-	__mem_debug__();
+	// __mem_debug__();
 	{
 		num second = 2;
-		__mem_debug__();
+		// __mem_debug__();
 		{
 			num third = 3;
-			__mem_debug();
+			// __mem_debug();
+			println("Result is {0}", first + second + third);
 		}
+		// this should trigger an error
+		println("Result is {0}", first + second + third);
 	}
 }
 
-__mem_debug__();
+// __mem_debug__();
