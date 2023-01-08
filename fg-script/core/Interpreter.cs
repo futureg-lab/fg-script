@@ -1,8 +1,112 @@
 ﻿namespace fg_script.core
 {
+    // C# to fg-script api
+    public class FGScriptFunction
+    {
+        public string Name { get; }
+        public int ArgCount { get; }
+        Func<Memory.Result[], Memory.Result> Definition { get; }
+
+        public FGScriptFunction(string name, int argc, Func<Memory.Result[], Memory.Result> definition)
+        {
+            Name = name;
+            ArgCount = argc;
+            Definition = definition;
+        }
+
+        public Memory.Result RunAgainst(Memory.Result[] input)
+        {
+            if (ArgCount != input.Count())
+                throw new FGScriptException("arg count error", ArgCount + " args expected", "");
+
+            var result = Definition(input);
+            return result;
+        }
+    }
+
     public class Interpreter : IVisitorSTmt<object?>, IVisitorExpr<Memory.Result>
     {
         public Memory Machine { get; } = new();
+
+        Dictionary<Tuple<string, int>, FGScriptFunction> ImportedFunc = new();
+
+        public Interpreter()
+        {
+            LoadNativeFunctions();
+        }
+
+        private void LoadNativeFunctions()
+        {
+            ImportFunction(new("min", 2, (Memory.Result[] args) =>
+            {
+                if (ShareSameType(ResultType.NUMBER, args))
+                {
+                    Double a = (Double)args.First().Value, b = (Double)args.Last().Value;
+                    return new(a > b ? a : b, ResultType.NUMBER);
+                }
+                List<ResultType> expected = new() { ResultType.NUMBER, ResultType.NUMBER };
+                List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
+                throw FuncSignatureError("min", expected, cargs);
+            }));
+
+            ImportFunction(new("max", 2, (Memory.Result[] args) =>
+            {
+                if (ShareSameType(ResultType.NUMBER, args))
+                {
+                    Double a = (Double)args.First().Value, b = (Double)args.Last().Value;
+                    return new(a > b ? a : b, ResultType.NUMBER);
+                }
+                List<ResultType> expected = new() { ResultType.NUMBER, ResultType.NUMBER };
+                List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
+                throw FuncSignatureError("max", expected, cargs);
+            }));
+
+            ImportFunction(new("pow", 2, (Memory.Result[] args) =>
+            {
+                if (ShareSameType(ResultType.NUMBER, args))
+                {
+                    Double a = (Double)args.First().Value, b = (Double)args.Last().Value;
+                    return new(Math.Pow(a, b), ResultType.NUMBER);
+                }
+                List<ResultType> expected = new() { ResultType.NUMBER };
+                List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
+                throw FuncSignatureError("pow", expected, cargs);
+            }));
+
+            ImportFunction(new("log", 1, (Memory.Result[] args) =>
+            {
+                if (ShareSameType(ResultType.NUMBER, args))
+                    return new(Math.Log((Double)args.First().Value), ResultType.NUMBER);
+                List<ResultType> expected = new() { ResultType.NUMBER };
+                List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
+                throw FuncSignatureError("log", expected, cargs);
+            }));
+
+            ImportFunction(new("sqrt", 1, (Memory.Result[] args) =>
+            {
+                if (ShareSameType(ResultType.NUMBER, args))
+                    return new(Math.Sqrt((Double)args.First().Value), ResultType.NUMBER);
+                List<ResultType> expected = new() { ResultType.NUMBER };
+                List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
+                throw FuncSignatureError("sqrt", expected, cargs);
+            }));
+
+            ImportFunction(new("rand", 0, (Memory.Result[] args) =>
+            {
+                Random random = new();
+                return new(random.NextDouble(), ResultType.NUMBER);
+            }));
+        }
+
+        public FGRuntimeException FuncSignatureError(string name, List<ResultType> expected, List<ResultType> got)
+        {
+            return new FGRuntimeException(Fmt("{0} takes {1}, got {2} instead", name, string.Join(", ", expected), string.Join(", ", got)));
+        }
+
+        public void ImportFunction(FGScriptFunction function)
+        {
+            ImportedFunc[Tuple.Create(function.Name, function.ArgCount)] = function;
+        }
 
         public void Run(Stmt stmt)
         {
@@ -19,7 +123,7 @@
             return string.Format(str, list);
         }
 
-        public static Boolean EvalBoolean(string repr)
+        private static Boolean EvalBoolean(string repr)
         {
             try
             {
@@ -37,7 +141,7 @@
         }
 
         // "645.6444" => 645.64444
-        public static Double EvalNumber(string repr)
+        private static Double EvalNumber(string repr)
         {
             try
             {
@@ -50,19 +154,27 @@
         }
 
         // ""string"" => srting
-        public static string EvalString(string str)
+        private static string EvalString(string str)
         {
             if (!str.StartsWith("\"") && str.EndsWith("\""))
                 throw new FGRuntimeException(str + " is not a string");
             return str.Substring(1, str.Length - 2);
         }
 
-        public static bool AreSameType(string raw_lexeme, ResultType reduced)
+        private static bool AreSameType(string raw_lexeme, ResultType reduced)
         {
             return raw_lexeme == "bool" && reduced == ResultType.BOOLEAN
                 || raw_lexeme == "str" && reduced == ResultType.STRING
                 || raw_lexeme == "num" && reduced == ResultType.NUMBER
                 || raw_lexeme == "tup" && reduced == ResultType.TUPLE; 
+        }
+
+        public static bool ShareSameType(ResultType type, Memory.Result[] tests)
+        {
+            foreach(var test in tests)
+                if (test.Type != type)
+                    return false;
+            return true;
         }
 
         public static void TypeMismatchCheck(string raw_lexeme, ResultType reduced)
@@ -142,7 +254,32 @@
 
         public object? VisitWhile(While stmt)
         {
-            throw new NotImplementedException();
+            Memory.Result cond = Eval(stmt.Condition);
+            if (cond.Type != ResultType.BOOLEAN)
+                throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", ResultType.BOOLEAN, cond.Type));
+            
+            Machine.MemPush(); // start new scope for the condition variable
+            
+            string temp_name = "__while__var__";
+            Machine.Store(temp_name, cond);
+
+
+            Boolean value = (Boolean) cond.Value;
+
+            while (value)
+            {
+                Run(stmt.Body);
+
+                Memory.Result? current = Machine.GetValue(temp_name);
+                if (current != null)
+                    // eval again
+                    value = (Boolean) current.Value;
+                else
+                    throw new FGRuntimeException(Fmt("internal error, temp reference {} was not found", temp_name));
+            }
+
+            Machine.MemPop();
+            return null;
         }
 
         public object? VisitReturn(Return stmt)
@@ -356,30 +493,60 @@
         public Memory.Result VisitFuncCall(FuncCall expr)
         {
             string callee = expr.Callee.Lexeme;
+
+            // debug
             if (callee.Equals("__mem_debug__"))
             {
                 Machine.DebugStackMemory();
                 return Memory.Result.Void();
             }
-            if (callee.Equals("print") || callee.Equals("println"))
+
+            // print (stderr/stdout)
+            HashSet<string> prints = new() { "print", "println", "err_print", "err_println" };
+            if (prints.Contains(callee))
             {
                 string total = "";
-                foreach(var arg in expr.Args)
-                {
-                    Memory.Result res = Eval(arg);
-                    total += res.Value;
-                }
-                if (callee.EndsWith("ln"))
-                    Console.WriteLine(total);
+                
+                List<object> all_values = expr.Args.ConvertAll(x => Eval(x).Value);
+                if (all_values.Count > 1)
+                    total = Fmt("" + all_values.First(), all_values.Skip(1).ToArray());
                 else
-                    Console.Write(total);
+                    total += all_values.Count == 0 ? "" : all_values.First();
+
+                string endline = callee.EndsWith("ln") ? "\n" : "";
+                if (callee.StartsWith("err"))
+                    Console.Error.Write(total + endline);
+                else
+                    Console.Out.Write(total + endline);
             }
+
+            // imported
+
+            var fid = Tuple.Create(callee, expr.Args.Count);
+            if (ImportedFunc.ContainsKey(fid))
+            {
+                var eval_args = expr
+                    .Args
+                    .ConvertAll<Memory.Result>(Eval)
+                    .ToArray();
+                return ImportedFunc[fid].RunAgainst(eval_args);
+
+                // return new("hello", ResultType.STRING)
+            }
+
+
+            // fg-script defined
+
             return Memory.Result.Void();
         }
 
         public Memory.Result VisitVarCall(VarCall expr)
         {
-            throw new NotImplementedException();
+            string var_name = expr.Callee.Lexeme;
+            Memory.Result? result = Machine.GetValue(var_name);
+            if (result == null)
+                throw new FGRuntimeException(Fmt("reference error {0} is undefined", var_name));
+            return result;
         }
 
         public Memory.Result VisitArrayAccessCall(ArrayAccessCall expr)

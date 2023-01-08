@@ -12,31 +12,47 @@
 
     public class Memory
     {
-        public Stack<Dictionary<string, Result>> MemStack { get; }
-        public Stack<FuncCall> CallStack { get; }
+        public List<Dictionary<string, Result>> MemStack { get; }
+        public List<FuncCall> CallStack { get; }
 
         public Memory()
         {
-            MemStack = new Stack<Dictionary<string, Result>>();
-            CallStack = new Stack<FuncCall>();
+            MemStack = new List<Dictionary<string, Result>>();
+            CallStack = new List<FuncCall>();
 
             // init first mem
-            MemStack.Push(new Dictionary<string, Result>());
+            MemStack.Add(new Dictionary<string, Result>());
         }
 
         public void MemPop()
         {
-            MemStack.Pop();
+            MemStack.RemoveRange(MemStack.Count - 1, 1);
         }
 
         public void MemPush()
         {
-            MemStack.Push(new Dictionary<string, Result>());
+            MemStack.Add(new Dictionary<string, Result>());
         }
 
         public void Store(string key, Result result)
         {
             MemStack.Last()[key] = result;
+        }
+
+        public Result? GetValue(string var_name)
+        {
+            // current scope
+            if (MemStack.Last().ContainsKey(var_name))
+                return MemStack.Last()[var_name];
+            // higher scope
+            // reverse iterate
+            for (int i = 0; i < MemStack.Count; i++)
+            {
+                var scope = MemStack[MemStack.Count - i - 1];
+                if (scope.ContainsKey(var_name))
+                    return scope[var_name];
+            }
+            return null;
         }
 
         public class Result
@@ -78,7 +94,7 @@
                     Result value = variable.Value;
                     Console.WriteLine("{0}::{1} => {2}", name, value.Type, value.Value);
                 }
-                Console.WriteLine("------- depth ----- {0} {1}", depth, MemStack.Count);
+                Console.WriteLine("------- depth ----- {0} --- var_count {1}", depth, MemStack.Count);
             }
         }
     }
