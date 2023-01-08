@@ -14,6 +14,11 @@
             return expr.Accept(this);
         }
 
+        private static string Fmt(string str, params object[] list)
+        {
+            return string.Format(str, list);
+        }
+
         public static Boolean EvalBoolean(string repr)
         {
             try
@@ -82,7 +87,7 @@
                     default:
                         throw new FGRuntimeException(reduced + " is not a valid type");
                 }
-                throw new FGRuntimeException("type " + raw_lexeme + " was expected, got " + got + " instead");
+                throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", raw_lexeme, got));
             }
         }
 
@@ -172,7 +177,8 @@
 
         public object? VisitRootExpression(RootExpression stmt)
         {
-            throw new NotImplementedException();
+            Eval(stmt.Expr);
+            return null;
         }
 
         // expressions
@@ -231,10 +237,10 @@
             Memory.Result eval_operand = Eval(expr.Operand);
             Memory.Result result;
 
-            string not_supp_msg = eval_operand.Type + " is not supported by \"" + symbol.Lexeme + "\" operator";
+            string not_supp_msg = Fmt("{0} is not supported by {1}", eval_operand.Type, symbol.Lexeme);
 
             if (symbol.Type != TokenType.MINUS && symbol.Type != TokenType.NOT)
-                throw new FGRuntimeException("\"" + symbol.Lexeme + "\" does not have a definition");
+                throw new FGRuntimeException(Fmt("\"{0}\" does not have a definition", symbol.Lexeme));
 
             if (eval_operand.Type == ResultType.BOOLEAN)
             {
@@ -267,7 +273,7 @@
             };
 
 
-            string incomp_message = string.Format("{0} does not support operands {0}, {1}", symbol.Lexeme, eval_left.Type, eval_right.Type);
+            string incomp_message = Fmt("{0} does not support operands {1}, {2}", symbol.Lexeme, eval_left.Type, eval_right.Type);
 
             // this piece of code needs to be refactored smh
             switch (symbol.Type)
@@ -349,7 +355,26 @@
 
         public Memory.Result VisitFuncCall(FuncCall expr)
         {
-            throw new NotImplementedException();
+            string callee = expr.Callee.Lexeme;
+            if (callee.Equals("__mem_debug__"))
+            {
+                Machine.DebugStackMemory();
+                return Memory.Result.Void();
+            }
+            if (callee.Equals("print") || callee.Equals("println"))
+            {
+                string total = "";
+                foreach(var arg in expr.Args)
+                {
+                    Memory.Result res = Eval(arg);
+                    total += res.Value;
+                }
+                if (callee.EndsWith("ln"))
+                    Console.WriteLine(total);
+                else
+                    Console.Write(total);
+            }
+            return Memory.Result.Void();
         }
 
         public Memory.Result VisitVarCall(VarCall expr)

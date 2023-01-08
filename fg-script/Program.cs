@@ -44,10 +44,10 @@ try
     Interpreter engine = new Interpreter();
     foreach (Stmt stmt in stmts)
     {
-        Console.WriteLine(printer.Print(stmt));
+        // Console.WriteLine(printer.Print(stmt));
         engine.Run(stmt);
     }
-    engine.Machine.DebugStackMemory();
+    // engine.Machine.DebugStackMemory();
 }
 catch (SyntaxErrorException syntax_excp)
 {

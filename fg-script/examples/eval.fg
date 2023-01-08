@@ -3,15 +3,23 @@
 
 num q = (3 * 5 + 2 - (4 / 6) * 3);
 
+println("Should start here");
+
+__mem_debug__();
+
+println("Should end here");
 
 {
- {
-   num b = 4;
-   {
-		num b = 4; // this should override the lastest b
-   }
- }
- {
-	num c = 8;
- }
+	num first = 1;
+	__mem_debug__();
+	{
+		num second = 2;
+		__mem_debug__();
+		{
+			num third = 3;
+			__mem_debug();
+		}
+	}
 }
+
+__mem_debug__();

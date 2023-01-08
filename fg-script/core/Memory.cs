@@ -7,7 +7,7 @@
         NUMBER,
         BOOLEAN,
         TUPLE,
-        NONE
+        NULL
     }
 
     public class Memory
@@ -47,6 +47,22 @@
             {
                 Value = value;
                 Type = type;
+            }
+
+            public Result(ResultType type) 
+            {
+                Type = type;
+                Value = "none";
+            }
+
+            public static Result Void()
+            {
+                return new(ResultType.VOID);
+            }
+
+            public static Result Null()
+            {
+                return new(ResultType.NULL);
             }
         }
 
