@@ -221,13 +221,13 @@
             string var_name = stmt.Callee.Lexeme;
             Memory.Result? current = Machine.GetValue(var_name);
             if (current == null)
-                throw new FGRuntimeException("re-assign", stmt.Callee + " has not been defined yet");
+                throw new FGRuntimeException("re-assign", "\"" + var_name + "\" has not been defined yet");
 
             Memory.Result new_value = Eval(stmt.NewValue);
             if (current.Type != new_value.Type)
                 throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", new_value.Type, stmt.NewValue));
 
-            Machine.Store(var_name, new_value);
+            Machine.Replace(var_name, new_value);
             
             return null;
         }
@@ -287,10 +287,15 @@
             {
                 Run(stmt.Body);
 
+
+                // re eval
+                Machine.Replace(temp_name, Eval(stmt.Condition));
                 Memory.Result? current = Machine.GetValue(temp_name);
                 if (current != null)
+                {
                     // eval again
                     value = (Boolean) current.Value;
+                } 
                 else
                     throw new FGRuntimeException(Fmt("internal error, temp reference {} was not found", temp_name));
             }
@@ -495,6 +500,89 @@
                         throw new FGRuntimeException(incomp_message);
                 // TODO
                 // == <= >= < > and or and ..
+                case TokenType.EQ:
+                    if (BothSidesAre(ResultType.NUMBER))
+                    {
+                        Boolean tmp = ((Double)eval_left.Value) == ((Double)eval_right.Value);
+                        return new(tmp, ResultType.BOOLEAN);
+                    }
+                    else if (BothSidesAre(ResultType.TUPLE))
+                    {
+                        // todo
+                        throw new NotImplementedException();
+                    }
+                    else
+                        throw new FGRuntimeException(incomp_message);
+                case TokenType.LT:
+                    if (BothSidesAre(ResultType.NUMBER))
+                    {
+                        Boolean tmp = ((Double)eval_left.Value) < ((Double)eval_right.Value);
+                        return new(tmp, ResultType.BOOLEAN);
+                    }
+                    else if (BothSidesAre(ResultType.TUPLE))
+                    {
+                        // todo
+                        throw new NotImplementedException();
+                    }
+                    else
+                        throw new FGRuntimeException(incomp_message);
+                case TokenType.GT:
+                    if (BothSidesAre(ResultType.NUMBER))
+                    {
+                        Boolean tmp = ((Double)eval_left.Value) < ((Double)eval_right.Value);
+                        return new(tmp, ResultType.BOOLEAN);
+                    }
+                    else if (BothSidesAre(ResultType.TUPLE))
+                    {
+                        // todo
+                        throw new NotImplementedException();
+                    }
+                    else
+                        throw new FGRuntimeException(incomp_message);
+                case TokenType.NEQ:
+                    if (BothSidesAre(ResultType.NUMBER))
+                    {
+                        Boolean tmp = ((Double)eval_left.Value) != ((Double)eval_right.Value);
+                        return new(tmp, ResultType.BOOLEAN);
+                    }
+                    else if (BothSidesAre(ResultType.STRING))
+                    {
+                        Boolean tmp = ((String)eval_left.Value).Equals((String) eval_right.Value);
+                        return new(tmp, ResultType.BOOLEAN);
+                    }
+                    else if (BothSidesAre(ResultType.TUPLE))
+                    {
+                        // todo
+                        throw new NotImplementedException();
+                    }
+                    else
+                        throw new FGRuntimeException(incomp_message);
+                case TokenType.LE:
+                    if (BothSidesAre(ResultType.NUMBER))
+                    {
+                        Boolean tmp = ((Double)eval_left.Value) <= ((Double)eval_right.Value);
+                        return new(tmp, ResultType.BOOLEAN);
+                    }
+                    else if (BothSidesAre(ResultType.TUPLE))
+                    {
+                        // todo
+                        throw new NotImplementedException();
+                    }
+                    else
+                        throw new FGRuntimeException(incomp_message);
+                case TokenType.GE:
+                    if (BothSidesAre(ResultType.NUMBER))
+                    {
+                        Boolean tmp = ((Double)eval_left.Value) >= ((Double)eval_right.Value);
+                        return new(tmp, ResultType.BOOLEAN);
+                    }
+                    else if (BothSidesAre(ResultType.TUPLE))
+                    {
+                        // todo
+                        throw new NotImplementedException();
+                    }
+                    else
+                        throw new FGRuntimeException(incomp_message);
             }
 
             throw new FGRuntimeException(incomp_message);

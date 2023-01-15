@@ -39,6 +39,29 @@
             MemStack.Last()[key] = result;
         }
 
+        public void Replace(string var_name, Result new_value)
+        {
+            // current scope
+            if (MemStack.Last().ContainsKey(var_name))
+            {
+                MemStack.Last()[var_name] = new_value;
+                return;
+            }
+            // higher scope
+            // reverse iterate
+            for (int i = 0; i < MemStack.Count; i++)
+            {
+                var scope = MemStack[MemStack.Count - i - 1];
+                if (scope.ContainsKey(var_name))
+                {
+                    scope[var_name] = new_value;
+                    return;
+                }
+            }
+
+            throw new FGScriptException("undefined value", var_name + " value is not defined anywhere", "");
+        }
+
         public Result? GetValue(string var_name)
         {
             // current scope

@@ -1,4 +1,4 @@
-﻿{
+﻿/*{
 	num first = 1;
 	__mem_debug__();
 	{
@@ -23,20 +23,27 @@ num y = 4;
 println("Min {0}, Max {1}, x^y = {2}, sqrt(x) = {3}", min(x, y), max(x, y), pow(x, y), sqrt(x));
 
 
+num x = 4;
+println("=> x value is {0}", x);
 
-num x = x - 1;
+{
+	{
+		x = x + 1;	
+	}
+}
 
-println(x);
+println("=> x value is {0}", x);
+
+println("---------");
+__mem_debug__();
+*/
 
 
-bool temp = true;
+bool starts = true;
+num x = 1;
 
-
-while temp {
-	num x = x - 1;
-	bool temp = false;
-	println("Hello " + temp);
-
-	println();
-	__mem_debug__();
+while x <= 10 {
+	println("Starts " + starts + ", count " + x);
+	x = x + 1;
+	starts = false;
 }
