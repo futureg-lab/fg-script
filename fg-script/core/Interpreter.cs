@@ -215,7 +215,7 @@
             return null;
         }
 
-        public object? VisitReAssignCall(ReAssign stmt)
+        public object? VisitReAssign(ReAssign stmt)
         {
             // should exists first
             string var_name = stmt.Callee.Lexeme;

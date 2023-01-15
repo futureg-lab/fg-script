@@ -25,7 +25,7 @@ namespace fg_script.core
         public T VisitExpose(Expose stmt);
         public T VisitExtern(Extern stmt);
         public T VisitRootExpression(RootExpression stmt);
-        public T VisitReAssignCall(ReAssign stmt);
+        public T VisitReAssign(ReAssign stmt);
     }
 
     public interface IVisitorExpr<T>

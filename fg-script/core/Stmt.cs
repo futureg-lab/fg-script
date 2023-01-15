@@ -239,7 +239,7 @@ namespace fg_script.core
         }
         override public T Accept<T>(IVisitorSTmt<T> visitor)
         {
-            return visitor.VisitReAssignCall(this);
+            return visitor.VisitReAssign(this);
         }
     }
 }
