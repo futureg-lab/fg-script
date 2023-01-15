@@ -31,7 +31,7 @@ try
         }
         Console.WriteLine(stmt);
     }*/
-    string filePath = "../../../examples/eval.fg";
+    string filePath = "../../../examples/assign.fg";
     source = Utils.ReadTextFile(filePath);
 
     Lexer lexer = new(source, "");
@@ -44,8 +44,8 @@ try
     Interpreter engine = new Interpreter();
     foreach (Stmt stmt in stmts)
     {
-        // Console.WriteLine(printer.Print(stmt));
-        engine.Run(stmt);
+        Console.WriteLine(printer.Print(stmt));
+        // engine.Run(stmt);
     }
     // engine.Machine.DebugStackMemory();
 }

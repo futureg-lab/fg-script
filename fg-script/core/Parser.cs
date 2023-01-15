@@ -42,6 +42,8 @@
             if (Match(TokenType.ERROR)) return StateError();
             if (Match(TokenType.BREAK) || Match(TokenType.CONTINUE))
                 return StateBreakOrContinue();
+            if (Match(TokenType.KEYWORD_OR_NAME) && MatchNext(TokenType.ASSIGN))
+                return StateReAssign();
 
             if (HasEnded())
                 return null;
@@ -128,6 +130,15 @@
 
             VarExpr expr = new(type, v_name, value);
             return new(expr);
+        }
+
+        protected ReAssign StateReAssign()
+        {
+            Token v_name = Consume(TokenType.KEYWORD_OR_NAME, "variable name was expected");
+            Consume(TokenType.ASSIGN, "\"=\" was expected");
+            Expr expr = ConsumeGenExpr();
+            Consume(TokenType.SEMICOLON, "\";\" was expected");
+            return new(v_name, expr);
         }
 
         protected Expose StateExposeDeclaration()

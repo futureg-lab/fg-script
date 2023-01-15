@@ -98,6 +98,9 @@ namespace fg_script_test
                 ret 1 + 1;
                 err ""some error"";
                 2 * 4 + x * (someCall() + z[1 + 1]);
+                
+                str s = ""some value"";
+                s = ""new value"";
             ";
             List<string> tests = new()
             {
@@ -107,7 +110,9 @@ namespace fg_script_test
                 "(bool:y => (or true false))",
                 "(#return (+ 1 1))",
                 "(#error \"some error\")",
-                "(#root (+ (* 2 4) (* x (+ someCall() z[(+ 1 1)]))))"
+                "(#root (+ (* 2 4) (* x (+ someCall() z[(+ 1 1)]))))",
+                "(str:s => \"some value\")",
+                "(#reassign s => \"new value\")",
             };
             TestSetFrom(source, tests);
         }

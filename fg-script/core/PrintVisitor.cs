@@ -210,5 +210,10 @@ namespace fg_script.core
         {
             return string.Format("(#while {0}\n{1})", Print(stmt.Condition), Print(stmt.Body)); 
         }
+
+        public string VisitReAssignCall(ReAssign stmt)
+        {
+            return String.Format("(#reassign {0} => {1})", stmt.Callee.Lexeme, Print(stmt.NewValue));
+        }
     }
 }

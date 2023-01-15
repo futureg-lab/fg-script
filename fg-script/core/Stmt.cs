@@ -227,4 +227,19 @@ namespace fg_script.core
             return vistor.VisitExtern(this);
         }
     }
+
+    public class ReAssign : Stmt
+    {
+        public Token Callee { get; }
+        public Expr NewValue { get; }
+        public ReAssign(Token callee, Expr value)
+        {
+            Callee = callee;
+            NewValue = value;
+        }
+        override public T Accept<T>(IVisitorSTmt<T> visitor)
+        {
+            return visitor.VisitReAssignCall(this);
+        }
+    }
 }

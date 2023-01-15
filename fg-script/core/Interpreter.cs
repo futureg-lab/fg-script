@@ -215,6 +215,23 @@
             return null;
         }
 
+        public object? VisitReAssignCall(ReAssign stmt)
+        {
+            // should exists first
+            string var_name = stmt.Callee.Lexeme;
+            Memory.Result? current = Machine.GetValue(var_name);
+            if (current == null)
+                throw new FGRuntimeException("re-assign", stmt.Callee + " has not been defined yet");
+
+            Memory.Result new_value = Eval(stmt.NewValue);
+            if (current.Type != new_value.Type)
+                throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", new_value.Type, stmt.NewValue));
+
+            Machine.Store(var_name, new_value);
+            
+            return null;
+        }
+
         public object? VisitBlock(Block stmt)
         {
             Machine.MemPush(); // new scope
