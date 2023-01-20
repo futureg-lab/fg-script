@@ -1,0 +1,17 @@
+﻿/**
+ * fg-script lang overview
+ * Some comments
+ */
+num a = 0;
+num b = 1;
+num N = 10;
+num iter = 0;
+
+while iter < N {
+	num c = a + b;
+	a = b; b = c;
+	iter = iter + 1;
+	println("fib {0} = {1}", iter, a);
+	// __mem_debug__();
+}
+
