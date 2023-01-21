@@ -1,0 +1,25 @@
+﻿/**
+ * fg-script
+ * Mutual recursion test :
+ * * Inner block scope
+ * * Stack allocation
+ * * Return value propagatiion
+ */
+
+fn odd(num n) -> bool {
+	ret not even(n);
+}
+
+fn even(num n) -> bool {
+	if n is 0 {
+		ret true;
+	}
+	ret odd(n - 1);
+}
+
+num nax = 10;
+num i = 0;
+while i < nax {
+	println("{0} is even ? {1}", i, even(i));
+	i = i + 1;
+}

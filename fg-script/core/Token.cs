@@ -55,7 +55,6 @@ namespace fg_script.core
         FUN_DECL,           // fn
         TYPE,               // bool, tup, num
         IN,                 // (i, val) in (1, 2, 3, 4..)
-        IS,                 // x is y -> bool
         OR,                 // x or y -> bool
         AND,                // x and y -> bool
 

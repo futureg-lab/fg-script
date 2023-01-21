@@ -1,0 +1,19 @@
+﻿/**
+ * fg-script lang overview
+ */
+
+fn fib(num x) -> num {
+	if x < 0 {
+		ret 0;
+	}
+	if x < 1 {
+		ret 1;
+	}
+	ret fib(x - 1) + fib(x - 2);
+}
+
+num n = 0;
+while n <= 10 {
+	println("fib {0} = {1}", n, fib(n));
+	n = n + 1;
+}

@@ -27,8 +27,10 @@
     public class Interpreter : IVisitorSTmt<object?>, IVisitorExpr<Memory.Result>
     {
         public Memory Machine { get; } = new();
-
+        // C# => fgscript
         Dictionary<Tuple<string, int>, FGScriptFunction> ImportedFunc = new();
+        // fg-script => fg-script
+        Dictionary<Tuple<string, int>, Func> UserDefFunc = new();
 
         public Interpreter()
         {
@@ -98,7 +100,7 @@
             }));
         }
 
-        public FGRuntimeException FuncSignatureError(string name, List<ResultType> expected, List<ResultType> got)
+        public static FGRuntimeException FuncSignatureError(string name, List<ResultType> expected, List<ResultType> got)
         {
             return new FGRuntimeException(Fmt("{0} takes {1}, got {2} instead", name, string.Join(", ", expected), string.Join(", ", got)));
         }
@@ -108,9 +110,9 @@
             ImportedFunc[Tuple.Create(function.Name, function.ArgCount)] = function;
         }
 
-        public void Run(Stmt stmt)
+        public object? Run(Stmt stmt)
         {
-            stmt.Accept(this);
+            return stmt.Accept(this);
         }
 
         public Memory.Result Eval(Expr expr)
@@ -234,13 +236,30 @@
 
         public object? VisitBlock(Block stmt)
         {
+            Stmt? interruption = null;
             Machine.MemPush(); // new scope
             
             foreach (var line in stmt.Statements)
-                Run(line);
+            {
+                if (line is Return || line is Break || line is Continue)
+                {
+                    interruption = line;
+                    break;
+                }
+                else
+                {
+                    // propagate
+                    object? evaluation = Run(line);
+                    if (evaluation != null && evaluation is Stmt)
+                    {
+                        interruption = (Stmt)evaluation;
+                        break;
+                    }
+                }
+            }
 
             Machine.MemPop(); // discard
-            return null;
+            return interruption;
         }
 
         public object? VisitStmt(Stmt stmt)
@@ -251,7 +270,9 @@
 
         public object? VisitFunc(Func stmt)
         {
-            throw new NotImplementedException();
+            var id = Tuple.Create(stmt.Name.Lexeme, stmt.Args.Count);
+            UserDefFunc[id] = stmt;
+            return null;
         }
 
         public object? VisitIf(If stmt)
@@ -268,10 +289,7 @@
 
             Boolean main_cond = (Boolean) res.Value;
             if (main_cond)
-            {
-                Run(stmt.IfBody);
-                return null;
-            }
+                return VisitBlock(stmt.IfBody);
 
             // has elseif
             if (!main_cond)
@@ -281,17 +299,11 @@
                     Memory.Result br_cond = Eval(elif.Condition);
                     IsItBoolean(br_cond);
                     if ((Boolean) br_cond.Value)
-                    {
-                        Run(elif.Body);
-                        return null;
-                    }
+                        return VisitBlock(elif.Body);
                 }
                 // has else and main_cond is false
                 if (stmt.ElseBody != null)
-                {
-                    Run(stmt.ElseBody);
-                    return null;
-                }
+                    return VisitBlock(stmt.ElseBody);
             }
             return null;
         }
@@ -318,17 +330,25 @@
             Machine.Store(temp_name, cond);
 
             Boolean value = (Boolean) cond.Value;
-
             while (value)
             {
-                Run(stmt.Body);
+                object? block_eval = VisitBlock(stmt.Body);
+                if (block_eval != null)
+                {
+                    if (block_eval is Break)
+                        break;
+                    if (block_eval is Continue)
+                        continue;
+                    if (block_eval is Return ret)
+                        return ret; // let a function handle this
+                }
 
                 // re eval
                 Machine.Replace(temp_name, Eval(stmt.Condition));
                 Memory.Result? current = Machine.GetValue(temp_name);
 
                 if (current == null) // should never happen
-                    throw new FGRuntimeException(Fmt("internal error, temp reference {} was not found", temp_name));
+                    throw new FGRuntimeException(Fmt("internal error, temp reference {0} was not found", temp_name));
 
                 value = (Boolean) current.Value;
             }
@@ -589,7 +609,7 @@
                 case TokenType.GT:
                     if (BothSidesAre(ResultType.NUMBER))
                     {
-                        Boolean tmp = ((Double)eval_left.Value) < ((Double)eval_right.Value);
+                        Boolean tmp = ((Double)eval_left.Value) > ((Double)eval_right.Value);
                         return new(tmp, ResultType.BOOLEAN);
                     }
                     else if (BothSidesAre(ResultType.TUPLE))
@@ -683,11 +703,12 @@
                     Console.Error.Write(total + endline);
                 else
                     Console.Out.Write(total + endline);
+
+                return Memory.Result.Void();
             }
 
-            // imported
-
             var fid = Tuple.Create(callee, expr.Args.Count);
+            // imported
             if (ImportedFunc.ContainsKey(fid))
             {
                 var eval_args = expr
@@ -695,14 +716,51 @@
                     .ConvertAll<Memory.Result>(Eval)
                     .ToArray();
                 return ImportedFunc[fid].RunAgainst(eval_args);
-
-                // return new("hello", ResultType.STRING)
             }
 
-
             // fg-script defined
+            if (UserDefFunc.ContainsKey(fid))
+            {
+                var eval_args = expr
+                    .Args
+                    .ConvertAll<Memory.Result>(Eval)
+                    .ToArray();
+                Func func = UserDefFunc[fid];
 
-            return Memory.Result.Void();
+                // check if args matches
+                // at this point we can assume that the sizes are the same
+                Memory.Result output_value = Memory.Result.Void();
+                Machine.MemPush();
+                for (int i = 0; i < eval_args.Length; i++)
+                {
+                    ResultType curr_eval = eval_args[i].Type;
+                    string fun_arg_lex = func.Args[i].DataType.Lexeme;
+                    if (!AreSameType(fun_arg_lex, curr_eval))
+                        throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", fun_arg_lex, curr_eval));
+                    // store arg as local scope variable with the appropriate name
+                    Machine.Store(func.Args[i].Name.Lexeme, eval_args[i]);
+                }
+                if (func.Body != null)
+                {
+                    object? block_eval = VisitBlock(func.Body);
+                    if (block_eval != null && block_eval is Return ret)
+                    {
+                        output_value = Eval(ret.ReturnValue);
+                        TypeMismatchCheck(func.ReturnType.Lexeme, output_value.Type);
+                    }
+                }
+                Machine.MemPop();
+
+                return output_value;
+            }
+
+            List<string> args = expr
+                .Args
+                .ConvertAll(x => Eval(x).Type.ToString());
+
+            string temp = string.Join(", ", args);
+
+            throw new FGRuntimeException(Fmt("reference error {0} with args {1} is undefined", callee, temp));
         }
 
         public Memory.Result VisitVarCall(VarCall expr)
