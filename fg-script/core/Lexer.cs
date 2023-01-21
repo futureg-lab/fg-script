@@ -51,6 +51,7 @@
             ReservedWords.Add("not", TokenType.NOT);
             ReservedWords.Add("ret", TokenType.RETURN);
             ReservedWords.Add("err", TokenType.ERROR);
+            ReservedWords.Add("repr_of", TokenType.REPR_OF);
             ReservedWords.Add("break", TokenType.BREAK);
             ReservedWords.Add("continue", TokenType.CONTINUE);
         }

@@ -1,5 +1,24 @@
 ﻿tup x = [1, 2, ["x" : 3, "q" : ["y" : 4], "z" : 5]];
 tup z = 1 .. 9;
+tup example_dic = [
+	a : 6,
+	b : 8,
+	c :  [
+		e : "Some text",
+		h : 3,
+		q : [1, 2, 3, 4, 5]
+	]
+];
 
 
-println("{0} and {1}", x, z);
+// println(example_dic);
+
+
+for (k, v) in example_dic {
+	println("key {0}, value {1}", k, v);
+	/*
+	if (k is "c") {
+		break;
+	}
+	*/
+}

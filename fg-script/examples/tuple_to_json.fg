@@ -1,0 +1,28 @@
+﻿/**
+ * Transform a fg-script to json
+ * What does this test ?
+ * * Recursion
+ * * for loop iteration
+ * * Basic concatenation
+ */
+
+fn to_json(tup value) -> str {
+	if repr_of value is "tup" {
+		for (k, v) in value {
+			println("{0} : {1}", k, v);
+		}
+		ret "";
+	}
+	ret "";
+}
+
+
+/*
+println("repr {0}", repr_of 2);
+println("repr {0}", repr_of "hello");
+println("repr {0}", repr_of [1, 2, 3]);
+println("repr {0}", repr_of false);
+*/
+
+
+print(to_json([1, [2, 3]]));

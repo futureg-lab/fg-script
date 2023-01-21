@@ -403,10 +403,13 @@
         // unary    ::= <literal> | <func_call> | <var_name> | <monoadic_operation> | <tuple>
         protected Expr ConsumeUnary()
         {
-            if (Match(TokenType.MINUS) || Match(TokenType.NOT))
+            if (Match(TokenType.MINUS) || Match(TokenType.NOT) || Match(TokenType.REPR_OF))
             {
-                Token op = Match(TokenType.MINUS) ? 
-                    Consume(TokenType.MINUS) : Consume(TokenType.NOT);
+                Token op;
+                if (Match(TokenType.MINUS)) op = Consume(TokenType.MINUS);
+                else if (Match(TokenType.NOT)) op = Consume(TokenType.NOT);
+                else op = Consume(TokenType.REPR_OF);
+
                 Expr expr = ConsumeUnary();
                 return new UnaryExpr(op, expr);
             }
