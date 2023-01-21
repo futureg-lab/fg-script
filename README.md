@@ -12,7 +12,7 @@ dotnet build --configuration Release --no-restore
 The project solution is located at the root directory
 
 # fg-script lang overview
-```
+```rust
 // basic json serializer using fg-script
 fn to_json(auto value) -> str {
 	// println("repr is " + repr_of value);
