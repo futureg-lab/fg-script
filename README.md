@@ -74,8 +74,8 @@ tup example_dic = [
 	]
 ];
 
-// In this example (3) should be labeled as it is couter-intuitive to assign (3) a generic label 
-tup example = (a : 1, b : 2, (3)); // throws an error
+// In this example [3] should be labeled with an explicit key
+tup example = [a : 1, b : 2, [3]]; // throws an error
 
 fn fib(num x) -> num {
 	if x < 0 {
@@ -92,7 +92,7 @@ fn main -> void {
 		print("index " + i);
 	}
 	
-	for (i, val) in (1, 2, 3, 4) {
+	for (i, val) in [1, 2, 3, 4] {
 		print("index " + i + ":" + val + "\n");
 	}
 	
