@@ -25,7 +25,7 @@ namespace fg_script.utils
             text += "\n";
             for (int i = 0; i < initialLength; i++)
             {
-                text += (i >= start && i < end ? "^" : "-");
+                text += (i >= start && i < end ? "^" : " ");
             }
             return text + "\n";
         }
@@ -34,7 +34,7 @@ namespace fg_script.utils
         {
             string[] splits = text.Split("\n");
             string line = splits[pos.Line - 1];
-            return UnderlineText(line, pos.Col - 2 + offset, pos.Col - 1 + offset);
+            return UnderlineText(line, pos.Col - 1 + offset, pos.Col + 3 + offset);
         }
     }
 }

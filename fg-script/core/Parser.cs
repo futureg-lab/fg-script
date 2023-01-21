@@ -370,7 +370,8 @@
             List<TokenType> bin = new()
             {
                 TokenType.MULT,
-                TokenType.DIV
+                TokenType.DIV,
+                TokenType.MOD
             };
             foreach (var op in bin)
             {

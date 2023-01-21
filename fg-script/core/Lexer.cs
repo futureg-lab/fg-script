@@ -44,7 +44,7 @@
             ReservedWords.Add("tup", TokenType.TYPE);
 
             // other
-            ReservedWords.Add("is", TokenType.IS);
+            ReservedWords.Add("is", TokenType.EQ);
             ReservedWords.Add("in", TokenType.IN);
             ReservedWords.Add("and", TokenType.AND);
             ReservedWords.Add("or", TokenType.OR);

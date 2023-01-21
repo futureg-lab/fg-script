@@ -31,7 +31,7 @@ try
         }
         Console.WriteLine(stmt);
     }*/
-    string filePath = "../../../examples/fibo_while.fg";
+    string filePath = "../../../examples/fun_sandbox.fg";
     source = Utils.ReadTextFile(filePath);
 
     Lexer lexer = new(source, "");
@@ -51,8 +51,8 @@ try
 }
 catch (SyntaxErrorException syntax_excp)
 {
-    Console.Error.Write(syntax_excp.Message);
     Console.Error.WriteLine(Utils.UnderlineTextLine(source, syntax_excp.Cursor, 1));
+    Console.Error.Write(syntax_excp.Message);
 }
 catch (FGScriptException fgexception)
 {

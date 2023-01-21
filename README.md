@@ -77,15 +77,14 @@ tup example_dic = [
 // In this example (3) should be labeled as it is couter-intuitive to assign (3) a generic label 
 tup example = (a : 1, b : 2, (3)); // throws an error
 
-fn fibo (num n) -> num {
-	// return is implicit
-	if (n < 0) {
-		err "n is negative!";
+fn fib(num x) -> num {
+	if x < 0 {
+		ret 0;
 	}
-	if n <= 2 {
+	if x < 1 {
 		ret 1;
 	}
-	ret fibo (n - 1) + fibo (n - 2);
+	ret fib(x - 1) + fib(x - 2);
 }
 
 fn main -> void {
@@ -105,7 +104,7 @@ fn main -> void {
 	
 	some_data = requestHttpJSON();
 	
-	cond_expr = false
+	cond_expr = false;
 	while cond_expr {
 		do_stuff();
 	}

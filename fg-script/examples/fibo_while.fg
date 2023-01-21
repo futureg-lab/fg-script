@@ -11,7 +11,15 @@ while iter < N {
 	num c = a + b;
 	a = b; b = c;
 	iter = iter + 1;
-	println("fib {0} = {1}", iter, a);
+
+	str descr = "";
+	// if stmt overview
+	if a % 2 == 0 {
+		descr = "even";
+	} else {
+		descr = "odd";
+	}
+
+	println("fib {0} = {1}, mod = {2} ({3})", iter, a, a % 2, descr);
 	// __mem_debug__();
 }
-
