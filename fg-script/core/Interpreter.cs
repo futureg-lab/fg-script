@@ -44,7 +44,7 @@
                 if (ShareSameType(ResultType.NUMBER, args))
                 {
                     Double a = (Double)args.First().Value, b = (Double)args.Last().Value;
-                    return new(a > b ? a : b, ResultType.NUMBER);
+                    return new(a < b ? a : b, ResultType.NUMBER);
                 }
                 List<ResultType> expected = new() { ResultType.NUMBER, ResultType.NUMBER };
                 List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
@@ -97,6 +97,24 @@
             {
                 Random random = new();
                 return new(random.NextDouble(), ResultType.NUMBER);
+            }));
+
+            ImportFunction(new("len", 1, (Memory.Result[] args) =>
+            {
+                Double size = 0;
+                var arg = args.First();
+                
+                if (arg.Type == ResultType.TUPLE)
+                    size = ((Dictionary<string, Memory.Result>)arg.Value).Count;
+                else if (arg.Type == ResultType.STRING)
+                    size = ((string)arg.Value).Length;
+                else
+                {
+                    List<ResultType> expected = new() { ResultType.STRING };
+                    List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
+                    throw FuncSignatureError("len", expected, cargs);
+                }
+                return new(size, ResultType.NUMBER);
             }));
         }
 
@@ -210,7 +228,9 @@
         {
             Memory.Result value = Eval(stmt.Variable.Value);
 
-            TypeMismatchCheck(stmt.Variable.DataType.Lexeme, value.Type);
+            // if flagged as auto => we can infer the type from the value
+            if (!__TypeIsAutoInfered(stmt.Variable.DataType))
+                TypeMismatchCheck(stmt.Variable.DataType.Lexeme, value.Type);
 
             // store it
             Machine.Store(stmt.Variable.Name.Lexeme, value);
@@ -236,23 +256,29 @@
 
         public object? VisitBlock(Block stmt)
         {
-            Stmt? interruption = null;
+            object? interruption = null;
             Machine.MemPush(); // new scope
             
             foreach (var line in stmt.Statements)
             {
                 if (line is Return || line is Break || line is Continue)
                 {
-                    interruption = line;
+                    if (line is Return ret )
+                    {
+                        // fetch value (if any) before Poping the current scope
+                        interruption = VisitReturn(ret);
+                    } 
+                    else
+                        interruption = line;
                     break;
                 }
                 else
                 {
                     // propagate
                     object? evaluation = Run(line);
-                    if (evaluation != null && evaluation is Stmt)
+                    if (evaluation != null)
                     {
-                        interruption = (Stmt)evaluation;
+                        interruption = evaluation;
                         break;
                     }
                 }
@@ -338,9 +364,9 @@
                         break;
                     if (block_eval is Continue)
                         continue;
-                    if (block_eval is Return ret)
+                    if (block_eval is Memory.Result content)
                     {
-                        potential_ret = ret; // let a function handle this
+                        potential_ret = content; // let a function handle this
                         break;
                     }
                 }
@@ -373,9 +399,9 @@
                         break;
                     if (block_eval is Continue)
                         continue;
-                    if (block_eval is Return ret)
+                    if (block_eval is Memory.Result content)
                     {
-                        potential_ret = ret; // let a function handle this
+                        potential_ret = content; // let a function handle this
                         break;
                     }
                 }
@@ -396,7 +422,9 @@
 
         public object? VisitReturn(Return stmt)
         {
-            throw new NotImplementedException();
+            if (stmt.ReturnValue != null)
+                return Eval(stmt.ReturnValue);
+            return null;
         }
 
         public object? VisitError(Error stmt)
@@ -561,7 +589,7 @@
                     if (eval_left.Type == ResultType.STRING || eval_right.Type == ResultType.STRING)
                     {
                         // concatenate
-                        string tmp = eval_left.Value.ToString() + eval_right.Value.ToString();
+                        string tmp = __StringifyResult(eval_left) + __StringifyResult(eval_right);
                         return new(tmp, ResultType.STRING);
                     }
                     else if(BothSidesAre(ResultType.NUMBER))
@@ -750,11 +778,6 @@
             Double start = (Double)__start.Value;
             Double end = (Double)__end.Value;
 
-            if (start > end)
-            {
-
-            }
-
             Dictionary<string, Memory.Result> tup = new();
             int index = 0;
             for (Double i = start; i <= end; i += 1.0)
@@ -821,20 +844,26 @@
                 Machine.MemPush();
                 for (int i = 0; i < eval_args.Length; i++)
                 {
+                    var arg = func.Args[i];
                     ResultType curr_eval = eval_args[i].Type;
                     string fun_arg_lex = func.Args[i].DataType.Lexeme;
-                    if (!AreSameType(fun_arg_lex, curr_eval))
+
+                    if (!__TypeIsAutoInfered(func.Args[i].DataType) 
+                        && !AreSameType(fun_arg_lex, curr_eval))
                         throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", fun_arg_lex, curr_eval));
+
                     // store arg as local scope variable with the appropriate name
                     Machine.Store(func.Args[i].Name.Lexeme, eval_args[i]);
                 }
                 if (func.Body != null)
                 {
                     object? block_eval = VisitBlock(func.Body);
-                    if (block_eval != null && block_eval is Return ret)
+                    if (block_eval != null)
                     {
-                        output_value = Eval(ret.ReturnValue);
-                        TypeMismatchCheck(func.ReturnType.Lexeme, output_value.Type);
+                        Memory.Result res = (Memory.Result)block_eval;
+                        output_value = res;
+                        if (!__TypeIsAutoInfered(func.ReturnType))
+                            TypeMismatchCheck(func.ReturnType.Lexeme, output_value.Type);
                     }
                 }
                 Machine.MemPop();
@@ -863,6 +892,11 @@
         public Memory.Result VisitArrayAccessCall(ArrayAccessCall expr)
         {
             throw new NotImplementedException();
+        }
+
+        private bool __TypeIsAutoInfered(Token token)
+        {
+            return token.Type == TokenType.TYPE && token.Lexeme.Equals("auto");
         }
 
         private string __StringifyResult(Memory.Result eval)
@@ -895,6 +929,11 @@
                 }
                 return Fmt("[{0}]", string.Join(", ", items));
             }
+
+            if (eval.Type == ResultType.NUMBER)
+                return value
+                    .ToString()
+                    .Replace(",", ".");
 
             // str, num
             return value.ToString();

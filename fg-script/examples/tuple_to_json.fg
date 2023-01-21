@@ -6,23 +6,37 @@
  * * Basic concatenation
  */
 
-fn to_json(tup value) -> str {
+fn to_json(auto value) -> str {
+	// println("repr is " + repr_of value);
 	if repr_of value is "tup" {
+		str tmp = "{";
+
+		num size = len(value);
+		num i = 0;
 		for (k, v) in value {
-			println("{0} : {1}", k, v);
+			str row = "\"" + k + "\""+ " : " + to_json(v);
+			tmp = tmp + row;
+			if i + 1 < size {
+				tmp = tmp + ",";
+			}
+			i = i + 1;
 		}
-		ret "";
+
+		tmp = tmp + "}";
+		ret tmp;
 	}
-	ret "";
+
+	ret "" + value;
 }
 
 
-/*
-println("repr {0}", repr_of 2);
-println("repr {0}", repr_of "hello");
-println("repr {0}", repr_of [1, 2, 3]);
-println("repr {0}", repr_of false);
-*/
+tup dic = [
+	a : 1,
+	b : [c : 3],
+	c : [1, 2],
+	d : 2
+];
 
+println(to_json(dic));
 
-print(to_json([1, [2, 3]]));
+println(len("hello world!"));
