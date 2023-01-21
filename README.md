@@ -36,7 +36,7 @@ fn to_json(auto value) -> str {
 }
 ```
 
-## Example 2 : Recursive form for the Fibonacci sequence
+## Example 2 : Fibonacci recursive
 ```rust
 fn fib(num x) -> num {
 	if x < 0 {
@@ -49,7 +49,7 @@ fn fib(num x) -> num {
 }
 ```
 
-## Example 3
+## Example 3 : fg-script features
 ```rust
 // import function from csharp to a fg-script
 extern requestHtml(str url) -> str;
