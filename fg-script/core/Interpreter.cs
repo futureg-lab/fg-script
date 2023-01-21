@@ -405,11 +405,6 @@
             throw new NotImplementedException();
         }
 
-        public Memory.Result VisitEnumExpr(EnumExpr expr)
-        {
-            throw new NotImplementedException();
-        }
-
         public Memory.Result VisitArgExpr(ArgExpr expr)
         {
             throw new NotImplementedException();
@@ -671,9 +666,38 @@
 
         public Memory.Result VisitTupleExpr(TupleExpr expr)
         {
-            throw new NotImplementedException();
-        }
+            Dictionary<string, Memory.Result> tup = new();
 
+            // Expr can be a tup, num, str, bool
+            foreach (KeyValuePair<string, Expr> entry in expr.Map)
+                tup[entry.Key] = Eval(entry.Value);
+
+            return new(tup, ResultType.TUPLE);
+        }
+        public Memory.Result VisitEnumExpr(EnumExpr expr)
+        {
+            Memory.Result __start = Eval(expr.Start);
+            Memory.Result __end = Eval(expr.End);
+
+            bool expected = (__start.Type == __end.Type && __start.Type == ResultType.NUMBER);
+            if (!expected)
+                throw new FGRuntimeException(Fmt("invalid enumeration, start, end should be of type \"num\""));
+
+            Double start = (Double)__start.Value;
+            Double end = (Double)__end.Value;
+
+            if (start > end)
+            {
+
+            }
+
+            Dictionary<string, Memory.Result> tup = new();
+            int index = 0;
+            for (Double i = start; i <= end; i += 1.0)
+                tup[(index++).ToString()] = new(i, ResultType.NUMBER);
+
+            return new(tup, ResultType.TUPLE);
+        }
 
         public Memory.Result VisitFuncCall(FuncCall expr)
         {
@@ -692,7 +716,7 @@
             {
                 string total = "";
                 
-                List<object> all_values = expr.Args.ConvertAll(x => Eval(x).Value);
+                List<string> all_values = expr.Args.ConvertAll(x => __StringifyResult(Eval(x)));
                 if (all_values.Count > 1)
                     total = Fmt("" + all_values.First(), all_values.Skip(1).ToArray());
                 else
@@ -775,6 +799,41 @@
         public Memory.Result VisitArrayAccessCall(ArrayAccessCall expr)
         {
             throw new NotImplementedException();
+        }
+
+
+        private string __StringifyResult(Memory.Result eval)
+        {
+            object value = eval.Value;
+
+            if (eval.Type == ResultType.NULL)
+                return "null";
+
+            if (eval.Type == ResultType.VOID)
+                throw new FGRuntimeException("cannot stringify void type");
+
+
+            if (value == null)
+                throw new FGRuntimeException("internal error", "processed value is not valid");
+
+            if (eval.Type == ResultType.BOOLEAN)
+                return (Boolean)value ? "true" : "false";
+
+            if (eval.Type == ResultType.TUPLE)
+            {
+                string str = "[";
+                var tup = (Dictionary<string, Memory.Result>) eval.Value;
+                List<string> items = new();
+                foreach(var entry in tup)
+                {
+                    items.Add(entry.Key + ": " + __StringifyResult(entry.Value));
+                }
+                str += string.Join(", ", items) + "]";
+                return str;
+            }
+
+            // num, str
+            return value.ToString();
         }
     }
 }

@@ -1,0 +1,43 @@
+﻿
+
+num x = 0;
+/************
+Expected output
+1, 5
+2, 5
+3, 5
+4, 5
+6, 5
+7, 5
+8, 5
+9, 5
+10, 5
+*************/
+while true {
+	x = x + 1;
+	num y = 0;
+
+	while true {
+		y = y + 1;
+		if y is 5 {
+			// break should propagate till it encounters
+			// the closest block owned by a loop
+			{
+				{
+					break;
+				}
+			}
+		}
+	}
+	
+	// skip 5
+	if x is 5 {
+		continue;
+	}
+
+	if x > 10 {
+		break;
+	}
+
+	println("{0}, {1}", x, y);
+}

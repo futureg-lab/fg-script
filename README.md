@@ -88,7 +88,7 @@ fn fib(num x) -> num {
 }
 
 fn main -> void {
-	for i = 0 .. 10 {
+	for i in 0 .. 10 {
 		print("index " + i);
 	}
 	

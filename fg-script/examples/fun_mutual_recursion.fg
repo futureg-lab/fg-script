@@ -3,7 +3,7 @@
  * Mutual recursion test :
  * * Inner block scope
  * * Stack allocation
- * * Return value propagatiion
+ * * Return value propagation
  */
 
 fn odd(num n) -> bool {
