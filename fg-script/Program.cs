@@ -31,7 +31,7 @@ try
         }
         Console.WriteLine(stmt);
     }*/
-    string filePath = "../../../examples/eval.fg";
+    string filePath = "../../../examples/fibo_while.fg";
     source = Utils.ReadTextFile(filePath);
 
     Lexer lexer = new(source, "");

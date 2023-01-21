@@ -277,9 +277,8 @@
             
             Machine.MemPush(); // start new scope for the condition variable
             
-            string temp_name = "__while__var__";
+            string temp_name = "__while__" + (new Random().Next());
             Machine.Store(temp_name, cond);
-
 
             Boolean value = (Boolean) cond.Value;
 
@@ -287,17 +286,14 @@
             {
                 Run(stmt.Body);
 
-
                 // re eval
                 Machine.Replace(temp_name, Eval(stmt.Condition));
                 Memory.Result? current = Machine.GetValue(temp_name);
-                if (current != null)
-                {
-                    // eval again
-                    value = (Boolean) current.Value;
-                } 
-                else
+
+                if (current == null) // should never happen
                     throw new FGRuntimeException(Fmt("internal error, temp reference {} was not found", temp_name));
+
+                value = (Boolean) current.Value;
             }
 
             Machine.MemPop();
@@ -498,8 +494,22 @@
                     }
                     else
                         throw new FGRuntimeException(incomp_message);
-                // TODO
-                // == <= >= < > and or and ..
+                case TokenType.AND:
+                    if (BothSidesAre(ResultType.BOOLEAN))
+                    {
+                        Boolean tmp = ((Boolean)eval_left.Value) && ((Boolean)eval_right.Value);
+                        return new(tmp, ResultType.BOOLEAN);
+                    }
+                    else
+                        throw new FGRuntimeException(incomp_message);
+                case TokenType.OR:
+                    if (BothSidesAre(ResultType.BOOLEAN))
+                    {
+                        Boolean tmp = ((Boolean)eval_left.Value) || ((Boolean)eval_right.Value);
+                        return new(tmp, ResultType.BOOLEAN);
+                    }
+                    else
+                        throw new FGRuntimeException(incomp_message);
                 case TokenType.EQ:
                     if (BothSidesAre(ResultType.NUMBER))
                     {
