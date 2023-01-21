@@ -315,7 +315,40 @@
 
         public object? VisitFor(For stmt)
         {
-            throw new NotImplementedException();
+            Token? key = stmt.KeyAlias;
+            Token value = stmt.ValueAlias;
+
+            Memory.Result iterable = Eval(stmt.ExprIterable);
+            if (iterable.Type != ResultType.TUPLE)
+                throw new FGRuntimeException("invalid loop expression", "value is not iterable");
+            object? potential_ret = null;
+            var tup = (Dictionary<string, Memory.Result>)iterable.Value; 
+            foreach (var entry in tup)
+            {
+                Machine.MemPush();
+                
+                if (key != null)
+                    Machine.Store(key.Lexeme, new(entry.Key, ResultType.STRING));
+                Machine.Store(value.Lexeme, new(entry.Value.Value, entry.Value.Type));
+
+                object? block_eval = VisitBlock(stmt.Body);
+                if (block_eval != null)
+                {
+                    if (block_eval is Break)
+                        break;
+                    if (block_eval is Continue)
+                        continue;
+                    if (block_eval is Return ret)
+                    {
+                        potential_ret = ret; // let a function handle this
+                        break;
+                    }
+                }
+
+                Machine.MemPop(); // discard key, value
+            }
+
+            return potential_ret;
         }
 
         public object? VisitWhile(While stmt)
@@ -330,6 +363,7 @@
             Machine.Store(temp_name, cond);
 
             Boolean value = (Boolean) cond.Value;
+            object? potential_ret = null;
             while (value)
             {
                 object? block_eval = VisitBlock(stmt.Body);
@@ -340,7 +374,10 @@
                     if (block_eval is Continue)
                         continue;
                     if (block_eval is Return ret)
-                        return ret; // let a function handle this
+                    {
+                        potential_ret = ret; // let a function handle this
+                        break;
+                    }
                 }
 
                 // re eval
@@ -354,7 +391,7 @@
             }
 
             Machine.MemPop();
-            return null;
+            return potential_ret;
         }
 
         public object? VisitReturn(Return stmt)
@@ -405,11 +442,6 @@
             throw new NotImplementedException();
         }
 
-        public Memory.Result VisitEnumExpr(EnumExpr expr)
-        {
-            throw new NotImplementedException();
-        }
-
         public Memory.Result VisitArgExpr(ArgExpr expr)
         {
             throw new NotImplementedException();
@@ -447,13 +479,35 @@
             Token symbol = expr.OpSymbol;
             // reduced to a point
             Memory.Result eval_operand = Eval(expr.Operand);
-            Memory.Result result;
 
             string not_supp_msg = Fmt("{0} is not supported by {1}", eval_operand.Type, symbol.Lexeme);
 
-            if (symbol.Type != TokenType.MINUS && symbol.Type != TokenType.NOT)
+            if (symbol.Type != TokenType.MINUS && symbol.Type != TokenType.NOT && symbol.Type != TokenType.REPR_OF)
                 throw new FGRuntimeException(Fmt("\"{0}\" does not have a definition", symbol.Lexeme));
 
+            // this is fine... :)
+            if (symbol.Type == TokenType.REPR_OF)
+            {
+                switch(eval_operand.Type)
+                {
+                    case ResultType.NUMBER:
+                        return new("num", ResultType.STRING);
+                    case ResultType.BOOLEAN:
+                        return new("bool", ResultType.STRING);
+                    case ResultType.STRING:
+                        return new("str", ResultType.STRING);
+                    case ResultType.TUPLE:
+                        return new("tup", ResultType.STRING);
+                    case ResultType.VOID:
+                        return new("void", ResultType.STRING);
+                    case ResultType.NULL:
+                        return new("null", ResultType.STRING);
+                    default:
+                        throw new FGRuntimeException(Fmt("could not determine repr_of type {0}", eval_operand.Type));
+                }
+            }
+
+            Memory.Result result;
             if (eval_operand.Type == ResultType.BOOLEAN)
             {
                 if (symbol.Type == TokenType.NOT)
@@ -586,6 +640,11 @@
                         Boolean tmp = ((Double)eval_left.Value) == ((Double)eval_right.Value);
                         return new(tmp, ResultType.BOOLEAN);
                     }
+                    else if (BothSidesAre(ResultType.STRING))
+                    {
+                        Boolean tmp = ((String)eval_left.Value).Equals((String)eval_right.Value);
+                        return new(tmp, ResultType.BOOLEAN);
+                    }
                     else if (BothSidesAre(ResultType.TUPLE))
                     {
                         // todo
@@ -671,9 +730,38 @@
 
         public Memory.Result VisitTupleExpr(TupleExpr expr)
         {
-            throw new NotImplementedException();
-        }
+            Dictionary<string, Memory.Result> tup = new();
 
+            // Expr can be a tup, num, str, bool
+            foreach (KeyValuePair<string, Expr> entry in expr.Map)
+                tup[entry.Key] = Eval(entry.Value);
+
+            return new(tup, ResultType.TUPLE);
+        }
+        public Memory.Result VisitEnumExpr(EnumExpr expr)
+        {
+            Memory.Result __start = Eval(expr.Start);
+            Memory.Result __end = Eval(expr.End);
+
+            bool expected = (__start.Type == __end.Type && __start.Type == ResultType.NUMBER);
+            if (!expected)
+                throw new FGRuntimeException(Fmt("invalid enumeration, start, end should be of type \"num\""));
+
+            Double start = (Double)__start.Value;
+            Double end = (Double)__end.Value;
+
+            if (start > end)
+            {
+
+            }
+
+            Dictionary<string, Memory.Result> tup = new();
+            int index = 0;
+            for (Double i = start; i <= end; i += 1.0)
+                tup[(index++).ToString()] = new(i, ResultType.NUMBER);
+
+            return new(tup, ResultType.TUPLE);
+        }
 
         public Memory.Result VisitFuncCall(FuncCall expr)
         {
@@ -692,7 +780,7 @@
             {
                 string total = "";
                 
-                List<object> all_values = expr.Args.ConvertAll(x => Eval(x).Value);
+                List<string> all_values = expr.Args.ConvertAll(x => __StringifyResult(Eval(x)));
                 if (all_values.Count > 1)
                     total = Fmt("" + all_values.First(), all_values.Skip(1).ToArray());
                 else
@@ -775,6 +863,41 @@
         public Memory.Result VisitArrayAccessCall(ArrayAccessCall expr)
         {
             throw new NotImplementedException();
+        }
+
+        private string __StringifyResult(Memory.Result eval)
+        {
+            object value = eval.Value;
+
+            if (eval.Type == ResultType.NULL)
+                return "null";
+
+            if (eval.Type == ResultType.VOID)
+                throw new FGRuntimeException("cannot stringify void type");
+
+
+            if (value == null)
+                throw new FGRuntimeException("internal error", "processed value is not valid");
+
+            if (eval.Type == ResultType.BOOLEAN)
+                return (Boolean)value ? "true" : "false";
+
+            if (eval.Type == ResultType.TUPLE)
+            {
+                var tup = (Dictionary<string, Memory.Result>) eval.Value;
+                List<string> items = new();
+                foreach(var entry in tup)
+                {
+                    string val = __StringifyResult(entry.Value);
+                    if (entry.Value.Type == ResultType.STRING)
+                        val = Fmt("\"{0}\"", val);
+                    items.Add(entry.Key + ": " + val);
+                }
+                return Fmt("[{0}]", string.Join(", ", items));
+            }
+
+            // str, num
+            return value.ToString();
         }
     }
 }

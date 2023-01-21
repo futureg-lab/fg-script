@@ -48,6 +48,7 @@ namespace fg_script.core
         BOOL,               // false | true
         TUPLE,              // ( a, b, c, d, ...)
         NULL,               // null keyword
+        REPR_OF,            // repr_of unary operator (returns the type as a string
 
         // keywords
         EXTERN,             // extern
