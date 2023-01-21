@@ -12,8 +12,9 @@ dotnet build --configuration Release --no-restore
 The project solution is located at the root directory
 
 # fg-script lang overview
+
+## Example 1 : fg-script tuple to json
 ```rust
-// basic json serializer using fg-script
 fn to_json(auto value) -> str {
 	// println("repr is " + repr_of value);
 	if repr_of value is "tup" {
@@ -34,6 +35,21 @@ fn to_json(auto value) -> str {
 	ret "" + value;
 }
 ```
+
+## Example 2 : Recursive form for the Fibonacci sequence
+```rust
+fn fib(num x) -> num {
+	if x < 0 {
+		ret 0;
+	}
+	if x < 1 {
+		ret 1;
+	}
+	ret fib(x - 1) + fib(x - 2);
+}
+```
+
+## Example 3
 ```rust
 // import function from csharp to a fg-script
 extern requestHtml(str url) -> str;
@@ -54,17 +70,15 @@ push(tup_empt, 2);
 push(tup_empt, "3");
 shift(tup_empt); // remove and return first item "1"
 pop(tup_empt); // remove and return last item "3"
-// tup_empt => (2)
 
 // using tuples as a dynamic array
 tup arr = arraytup(); // add a flags that enforces number indexing
 arr[0] = 1;
 arr[1] = 2;
 // arr[2] = 3 // error
-print(size(arr)); // 2
-print(type(arr)); // tuple
-print(isarray(arr)); // true
-print(istuple(arr)); // true
+println(len(arr)); // 2
+println(repr_of arr); // tup
+println(repr_of arr == "tup"); // true
 
 // string
 str some_str = "Hello World";
@@ -102,16 +116,6 @@ tup example = [a : 1, b : 2, [3]]; // throws an error
 auto a1 = [1, 2];
 auto a2 = "hello world";
 
-fn fib(num x) -> num {
-	if x < 0 {
-		ret 0;
-	}
-	if x < 1 {
-		ret 1;
-	}
-	ret fib(x - 1) + fib(x - 2);
-}
-
 fn main -> void {
 	for i in 0 .. 10 {
 		print("index " + i);
@@ -122,8 +126,8 @@ fn main -> void {
 	}
 	
 	for (key, value) in example_dic {
-		if type(value) is "tuple" {
-			print("Raw value at " + key + " : " + value);
+		if repr_of value is "tup" {
+			println("Raw value at " + key + " : " + value);
 		}
 	}
 	
