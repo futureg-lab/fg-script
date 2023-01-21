@@ -1,0 +1,26 @@
+﻿
+
+println("max {0}", max(1, 2));
+println("min {0}", min(1, 2));
+println("sqrt {0}", sqrt(2));
+println("log {0}", log(2));
+println("pow {0}", pow(2, 3));
+println("rand {0}", rand());
+println("len str {0}", len("hello world"));
+println("len tup {0}", len([ 1, 2, 3, [4] ]));
+
+
+// todo
+/*
+sin, cos, abs, 
+
+
+join(",", tup)
+
+fmt
+push
+pop
+assign
+array assign
+delete
+*/

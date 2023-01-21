@@ -15,10 +15,9 @@ tup example_dic = [
 
 
 for (k, v) in example_dic {
-	println("key {0}, value {1}", k, v);
 	/*
 	if (k is "c") {
 		break;
-	}
-	*/
+	}*/
+	println("key {0}, value {1}", k, v);
 }

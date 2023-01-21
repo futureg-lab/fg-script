@@ -42,6 +42,7 @@
             ReservedWords.Add("str", TokenType.TYPE);
             ReservedWords.Add("void", TokenType.TYPE);
             ReservedWords.Add("tup", TokenType.TYPE);
+            ReservedWords.Add("auto", TokenType.TYPE);
 
             // other
             ReservedWords.Add("is", TokenType.EQ);

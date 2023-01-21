@@ -12,7 +12,28 @@ dotnet build --configuration Release --no-restore
 The project solution is located at the root directory
 
 # fg-script lang overview
-
+```
+// basic json serializer using fg-script
+fn to_json(auto value) -> str {
+	// println("repr is " + repr_of value);
+	if repr_of value is "tup" {
+		str json = "{";
+		num size = len(value);
+		num i = 0;
+		for (k, v) in value {
+			str row = "\"" + k + "\"" + " : " + to_json(v);
+			json = json + row;
+			if i + 1 < size {
+				json = json + ",";
+			}
+			i = i + 1;
+		}
+		json = json + "}";
+		ret json;
+	}
+	ret "" + value;
+}
+```
 ```rust
 // import function from csharp to a fg-script
 extern requestHtml(str url) -> str;
@@ -76,6 +97,10 @@ tup example_dic = [
 
 // In this example [3] should be labeled with an explicit key
 tup example = [a : 1, b : 2, [3]]; // throws an error
+
+// type inference (!= generic, acts the same as auto in C++)
+auto a1 = [1, 2];
+auto a2 = "hello world";
 
 fn fib(num x) -> num {
 	if x < 0 {
