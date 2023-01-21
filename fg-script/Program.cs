@@ -51,8 +51,8 @@ try
 }
 catch (SyntaxErrorException syntax_excp)
 {
-    Console.Error.Write(syntax_excp.Message);
     Console.Error.WriteLine(Utils.UnderlineTextLine(source, syntax_excp.Cursor, 1));
+    Console.Error.Write(syntax_excp.Message);
 }
 catch (FGScriptException fgexception)
 {

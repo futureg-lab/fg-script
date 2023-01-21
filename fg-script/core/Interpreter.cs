@@ -256,7 +256,44 @@
 
         public object? VisitIf(If stmt)
         {
-            throw new NotImplementedException();
+            var IsItBoolean = (Memory.Result res) =>
+            {
+                if (res.Type != ResultType.BOOLEAN)
+                    throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", ResultType.BOOLEAN, res.Type));
+            };
+
+            // main body
+            Memory.Result res = Eval(stmt.IfCondition);
+            IsItBoolean(res);
+
+            Boolean main_cond = (Boolean) res.Value;
+            if (main_cond)
+            {
+                Run(stmt.IfBody);
+                return null;
+            }
+
+            // has elseif
+            if (!main_cond)
+            {
+                foreach (var elif in stmt.Branches)
+                {
+                    Memory.Result br_cond = Eval(elif.Condition);
+                    IsItBoolean(br_cond);
+                    if ((Boolean) br_cond.Value)
+                    {
+                        Run(elif.Body);
+                        return null;
+                    }
+                }
+                // has else and main_cond is false
+                if (stmt.ElseBody != null)
+                {
+                    Run(stmt.ElseBody);
+                    return null;
+                }
+            }
+            return null;
         }
 
         public object? VisitBranch(Branch stmt)
@@ -433,6 +470,19 @@
             // this piece of code needs to be refactored smh
             switch (symbol.Type)
             {
+                case TokenType.MOD:
+                    if (BothSidesAre(ResultType.NUMBER))
+                    {
+                        Double tmp = ((Double)eval_left.Value) % ((Double)eval_right.Value);
+                        return new(tmp, ResultType.NUMBER);
+                    }
+                    else if (BothSidesAre(ResultType.TUPLE))
+                    {
+                        // todo
+                        throw new NotImplementedException();
+                    }
+                    else
+                        throw new FGRuntimeException(incomp_message);
                 case TokenType.PLUS:
                     if (eval_left.Type == ResultType.STRING || eval_right.Type == ResultType.STRING)
                     {
