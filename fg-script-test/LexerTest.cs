@@ -99,7 +99,7 @@ namespace fg_script_test
                 TokenType.TYPE, TokenType.TYPE, TokenType.TYPE,
                 TokenType.IF, TokenType.ELSE, TokenType.ELSE_IF, TokenType.FOR, 
                 TokenType.BOOL, TokenType.BOOL, 
-                TokenType.AND, TokenType.OR, TokenType.IS, TokenType.FUN_DECL,
+                TokenType.AND, TokenType.OR, TokenType.EQ, TokenType.FUN_DECL,
                 TokenType.EXTERN, TokenType.EXPOSE, TokenType.RETURN, TokenType.KEYWORD_OR_NAME,
                 TokenType.ERROR, TokenType.IN, TokenType.BREAK, TokenType.CONTINUE,
                 TokenType.EOF
