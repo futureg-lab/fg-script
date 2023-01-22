@@ -21,3 +21,7 @@ for (k, v) in example_dic {
 	}*/
 	println("key {0}, value {1}", k, v);
 }
+
+for i in 1 .. 10 {
+	println("count {0}", i);
+}

@@ -42,14 +42,10 @@ sin, cos, abs, tan, tanh
 
 split("::ds", "some.input")
 join(",", tup)
-
+add operate between tups +, -, *, / (generalize)
+ bin(a, b, lambda(i <- a, j <- b))
 
 num x = input();
-
-to_num("5") => 5
-to_str(5) => "5"
-to_str([5]) => "[0:5]"
-to_tup(5), to_tup("5") => [5], ["5"]
 
 fmt
 push

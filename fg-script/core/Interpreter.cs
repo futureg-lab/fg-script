@@ -1,4 +1,6 @@
-﻿namespace fg_script.core
+﻿using System.Text.RegularExpressions;
+
+namespace fg_script.core
 {
     // C# to fg-script api
     public class FGScriptFunction
@@ -252,6 +254,9 @@
                     case ResultType.TUPLE:
                         got = "tup";
                         break;
+                    case ResultType.NULL:
+                        got = "null";
+                        break;
                     default:
                         throw new FGRuntimeException(reduced + " is not a valid type");
                 }
@@ -265,6 +270,7 @@
             Memory.Result value = Eval(stmt.Variable.Value);
 
             // if flagged as auto => we can infer the type from the value
+            // any type can hold a null literal
             if (!__TypeIsAutoInfered(stmt.Variable.DataType))
                 TypeMismatchCheck(stmt.Variable.DataType.Lexeme, value.Type);
 
@@ -282,11 +288,59 @@
                 throw new FGRuntimeException("re-assign", "\"" + var_name + "\" has not been defined yet");
 
             Memory.Result new_value = Eval(stmt.NewValue);
-            if (current.Type != new_value.Type)
-                throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", new_value.Type, stmt.NewValue));
+            // only a null can be re-assigned and promoted to a new type
+            if (current.Type != new_value.Type && current.Type != ResultType.NULL)
+                throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", current.Type, new_value.Type));
 
             Machine.Replace(var_name, new_value);
             
+            return null;
+        }
+
+        public object? VisitReAssignTupleIndex(ReAssignTuple stmt)
+        {
+            // should exists first
+            string var_name = stmt.Callee.Lexeme;
+            Memory.Result? current = Machine.GetValue(var_name);
+            if (current == null)
+                throw new FGRuntimeException("re-assign", "\"" + var_name + "\" has not been defined yet");
+
+            if (current.Type != ResultType.TUPLE)
+                throw new FGRuntimeException("array access", "\"" + var_name + "\" is not a tuple");
+
+            Memory.Result new_value = Eval(stmt.NewValue);
+
+            // mutate the stored value
+            Dictionary<string, Memory.Result> to_mutate = (Dictionary<string, Memory.Result>) current.Value;
+
+            List<string> done = new();
+            foreach (Expr expr_index in stmt.Indexes)
+            {
+                Memory.Result index = Eval(expr_index);
+                if (index.Type != ResultType.NUMBER && index.Type != ResultType.STRING)
+                    throw new FGRuntimeException(Fmt("index type num or str was expected, got \"{0}\" instead", new_value.Type));
+
+                string sanitized_idx = __StringifyResult(index);
+                if (!to_mutate.ContainsKey(sanitized_idx))
+                    throw new FGRuntimeException("array access", Fmt("{0}[{1}] does not contain key {2}", var_name, string.Join(", ", done), sanitized_idx));
+                done.Add(sanitized_idx);
+
+                Memory.Result node = to_mutate[sanitized_idx];
+                if (node.Value is Dictionary<string, Memory.Result>)
+                {
+                    to_mutate = (Dictionary<string, Memory.Result>)node.Value;
+                    continue;
+                }
+                // re assign
+                if (node.Type != new_value.Type && node.Type != ResultType.NULL)
+                    throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", node.Type, new_value.Type));
+                if (done.Count < stmt.Indexes.Count)
+                    throw new FGRuntimeException("array access", Fmt("{0}[{1}] is not a tuple", var_name, string.Join(", ", done)));
+                else
+                    to_mutate[sanitized_idx] = new_value;
+                break;
+            }
+
             return null;
         }
 
@@ -465,17 +519,17 @@
 
         public object? VisitError(Error stmt)
         {
-            throw new NotImplementedException();
+            return stmt;
         }
 
         public object? VisitBreak(Break stmt)
         {
-            throw new NotImplementedException();
+            return stmt;
         }
 
         public object? VisitContinue(Continue stmt)
         {
-            throw new NotImplementedException();
+            return stmt;
         }
 
         public object? VisitExpose(Expose stmt)
@@ -498,7 +552,7 @@
 
         public Memory.Result VisitExpr(Expr expr)
         {
-            throw new NotImplementedException();
+            return Eval(expr);
         }
 
         public Memory.Result VisitVarExpr(VarExpr expr)
@@ -514,7 +568,7 @@
         // numbers, booleans, strings
         public Memory.Result VisitLiteralExpr(LiteralExpr expr)
         {
-            object value;
+            object? value;
             ResultType type;
             switch (expr.Value.Type)
             {
@@ -529,6 +583,10 @@
                 case TokenType.BOOL:
                     value = EvalBoolean(expr.Value.Lexeme);
                     type = ResultType.BOOLEAN;
+                    break;
+                case TokenType.NULL:
+                    value = null;
+                    type = ResultType.NULL;
                     break;
                 default:
                     throw new FGRuntimeException("invalid literal value");
@@ -846,12 +904,48 @@
                     total += all_values.Count == 0 ? "" : all_values.First();
 
                 string endline = callee.EndsWith("ln") ? "\n" : "";
+
+                string all_text = Regex.Unescape(total + endline);
+
                 if (callee.StartsWith("err"))
-                    Console.Error.Write(total + endline);
+                    Console.Error.Write(all_text);
                 else
-                    Console.Out.Write(total + endline);
+                    Console.Out.Write(all_text);
 
                 return Memory.Result.Void();
+            }
+
+            // scan (stdin)
+            if (callee.Equals("scanln"))
+            {
+                if (expr.Args.Count != 1)
+                    throw new FGRuntimeException("scanln failed", "1 arg expected");
+                object __arg = expr.Args.First();
+                // scanln(var_name => a VarCall) 
+                if (__arg is VarCall)
+                {
+                    string? input = Console.ReadLine();
+                    VarCall arg = (VarCall)__arg;
+
+                    Memory.Result? current = Machine.GetValue(arg.Callee.Lexeme);
+                    if (current == null)
+                        throw new FGRuntimeException("scanln failed", Fmt("{0} has not been initialized yet", arg.Callee.Lexeme));
+                    if (current.Type == ResultType.TUPLE)
+                        throw new FGRuntimeException("scanln failed", Fmt("{0} is a tuple", arg.Callee.Lexeme));
+                    if (input == null)
+                        return Memory.Result.Void();
+
+                    if (current.Type == ResultType.NUMBER)
+                        current = new(EvalNumber(input), ResultType.NUMBER);
+
+                    if (current.Type == ResultType.NULL)
+                        current = new(input, ResultType.STRING);
+
+                    Machine.Replace(arg.Callee.Lexeme, current);
+                    return Memory.Result.Void();
+                }
+                else
+                    throw new FGRuntimeException("scanln failed", "variable expected, got an expression instead");
             }
 
             var fid = Tuple.Create(callee, expr.Args.Count);
@@ -874,7 +968,7 @@
                     .ToArray();
                 Func func = UserDefFunc[fid];
 
-                // check if args matches
+                // check if the args match
                 // at this point we can assume that the sizes are the same
                 Memory.Result output_value = Memory.Result.Void();
                 Machine.MemPush();
@@ -924,9 +1018,48 @@
             return result;
         }
 
-        public Memory.Result VisitArrayAccessCall(ArrayAccessCall expr)
+        public Memory.Result VisitTupleIndexAccessCall(TupleIndexAccessCall expr)
         {
-            throw new NotImplementedException();
+            // should exists first
+            string var_name = expr.Callee.Lexeme;
+            Memory.Result? current = Machine.GetValue(var_name);
+            if (current == null)
+                throw new FGRuntimeException("re-assign", "\"" + var_name + "\" has not been defined yet");
+
+            if (current.Type != ResultType.TUPLE)
+                throw new FGRuntimeException("index access", "\"" + var_name + "\" is not a tuple");
+
+            // mutate the stored value
+            Dictionary<string, Memory.Result> to_mutate = (Dictionary<string, Memory.Result>)current.Value;
+            Memory.Result? indexed_value = null;
+            List<string> done = new();
+            foreach (Expr expr_index in expr.Indexes)
+            {
+                Memory.Result index = Eval(expr_index);
+
+                string sanitized_idx = __StringifyResult(index);
+                if (!to_mutate.ContainsKey(sanitized_idx))
+                    throw new FGRuntimeException("index access", Fmt("{0}[{1}] does not contain key {2}", var_name, string.Join(", ", done), sanitized_idx));
+                done.Add(sanitized_idx);
+
+                Memory.Result node = to_mutate[sanitized_idx];
+                indexed_value = node;
+                if (node.Value is Dictionary<string, Memory.Result>)
+                {
+                    to_mutate = (Dictionary<string, Memory.Result>)node.Value;
+                }
+                else
+                {
+                    if (done.Count < expr.Indexes.Count)
+                        throw new FGRuntimeException("array access", Fmt("{0}[{1}] is not a tuple", var_name, string.Join(", ", done)));
+                    break;
+                }
+            }
+
+            if (indexed_value == null) // should never happen
+                throw new FGRuntimeException("internal error", "memory access violation");
+
+            return indexed_value;
         }
 
         private bool __TypeIsAutoInfered(Token token)
@@ -966,9 +1099,10 @@
             }
 
             if (eval.Type == ResultType.NUMBER)
-                return value
-                    .ToString()
-                    .Replace(",", ".");
+                return value.ToString().Replace(",", ".");
+
+            if (eval.Type == ResultType.NULL)
+                return "null";
 
             // str, num
             return value.ToString();

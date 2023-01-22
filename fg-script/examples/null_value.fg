@@ -1,0 +1,29 @@
+﻿// only auto can hold a null value
+// null is merely a flag
+// i.e. in fg-script all types 
+
+// num x = null; // error
+// str y = null; // error
+// tup z = null; // error
+// tup a = [null]; // ok
+// auto b = null; // ok, only a auto value can be promoted to any value if null
+
+
+fn show_content(auto v, str name) -> void {
+	println("rerpr_of {0} :: {1} => {2}", name, repr_of v, v);
+}
+
+
+// promoting
+auto val = null;
+show_content(val, "val");
+// repr_of val = null, value = null
+val = 3; // promote null to value
+// val = "3"; // error, val is now a num and can't be reassigned to a str
+show_content(val, "val");
+
+// naturally, a tup can hold a null value
+// null is merely a literal expression
+// that can be promoted to another type at runtime in fg-script
+tup x = [null, [a : null]];
+show_content(x, "x");

@@ -242,4 +242,22 @@ namespace fg_script.core
             return visitor.VisitReAssign(this);
         }
     }
+
+    public class ReAssignTuple : Stmt
+    {
+        public Token Callee { get; }
+        public List<Expr> Indexes { get; }
+        public Expr NewValue { get; }
+
+        public ReAssignTuple(Token callee, List<Expr> indexes, Expr value)
+        {
+            Callee = callee;
+            Indexes = indexes;
+            NewValue = value;
+        }
+        override public T Accept<T>(IVisitorSTmt<T> visitor)
+        {
+            return visitor.VisitReAssignTupleIndex(this);
+        }
+    }
 }

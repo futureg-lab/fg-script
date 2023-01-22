@@ -26,6 +26,7 @@ namespace fg_script.core
         public T VisitExtern(Extern stmt);
         public T VisitRootExpression(RootExpression stmt);
         public T VisitReAssign(ReAssign stmt);
+        public T VisitReAssignTupleIndex(ReAssignTuple stmt);
     }
 
     public interface IVisitorExpr<T>
@@ -41,7 +42,7 @@ namespace fg_script.core
         public T VisitBinaryExpr(BinaryExpr expr);
         public T VisitFuncCall(FuncCall expr);
         public T VisitVarCall(VarCall expr);
-        public T VisitArrayAccessCall(ArrayAccessCall expr);
+        public T VisitTupleIndexAccessCall(TupleIndexAccessCall expr);
     }
 
     public interface INodeStmt

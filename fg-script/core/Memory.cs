@@ -80,9 +80,9 @@
 
         public class Result
         {
-            public object Value { get; }
+            public object? Value { get; }
             public ResultType Type { get; }
-            public Result(object value, ResultType type)
+            public Result(object? value, ResultType type)
             {
                 Value = value;
                 Type = type;
@@ -91,7 +91,7 @@
             public Result(ResultType type) 
             {
                 Type = type;
-                Value = "none";
+                Value = null;
             }
 
             public static Result Void()
