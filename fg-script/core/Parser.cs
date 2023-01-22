@@ -437,7 +437,7 @@
                 else if (Match(TokenType.NOT)) op = Consume(TokenType.NOT);
                 else op = Consume(TokenType.REPR_OF);
 
-                Expr expr = ConsumeUnary();
+                Expr expr = ConsumeGenExpr();
                 return new UnaryExpr(op, expr);
             }
 
