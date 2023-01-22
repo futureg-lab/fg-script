@@ -297,7 +297,7 @@ namespace fg_script.core
             return null;
         }
 
-        public object? VisitReAssignArray(ReAssignArray stmt)
+        public object? VisitReAssignTupleIndex(ReAssignTuple stmt)
         {
             // should exists first
             string var_name = stmt.Callee.Lexeme;
@@ -985,7 +985,7 @@ namespace fg_script.core
             return result;
         }
 
-        public Memory.Result VisitArrayAccessCall(ArrayAccessCall expr)
+        public Memory.Result VisitTupleIndexAccessCall(TupleIndexAccessCall expr)
         {
             // should exists first
             string var_name = expr.Callee.Lexeme;
@@ -994,7 +994,7 @@ namespace fg_script.core
                 throw new FGRuntimeException("re-assign", "\"" + var_name + "\" has not been defined yet");
 
             if (current.Type != ResultType.TUPLE)
-                throw new FGRuntimeException("array access", "\"" + var_name + "\" is not a tuple");
+                throw new FGRuntimeException("index access", "\"" + var_name + "\" is not a tuple");
 
             // mutate the stored value
             Dictionary<string, Memory.Result> to_mutate = (Dictionary<string, Memory.Result>)current.Value;
@@ -1006,7 +1006,7 @@ namespace fg_script.core
 
                 string sanitized_idx = __StringifyResult(index);
                 if (!to_mutate.ContainsKey(sanitized_idx))
-                    throw new FGRuntimeException("array access", Fmt("{0}[{1}] does not contain key {2}", var_name, string.Join(", ", done), sanitized_idx));
+                    throw new FGRuntimeException("index access", Fmt("{0}[{1}] does not contain key {2}", var_name, string.Join(", ", done), sanitized_idx));
                 done.Add(sanitized_idx);
 
                 Memory.Result node = to_mutate[sanitized_idx];

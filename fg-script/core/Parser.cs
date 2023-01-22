@@ -46,7 +46,7 @@
             if (Match(TokenType.KEYWORD_OR_NAME))
             {
                  if (MatchNext(TokenType.ASSIGN)) return StateReAssign();
-                if (MatchNext(TokenType.LEFT_BRACKET)) return StateReAssignArray();
+                if (MatchNext(TokenType.LEFT_BRACKET)) return StateReAssignTuple();
             }
 
 
@@ -146,7 +146,7 @@
             return new(v_name, expr);
         }
         
-        protected ReAssignArray StateReAssignArray()
+        protected ReAssignTuple StateReAssignTuple()
         {
             Token v_name = Consume(TokenType.KEYWORD_OR_NAME, "variable name was expected");
             Consume(TokenType.LEFT_BRACKET, @"""["" was expected");
@@ -575,7 +575,7 @@
             return res;
         }
 
-        protected ArrayAccessCall ConsumeArrayAccessCall()
+        protected TupleIndexAccessCall ConsumeArrayAccessCall()
         {
             Token callee = Consume(TokenType.KEYWORD_OR_NAME, "tuple name expected");
             Consume(TokenType.LEFT_BRACKET, @"""["" was expected");

@@ -93,7 +93,7 @@ namespace fg_script.core
             return String.Format("[{0}]", list_str);
         }
 
-        public string VisitArrayAccessCall(ArrayAccessCall expr)
+        public string VisitTupleIndexAccessCall(TupleIndexAccessCall expr)
         {
             List<string> all = expr.Indexes.ConvertAll(x => Print(x));
             return string.Format("{0}[{1}]", expr.Callee.Lexeme, string.Join(", ", all));
@@ -217,7 +217,7 @@ namespace fg_script.core
             return String.Format("(#reassign {0} => {1})", stmt.Callee.Lexeme, Print(stmt.NewValue));
         }
 
-        public string VisitReAssignArray(ReAssignArray stmt)
+        public string VisitReAssignTupleIndex(ReAssignTuple stmt)
         {
             List<string> all = stmt.Indexes.ConvertAll(x => Print(x));
             return String.Format("(#reassign_arr {0}[{1}] => {2})", stmt.Callee.Lexeme, string.Join(", ", all), Print(stmt.NewValue));

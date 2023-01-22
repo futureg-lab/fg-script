@@ -243,13 +243,13 @@ namespace fg_script.core
         }
     }
 
-    public class ReAssignArray : Stmt
+    public class ReAssignTuple : Stmt
     {
         public Token Callee { get; }
         public List<Expr> Indexes { get; }
         public Expr NewValue { get; }
 
-        public ReAssignArray(Token callee, List<Expr> indexes, Expr value)
+        public ReAssignTuple(Token callee, List<Expr> indexes, Expr value)
         {
             Callee = callee;
             Indexes = indexes;
@@ -257,7 +257,7 @@ namespace fg_script.core
         }
         override public T Accept<T>(IVisitorSTmt<T> visitor)
         {
-            return visitor.VisitReAssignArray(this);
+            return visitor.VisitReAssignTupleIndex(this);
         }
     }
 }

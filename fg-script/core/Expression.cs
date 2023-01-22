@@ -161,18 +161,18 @@
         }
     }
 
-    public class ArrayAccessCall : Expr
+    public class TupleIndexAccessCall : Expr
     {
         public Token Callee { get; }
         public List<Expr> Indexes { get; }
-        public ArrayAccessCall(Token callee, List<Expr> indexes)
+        public TupleIndexAccessCall(Token callee, List<Expr> indexes)
         {
             Callee = callee;
             Indexes = indexes;
         }
         override public T Accept<T>(IVisitorExpr<T> visitor)
         {
-            return visitor.VisitArrayAccessCall(this);
+            return visitor.VisitTupleIndexAccessCall(this);
         }
     }
 }
