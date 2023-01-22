@@ -915,6 +915,39 @@ namespace fg_script.core
                 return Memory.Result.Void();
             }
 
+            // scan (stdin)
+            if (callee.Equals("scanln"))
+            {
+                if (expr.Args.Count != 1)
+                    throw new FGRuntimeException("scanln failed", "1 arg expected");
+                object __arg = expr.Args.First();
+                // scanln(var_name => a VarCall) 
+                if (__arg is VarCall)
+                {
+                    string? input = Console.ReadLine();
+                    VarCall arg = (VarCall)__arg;
+
+                    Memory.Result? current = Machine.GetValue(arg.Callee.Lexeme);
+                    if (current == null)
+                        throw new FGRuntimeException("scanln failed", Fmt("{0} has not been initialized yet", arg.Callee.Lexeme));
+                    if (current.Type == ResultType.TUPLE)
+                        throw new FGRuntimeException("scanln failed", Fmt("{0} is a tuple", arg.Callee.Lexeme));
+                    if (input == null)
+                        return Memory.Result.Void();
+
+                    if (current.Type == ResultType.NUMBER)
+                        current = new(EvalNumber(input), ResultType.NUMBER);
+
+                    if (current.Type == ResultType.NULL)
+                        current = new(input, ResultType.STRING);
+
+                    Machine.Replace(arg.Callee.Lexeme, current);
+                    return Memory.Result.Void();
+                }
+                else
+                    throw new FGRuntimeException("scanln failed", "variable expected, got an expression instead");
+            }
+
             var fid = Tuple.Create(callee, expr.Args.Count);
             // imported
             if (ImportedFunc.ContainsKey(fid))

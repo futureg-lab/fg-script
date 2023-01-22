@@ -31,7 +31,7 @@ try
         }
         Console.WriteLine(stmt);
     }*/
-    string filePath = "../../../examples/tuple.fg";
+    string filePath = "../../../examples/fibo_func.fg";
     source = Utils.ReadTextFile(filePath);
 
     Lexer lexer = new(source, "");
