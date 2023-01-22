@@ -1,0 +1,45 @@
+﻿fn mut_pow_2(tup arr) -> tup {
+	for row in arr {
+		for j in 0 .. 1 {
+			row[j] = pow(2, row[j]);
+		}
+	}
+}
+
+fn mut_pow_2_v2(tup arr) -> tup {
+	for i in 0 .. len(arr) - 1 {
+		for j in 0 .. len(arr[i]) - 1 {
+			arr[i, j] = pow(2, arr[i, j]);
+		}
+	}
+}
+
+
+fn pretty_matrix(tup arr) -> str {
+	str res = "[";
+	for i in 0 .. len(arr) - 1 {
+		str row = "\n  [ ";
+		for j in 0 .. len(arr[i]) - 1 {
+			row = row + to_str(arr[i, j]) + " ";
+		}
+		row = row + "]";
+		res = res + row;
+	}
+	res = res + "\n]";
+	ret res;
+}
+
+tup x = [[1, 2], [3, 4]];
+println(pretty_matrix(x));
+
+mut_pow_2(x);
+println(pretty_matrix(x));
+
+mut_pow_2_v2(x);
+println(pretty_matrix(x));
+
+/*
+x[0, 0] = 5;
+x[1, 1] = 87;
+println(x);
+*/

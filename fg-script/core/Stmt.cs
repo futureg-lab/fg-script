@@ -242,4 +242,22 @@ namespace fg_script.core
             return visitor.VisitReAssign(this);
         }
     }
+
+    public class ReAssignArray : Stmt
+    {
+        public Token Callee { get; }
+        public List<Expr> Indexes { get; }
+        public Expr NewValue { get; }
+
+        public ReAssignArray(Token callee, List<Expr> indexes, Expr value)
+        {
+            Callee = callee;
+            Indexes = indexes;
+            NewValue = value;
+        }
+        override public T Accept<T>(IVisitorSTmt<T> visitor)
+        {
+            return visitor.VisitReAssignArray(this);
+        }
+    }
 }

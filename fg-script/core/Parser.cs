@@ -42,8 +42,13 @@
             if (Match(TokenType.ERROR)) return StateError();
             if (Match(TokenType.BREAK) || Match(TokenType.CONTINUE))
                 return StateBreakOrContinue();
-            if (Match(TokenType.KEYWORD_OR_NAME) && MatchNext(TokenType.ASSIGN))
-                return StateReAssign();
+
+            if (Match(TokenType.KEYWORD_OR_NAME))
+            {
+                 if (MatchNext(TokenType.ASSIGN)) return StateReAssign();
+                if (MatchNext(TokenType.LEFT_BRACKET)) return StateReAssignArray();
+            }
+
 
             if (HasEnded())
                 return null;
@@ -139,6 +144,28 @@
             Expr expr = ConsumeGenExpr();
             Consume(TokenType.SEMICOLON, "\";\" was expected");
             return new(v_name, expr);
+        }
+        
+        protected ReAssignArray StateReAssignArray()
+        {
+            Token v_name = Consume(TokenType.KEYWORD_OR_NAME, "variable name was expected");
+            Consume(TokenType.LEFT_BRACKET, @"""["" was expected");
+
+            List<Expr> indexes = new();
+
+            while (!Match(TokenType.RIGHT_BRACKET))
+            {
+                indexes.Add(ConsumeGenExpr());
+                if (!Match(TokenType.RIGHT_BRACKET))
+                    Consume(TokenType.COMMA);
+            }
+            Consume(TokenType.RIGHT_BRACKET, @"""]"" was expected");
+
+            Consume(TokenType.ASSIGN, "\"=\" was expected");
+            Expr expr = ConsumeGenExpr();
+            Consume(TokenType.SEMICOLON, "\";\" was expected");
+
+            return new(v_name, indexes, expr);
         }
 
         protected Expose StateExposeDeclaration()
@@ -552,11 +579,17 @@
         {
             Token callee = Consume(TokenType.KEYWORD_OR_NAME, "tuple name expected");
             Consume(TokenType.LEFT_BRACKET, @"""["" was expected");
-
-            Expr index = ConsumeGenExpr();
             
+            List<Expr> indexes = new();
+            
+            while (!Match(TokenType.RIGHT_BRACKET))
+            {
+                indexes.Add(ConsumeGenExpr());
+                if (!Match(TokenType.RIGHT_BRACKET))
+                    Consume(TokenType.COMMA);
+            }
             Consume(TokenType.RIGHT_BRACKET, @"""]"" was expected");
-            return new(callee, index);
+            return new(callee, indexes);
         }
 
         protected Token Consume(TokenType type, string err_message = "")

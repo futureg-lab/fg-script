@@ -164,11 +164,11 @@
     public class ArrayAccessCall : Expr
     {
         public Token Callee { get; }
-        public Expr Index { get; }
-        public ArrayAccessCall(Token callee, Expr index)
+        public List<Expr> Indexes { get; }
+        public ArrayAccessCall(Token callee, List<Expr> indexes)
         {
             Callee = callee;
-            Index = index;
+            Indexes = indexes;
         }
         override public T Accept<T>(IVisitorExpr<T> visitor)
         {

@@ -95,7 +95,8 @@ namespace fg_script.core
 
         public string VisitArrayAccessCall(ArrayAccessCall expr)
         {
-            return string.Format("{0}[{1}]", expr.Callee.Lexeme, Print(expr.Index));
+            List<string> all = expr.Indexes.ConvertAll(x => Print(x));
+            return string.Format("{0}[{1}]", expr.Callee.Lexeme, string.Join(", ", all));
         }
 
         public string VisitBlock(Block stmt)
@@ -214,6 +215,12 @@ namespace fg_script.core
         public string VisitReAssign(ReAssign stmt)
         {
             return String.Format("(#reassign {0} => {1})", stmt.Callee.Lexeme, Print(stmt.NewValue));
+        }
+
+        public string VisitReAssignArray(ReAssignArray stmt)
+        {
+            List<string> all = stmt.Indexes.ConvertAll(x => Print(x));
+            return String.Format("(#reassign_arr {0}[{1}] => {2})", stmt.Callee.Lexeme, string.Join(", ", all), Print(stmt.NewValue));
         }
     }
 }

@@ -1,4 +1,0 @@
-﻿fn someFunc(num one, str two, tup four) -> str
-{
-	// some body
-}

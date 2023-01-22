@@ -31,7 +31,7 @@ try
         }
         Console.WriteLine(stmt);
     }*/
-    string filePath = "../../../examples/native_func.fg";
+    string filePath = "../../../examples/tuple.fg";
     source = Utils.ReadTextFile(filePath);
 
     Lexer lexer = new(source, "");
@@ -57,4 +57,8 @@ catch (SyntaxErrorException syntax_excp)
 catch (FGScriptException fgexception)
 {
     Console.Error.WriteLine(fgexception.Message);
+}
+catch (Exception e)
+{
+    Console.Error.WriteLine(e);
 }

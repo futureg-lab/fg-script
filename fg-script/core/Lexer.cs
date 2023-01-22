@@ -251,8 +251,8 @@
             NextChar(); // ignore first '"'
             while (CurrentChar != '"')
             {
-                if (CurrentChar == '\\') 
-                    NextChar();
+                // if (CurrentChar == '\\') 
+                //    NextChar();
                 str += CurrentChar;
                 NextChar();
                 if (HasEnded())
