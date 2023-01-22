@@ -1,64 +1,90 @@
 ﻿using fg_script.core;
 using fg_script.utils;
 
-
-string source = "";
-
-try
+void loadfile()
 {
-    /*
-    string filePath = "../../../examples/fn_decl.fg";
-    string source = Utils.ReadTextFile(filePath);
-    Console.WriteLine(source);
-    Lexer lexer = new(source, "");
-    List<Token> list = lexer.Tokenize();
-
-    foreach (Token token in list)
+    string source = "";
+    try
     {
-        Console.WriteLine(token);
-    }
+        string filePath = "../../../examples/scanln.fg";
+        source = Utils.ReadTextFile(filePath);
 
-    Parser parser = new(filePath, ref list);
-    List<Stmt> stmts = parser.Run();
-    foreach (Stmt stmt in stmts)
-    {
-        if (stmt is Func)
+        Lexer lexer = new(source, "");
+        List<Token> list = lexer.Tokenize();
+
+        Parser parser = new(filePath, ref list);
+        List<Stmt> stmts = parser.Run();
+
+        PrintVisitor printer = new PrintVisitor();
+        Interpreter engine = new Interpreter();
+        foreach (Stmt stmt in stmts)
         {
-            foreach (var arg in ((Func)stmt).Args)
+            // Console.WriteLine(printer.Print(stmt));
+            engine.Run(stmt);
+        }
+        // engine.Machine.DebugStackMemory();
+    }
+    catch (SyntaxErrorException syntax_excp)
+    {
+        Console.Error.WriteLine(Utils.UnderlineTextLine(source, syntax_excp.Cursor, 1));
+        Console.Error.Write(syntax_excp.Message);
+    }
+    catch (FGScriptException fgexception)
+    {
+        Console.Error.WriteLine(fgexception.Message);
+    }
+    catch (Exception e)
+    {
+        Console.Error.WriteLine(e);
+    }
+}
+
+
+void interactive()
+{
+    Console.WriteLine(" Welcome to fg-script interactive v0.0.1 :: FutureG-lab");
+    Interpreter engine = new();
+    while (true)
+    {
+        string source = "";
+        try
+        {
+            Console.Write("\n>>> ");
+            string? current = Console.ReadLine();
+            if (current == null || "".Equals(current))
+                continue;
+
+            source = current.Trim();
+
+            if (!source.EndsWith("}") && !source.EndsWith(";"))
+                source += ";";
+
+            Lexer lexer = new(source, "");
+            List<Token> list = lexer.Tokenize();
+
+            Parser parser = new("<interactive>", ref list);
+            List<Stmt> stmts = parser.Run();
+            foreach (Stmt stmt in stmts)
             {
-                Console.WriteLine(String.Format("** {0} => {1}", arg.Name, arg.DataType));
+                object? eval_if_any = engine.Run(stmt);
+                if (stmt is RootExpression && eval_if_any != null)
+                    Console.Write(Interpreter.__StringifyResult((Memory.Result) eval_if_any));
             }
         }
-        Console.WriteLine(stmt);
-    }*/
-    string filePath = "../../../examples/fibo_func.fg";
-    source = Utils.ReadTextFile(filePath);
-
-    Lexer lexer = new(source, "");
-    List<Token> list = lexer.Tokenize();
-
-    Parser parser = new(filePath, ref list);
-    List<Stmt> stmts = parser.Run();
-
-    PrintVisitor printer = new PrintVisitor();
-    Interpreter engine = new Interpreter();
-    foreach (Stmt stmt in stmts)
-    {
-        // Console.WriteLine(printer.Print(stmt));
-        engine.Run(stmt);
+        catch (SyntaxErrorException syntax_excp)
+        {
+            Console.Error.Write(Utils.UnderlineTextLine(source, syntax_excp.Cursor, 1));
+            Console.Error.Write(syntax_excp.Message);
+        }
+        catch (FGScriptException fgexception)
+        {
+            Console.Error.Write(fgexception.Message);
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine(e);
+        }
     }
-    // engine.Machine.DebugStackMemory();
 }
-catch (SyntaxErrorException syntax_excp)
-{
-    Console.Error.WriteLine(Utils.UnderlineTextLine(source, syntax_excp.Cursor, 1));
-    Console.Error.Write(syntax_excp.Message);
-}
-catch (FGScriptException fgexception)
-{
-    Console.Error.WriteLine(fgexception.Message);
-}
-catch (Exception e)
-{
-    Console.Error.WriteLine(e);
-}
+
+interactive();

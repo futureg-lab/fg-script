@@ -203,7 +203,7 @@ namespace fg_script.core
         {
             try
             {
-                return Double.Parse(repr);
+                return Double.Parse(repr.Replace(".", ","));
             }
             catch (Exception)
             {
@@ -544,8 +544,7 @@ namespace fg_script.core
 
         public object? VisitRootExpression(RootExpression stmt)
         {
-            Eval(stmt.Expr);
-            return null;
+            return Eval(stmt.Expr);
         }
 
         // expressions
@@ -1062,12 +1061,12 @@ namespace fg_script.core
             return indexed_value;
         }
 
-        private bool __TypeIsAutoInfered(Token token)
+        private static bool __TypeIsAutoInfered(Token token)
         {
             return token.Type == TokenType.TYPE && token.Lexeme.Equals("auto");
         }
 
-        private string __StringifyResult(Memory.Result eval)
+        public static string __StringifyResult(Memory.Result eval)
         {
             object value = eval.Value;
 
