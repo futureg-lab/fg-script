@@ -16,23 +16,25 @@ The project solution is located at the root directory
 ## Example 1 : fg-script tuple to json
 ```rust
 fn to_json(auto value) -> str {
-	// println("repr is " + repr_of value);
 	if repr_of value is "tup" {
-		str json = "{";
+		str tmp = "{";
 		num size = len(value);
 		num i = 0;
 		for (k, v) in value {
-			str row = "\"" + k + "\"" + " : " + to_json(v);
-			json = json + row;
+			str row = "\"" + k + "\""+ " : " + to_json(v);
+			tmp = tmp + row;
 			if i + 1 < size {
-				json = json + ",";
+				tmp = tmp + ",";
 			}
 			i = i + 1;
 		}
-		json = json + "}";
-		ret json;
+		tmp = tmp + "}";
+		ret tmp;
 	}
-	ret "" + value;
+	if repr_of value is "str" {
+		ret "\"" + value + "\"";
+	}
+	ret to_str(value);
 }
 ```
 
@@ -84,11 +86,11 @@ println(repr_of arr == "tup"); // true
 str some_str = "Hello World";
 
 num some_num = 5;
-tup as_tup = some_num; // (5) no need to cast since it's already a tuple
-str as_str = str(some_num); // stringify
-str as_num = num(as_str); // numberify
-tup as_tup_again = tup(as_tup); // still (5)
-tup as_tup_again = tup(as_str); // ("5")
+tup as_tup = some_num; // [5] no need to cast since it's already a tuple
+str as_str = to_str(some_num); // stringify
+str as_num = to_num(as_str); // numberify
+tup as_tup_again = to_tup(as_tup); // [[5]]
+tup as_tup_again = to_tup(as_str); // ["5"]
 
 // operation with tuples with the same dimension*
 tup vec1 = [1, 2, 3];

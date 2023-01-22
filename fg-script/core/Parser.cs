@@ -424,6 +424,8 @@
                 return new LiteralExpr(Consume(TokenType.NUMBER));
             if (Match(TokenType.BOOL))
                 return new LiteralExpr(Consume(TokenType.BOOL));
+            if (Match(TokenType.NULL))
+                return new LiteralExpr(Consume(TokenType.NULL));
 
             // var call
             if (Match(TokenType.KEYWORD_OR_NAME)) 

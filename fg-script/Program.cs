@@ -31,7 +31,7 @@ try
         }
         Console.WriteLine(stmt);
     }*/
-    string filePath = "../../../examples/tuple_to_json.fg";
+    string filePath = "../../../examples/native_func.fg";
     source = Utils.ReadTextFile(filePath);
 
     Lexer lexer = new(source, "");

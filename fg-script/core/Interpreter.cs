@@ -39,6 +39,41 @@
 
         private void LoadNativeFunctions()
         {
+            // cast
+            ImportFunction(new("to_str", 1, (Memory.Result[] args) =>
+            {
+                string a = __StringifyResult(args.First()) ;
+                return new(a, ResultType.STRING);
+            }));
+
+            ImportFunction(new("to_num", 1, (Memory.Result[] args) =>
+            {
+                if (ShareSameType(ResultType.STRING, args))
+                {
+                    string input = (string)args.First().Value;
+                    try
+                    {
+                        Double a = Double.Parse(input.Replace(".", ","));
+                        return new(a, ResultType.NUMBER);
+                    }
+                    catch (Exception)
+                    {
+                        throw new FGRuntimeException(Fmt("cannot convert str {0} to a num", input));
+                    }
+                }
+                List<ResultType> expected = new() { ResultType.STRING };
+                List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
+                throw FuncSignatureError("to_num", expected, cargs);
+            }));
+
+            ImportFunction(new("to_tup", 1, (Memory.Result[] args) =>
+            {
+                Dictionary<string, Memory.Result> tup = new();
+                tup["0"] = args.First();
+                return new(tup, ResultType.TUPLE);
+            }));
+
+            // math
             ImportFunction(new("min", 2, (Memory.Result[] args) =>
             {
                 if (ShareSameType(ResultType.NUMBER, args))
@@ -99,6 +134,7 @@
                 return new(random.NextDouble(), ResultType.NUMBER);
             }));
 
+            // on lists and strings
             ImportFunction(new("len", 1, (Memory.Result[] args) =>
             {
                 Double size = 0;
@@ -876,8 +912,7 @@
                 .ConvertAll(x => Eval(x).Type.ToString());
 
             string temp = string.Join(", ", args);
-
-            throw new FGRuntimeException(Fmt("reference error {0} with args {1} is undefined", callee, temp));
+            throw new FGRuntimeException(Fmt("reference error {0} with args {1} (arg_count {2}) is undefined", callee, temp, args.Count));
         }
 
         public Memory.Result VisitVarCall(VarCall expr)
