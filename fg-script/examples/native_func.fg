@@ -9,17 +9,55 @@ println("rand {0}", rand());
 println("len str {0}", len("hello world"));
 println("len tup {0}", len([ 1, 2, 3, [4] ]));
 
+println("==== Conversion ====");
+
+fn to_str_test(auto v) -> void {
+	str res = to_str(v);
+	println("to_str :: {0} ({1}) => {2} ({3})", v, repr_of v, res, repr_of res);
+}
+fn to_tup_test(auto v) -> void {
+	tup res = to_tup(v);
+	println("to_tup :: {0} ({1}) => {2} ({3})", v, repr_of v, res, repr_of res);
+}
+tup test_items = [
+	5,
+	"5",
+	["x" : pow(2, 3), y : "9"]
+];
+for item in test_items {
+	to_str_test(item);
+	to_tup_test(item);
+}
+
+tup test_str = ["12.65", ".687", "1234.68"];
+for test in test_str {
+	println("to_num :: {0} (str) => {1}", test, to_num(test));
+}
+
+// println(null);
 
 // todo
 /*
-sin, cos, abs, 
+sin, cos, abs, tan, tanh
 
-
+split("::ds", "some.input")
 join(",", tup)
+
+
+num x = input();
+
+to_num("5") => 5
+to_str(5) => "5"
+to_str([5]) => "[0:5]"
+to_tup(5), to_tup("5") => [5], ["5"]
 
 fmt
 push
 pop
+first
+last
+slice_of(str or tup) :: substr logic
+map(tup, any)
 assign
 array assign
 delete
