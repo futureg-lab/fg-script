@@ -13,13 +13,10 @@
     public class Memory
     {
         public List<Dictionary<string, Result>> MemStack { get; }
-        public List<FuncCall> CallStack { get; }
 
         public Memory()
         {
             MemStack = new List<Dictionary<string, Result>>();
-            CallStack = new List<FuncCall>();
-
             // init first mem
             MemStack.Add(new Dictionary<string, Result>());
         }
