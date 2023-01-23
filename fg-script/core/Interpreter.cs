@@ -766,6 +766,11 @@ namespace fg_script.core
                         Boolean tmp = ((String)eval_left.Value).Equals((String)eval_right.Value);
                         return new(tmp, ResultType.BOOLEAN);
                     }
+                    else if (BothSidesAre(ResultType.BOOLEAN))
+                    {
+                        Boolean tmp = ((Boolean)eval_left.Value) == ((Boolean)eval_right.Value);
+                        return new(tmp, ResultType.BOOLEAN);
+                    }
                     else if (BothSidesAre(ResultType.TUPLE))
                     {
                         // todo
