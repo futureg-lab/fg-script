@@ -45,10 +45,20 @@
 
             if (Match(TokenType.KEYWORD_OR_NAME))
             {
-                 if (MatchNext(TokenType.ASSIGN)) return StateReAssign();
-                if (MatchNext(TokenType.LEFT_BRACKET)) return StateReAssignTuple();
+                if (MatchNext(TokenType.ASSIGN)) return StateReAssign();
+                if (MatchNext(TokenType.LEFT_BRACKET))
+                {
+                    try
+                    {
+                        // is it a root expression ?
+                        return StateRootExpression();
+                    }
+                    catch (Exception)
+                    {
+                        return StateReAssignTuple();
+                    }
+                }
             }
-
 
             if (HasEnded())
                 return null;
