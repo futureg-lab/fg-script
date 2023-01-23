@@ -8,7 +8,7 @@
 
 fn to_json(auto value) -> str {
 	// println("repr is " + repr_of value);
-	if repr_of value is "tup" {
+	if (repr_of value) is "tup" {
 		str tmp = "{";
 
 		num size = len(value);
@@ -26,7 +26,7 @@ fn to_json(auto value) -> str {
 		ret tmp;
 	}
 
-	if repr_of value is "str" {
+	if (repr_of value) is "str" {
 		ret "\"" + value + "\"";
 	}
 
