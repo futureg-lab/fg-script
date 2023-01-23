@@ -26,6 +26,15 @@ namespace fg_script.core
         }
     }
 
+    internal class ReturnHolder
+    {
+        public Memory.Result Evaluation { get; }
+        public ReturnHolder(Memory.Result eval)
+        {
+            Evaluation = eval;
+        }
+    }
+
     public class Interpreter : IVisitorSTmt<object?>, IVisitorExpr<Memory.Result>
     {
         public Memory Machine { get; } = new();
@@ -353,20 +362,13 @@ namespace fg_script.core
             {
                 if (line is Return || line is Break || line is Continue)
                 {
-                    if (line is Return ret )
-                    {
-                        // fetch value (if any) before Poping the current scope
-                        interruption = VisitReturn(ret);
-                    } 
-                    else
-                        interruption = line;
+                    interruption = Run(line);
                     break;
                 }
                 else
                 {
-                    // propagate
                     object? evaluation = Run(line);
-                    if (evaluation != null)
+                    if (evaluation is ReturnHolder || evaluation is Break || evaluation is Continue)
                     {
                         interruption = evaluation;
                         break;
@@ -513,7 +515,7 @@ namespace fg_script.core
         public object? VisitReturn(Return stmt)
         {
             if (stmt.ReturnValue != null)
-                return Eval(stmt.ReturnValue);
+                return new ReturnHolder(Eval(stmt.ReturnValue));
             return null;
         }
 
@@ -992,10 +994,9 @@ namespace fg_script.core
                 if (func.Body != null)
                 {
                     object? block_eval = VisitBlock(func.Body);
-                    if (block_eval != null)
+                    if (block_eval is ReturnHolder content)
                     {
-                        Memory.Result res = (Memory.Result)block_eval;
-                        output_value = res;
+                        output_value = content.Evaluation;
                         if (!__TypeIsAutoInfered(func.ReturnType))
                             TypeMismatchCheck(func.ReturnType.Lexeme, output_value.Type);
                     }

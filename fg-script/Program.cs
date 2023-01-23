@@ -13,7 +13,7 @@ void loadfile()
     string source = "";
     try
     {
-        string filePath = "../../../examples/tuple_to_json.fg";
+        string filePath = "../../../examples/fibo_while.fg";
         source = Utils.ReadTextFile(filePath);
 
         Lexer lexer = new(source, "");
