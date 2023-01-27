@@ -773,6 +773,15 @@ namespace fg_script.core
                         Boolean tmp = ((Boolean)eval_left.Value) == ((Boolean)eval_right.Value);
                         return new(tmp, ResultType.BOOLEAN);
                     }
+                    else if (BothSidesAre(ResultType.NULL))
+                    {
+                        return new(true, ResultType.BOOLEAN);
+                    }
+                    else if (eval_left.Type == ResultType.NULL && eval_right.Type != ResultType.NULL
+                        || eval_left.Type != ResultType.NULL && eval_right.Type == ResultType.NULL )
+                    {
+                        return new(false, ResultType.BOOLEAN);
+                    }
                     else if (BothSidesAre(ResultType.TUPLE))
                     {
                         // todo
