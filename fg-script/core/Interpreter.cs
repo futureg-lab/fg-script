@@ -697,25 +697,39 @@ namespace fg_script.core
             if (symbol.Type == TokenType.REPR_OF)
                 return new(__Describe(eval_operand.Type), ResultType.STRING);
 
-            Memory.Result result;
-            if (eval_operand.Type == ResultType.BOOLEAN)
+            Memory.Result DoMinus(Memory.Result input)
             {
-                if (symbol.Type == TokenType.NOT)
-                    result = new(!((Boolean)eval_operand.Value), eval_operand.Type);
-                else
-                    throw new FGRuntimeException(not_supp_msg);
+                if (input.Type != ResultType.NUMBER)
+                    throw new FGRuntimeException("operand not supported", Fmt("{0} is not supported by {1}", input.Type, symbol.Lexeme));
+                return new(-((Double)input.Value), input.Type);
             }
-            else if (eval_operand.Type == ResultType.NUMBER)
-            {
-                if (symbol.Type == TokenType.MINUS)
-                    result = new(-((Double)eval_operand.Value), eval_operand.Type);
-                else
-                    throw new FGRuntimeException(not_supp_msg);
-            }
-            else
-                throw new FGRuntimeException(not_supp_msg);
 
-            return result;
+            Memory.Result DoNot (Memory.Result input)
+            {
+                if (input.Type != ResultType.BOOLEAN)
+                    throw new FGRuntimeException("operand not supported", Fmt("{0} is not supported by {1}", input.Type, symbol.Lexeme));
+                return new(!((Boolean)input.Value), input.Type);
+            }
+
+            Memory.Result result;
+
+            switch(symbol.Type)
+            {
+                case TokenType.MINUS:
+                    if (eval_operand.Type == ResultType.NUMBER)
+                        return DoMinus(eval_operand);
+                    else if (eval_operand.Type == ResultType.TUPLE)
+                        return __LiftUnaryFnToTuple(eval_operand, DoMinus);
+                    break;
+                case TokenType.NOT:
+                    if (eval_operand.Type == ResultType.BOOLEAN)
+                        return DoNot(eval_operand);
+                    else if (eval_operand.Type == ResultType.TUPLE)
+                        return __LiftUnaryFnToTuple(eval_operand, DoNot);
+                    break;
+            }
+
+            throw new FGRuntimeException(not_supp_msg);
         }
         public Memory.Result VisitBinaryExpr(BinaryExpr expr)
         {
@@ -1235,6 +1249,22 @@ namespace fg_script.core
                     res.Add(value.Key, __LiftBinaryFnToTuple(vleft, vright, binary));
                 else
                     res.Add(value.Key, binary(vleft, vright));
+            }
+            return new(res, ResultType.TUPLE);
+        }
+
+        private static Memory.Result __LiftUnaryFnToTuple(
+            Memory.Result input,
+            Func<Memory.Result, Memory.Result> unary)
+        {
+            var tuple = (Dictionary<string, Memory.Result>)input.Value;
+            var res = new Dictionary<string, Memory.Result>();
+            foreach (var item in tuple)
+            {
+                if (item.Value.Type == ResultType.TUPLE)
+                    res.Add(item.Key, __LiftUnaryFnToTuple(item.Value, unary));
+                else
+                    res.Add(item.Key, unary(item.Value));
             }
             return new(res, ResultType.TUPLE);
         }

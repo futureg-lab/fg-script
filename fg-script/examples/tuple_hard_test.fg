@@ -25,7 +25,10 @@ tup ta = some_struct();
 tup tb = some_struct();
 
 println("ta      = {0}", ta);
+println("-ta     = {0}", -ta);
+
 println("tb      = {0}", tb);
+println("-tb     = {0}", -tb);
 
 println("ta + tb = {0}", ta + tb);
 println("ta - tb = {0}", ta - tb);
@@ -36,7 +39,9 @@ println("Boolean mass test");
 tup x = [false, true, [true, false, true], false, [v : true]];
 tup y = [true, false, [true, true, false], false, [v : false]];
 println("x        = {0}", x);
+println("not x    = {0}", not x);
 println("y        = {0}", y);
+println("not y    = {0}", not y);
 println("x and y  = {0}", x and y);
 println("x or y   = {0}", x or y);
 println("x xor y  = {0}", x xor y);
