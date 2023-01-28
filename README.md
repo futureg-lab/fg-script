@@ -91,10 +91,10 @@ tup as_tup_again = to_tup(as_str); // ["5"]
 // operation with tuples with the same dimension*
 tup vec1 = [1, 2, 3];
 tup vec2 = [4, "5", 6];
-tup res1 = vec1 + vec2; // [1, "52", 9]
-tup res2 = vec1 * vec2; // error : "*" operator is undefined for operands (num, str)
-tup res3 = vec1 - vec2; // error : "-" operator is undefined for operands (num, str)
-tup res4 = vec1 / vec2; // error : "/" operator is undefined for operands (num, str)
+tup res1 = vec1 + vec2; // [1, "25", 9]
+tup res2 = vec1 * vec2; // * does not support operands num, str
+tup res3 = vec1 - vec2; // - does not support operands num, str
+tup res4 = vec1 / vec2; // / does not support operands num, str
 
 // a dic is a tuple, with a label on each item
 tup example_dic = [
@@ -108,7 +108,7 @@ tup example_dic = [
 ];
 
 // In this example [3] should be labeled with an explicit key
-tup example = [a : 1, b : 2, [3]]; // throws an error
+tup example = [a : 1, b : 2, [3]]; // ":" was expected, got LEFT_BRACKET instead
 
 // type inference (!= generic, acts the same as auto in C++)
 auto a1 = [1, 2];
@@ -116,11 +116,11 @@ auto a2 = "hello world";
 
 fn main -> void {
 	for i in 0 .. 10 {
-		print("index " + i);
+		println("index " + i);
 	}
 	
 	for (i, val) in [1, 2, 3, 4] {
-		print("index " + i + ":" + val + "\n");
+		println("index " + i + ":" + val + "\n");
 	}
 	
 	for (key, value) in example_dic {
