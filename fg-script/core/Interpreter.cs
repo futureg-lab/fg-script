@@ -163,6 +163,82 @@ namespace fg_script.core
                 }
                 return new(size, ResultType.NUMBER);
             }));
+
+            // tuple operations
+            ImportFunction(new("tpop", 1, (Memory.Result[] args) =>
+            {
+                var tuple = args.First();
+
+                if (tuple.Type == ResultType.TUPLE)
+                {
+                    var value = (Dictionary<string, Memory.Result>)tuple.Value;
+                    if (value.Count == 0)
+                        return tuple;
+                    string last_key = value.Last().Key;
+                    value.Remove(last_key);
+                    return tuple;
+                }
+                List<ResultType> expected = new() { ResultType.TUPLE };
+                List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
+                throw FuncSignatureError("tpop", expected, cargs);
+            }));
+
+            ImportFunction(new("tpush", 2, (Memory.Result[] args) =>
+            {
+                var tuple = args.First();
+                var new_item = args.Last();
+
+                if (tuple.Type == ResultType.TUPLE)
+                {
+                    var value = (Dictionary<string, Memory.Result>)tuple.Value;
+                    string new_key = value.Count.ToString();
+                    value[new_key] = new_item;
+                    return tuple;
+                }
+                List<ResultType> expected = new() { ResultType.TUPLE };
+                List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
+                throw FuncSignatureError("tpush", expected, cargs);
+            }));
+
+            ImportFunction(new("tfirst", 1, (Memory.Result[] args) =>
+            {
+                var tuple = args.First();
+                if (tuple.Type == ResultType.TUPLE)
+                {
+                    var value = (Dictionary<string, Memory.Result>)tuple.Value;
+                    return value.First().Value;
+                }
+                List<ResultType> expected = new() { ResultType.TUPLE };
+                List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
+                throw FuncSignatureError("tfirst", expected, cargs);
+            }));
+
+            ImportFunction(new("tlast", 1, (Memory.Result[] args) =>
+            {
+                var tuple = args.First();
+                if (tuple.Type == ResultType.TUPLE)
+                {
+                    var value = (Dictionary<string, Memory.Result>)tuple.Value;
+                    return value.Last().Value;
+                }
+                List<ResultType> expected = new() { ResultType.TUPLE };
+                List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
+                throw FuncSignatureError("tlast", expected, cargs);
+            }));
+
+            ImportFunction(new("tempty", 1, (Memory.Result[] args) =>
+            {
+                var tuple = args.First();
+                if (tuple.Type == ResultType.TUPLE)
+                {
+                    var value = (Dictionary<string, Memory.Result>)tuple.Value;
+                    value.Clear();
+                    return tuple;
+                }
+                List<ResultType> expected = new() { ResultType.TUPLE };
+                List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
+                throw FuncSignatureError("tempty", expected, cargs);
+            }));
         }
 
         public static FGRuntimeException FuncSignatureError(string name, List<ResultType> expected, List<ResultType> got)
