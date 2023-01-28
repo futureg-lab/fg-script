@@ -1,0 +1,42 @@
+﻿
+fn rand_sign() -> num {
+	if rand() > 0.5 {
+		ret 1;
+	}
+	ret -1;
+}
+
+
+fn some_struct() -> tup {
+	num i = 0;
+	tup a = [];
+	tup b = [];
+	tup c = [];
+	while i < 2 {
+		tpush(a, rand_sign() * floor(1 + rand() * 10));
+		tpush(b, rand_sign() * floor(1 + rand() * 10));
+		tpush(c, rand_sign() * floor(1 + rand() * 10));
+		i = i + 1;
+	}
+	ret [a, [b, [c]]];
+}
+
+tup ta = some_struct();
+tup tb = some_struct();
+
+println("ta      = {0}", ta);
+println("tb      = {0}", tb);
+
+println("ta + tb = {0}", ta + tb);
+println("ta - tb = {0}", ta - tb);
+println("ta * tb = {0}", ta * tb);
+println("ta / tb = {0}", ta / tb);
+
+println("Boolean mass test");
+tup x = [false, true, [true, false, true], false, [v : true]];
+tup y = [true, false, [true, true, false], false, [v : false]];
+println("x        = {0}", x);
+println("y        = {0}", y);
+println("x and y  = {0}", x and y);
+println("x or y   = {0}", x or y);
+println("x xor y  = {0}", x xor y);
