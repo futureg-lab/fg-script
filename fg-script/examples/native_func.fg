@@ -34,6 +34,13 @@ for test in test_str {
 	println("to_num :: {0} (str) => {1}", test, to_num(test));
 }
 
+
+str s = "hello -- world -- !";
+tup sp = split("--", s);
+str j = join("//", sp);
+println("split {0} = {1}", s, sp);
+println("join {0} = {1}", s, j);
+
 // println(null);
 
 // todo
@@ -47,14 +54,5 @@ add operate between tups +, -, *, / (generalize)
 
 num x = input();
 
-fmt
-push
-pop
-first
-last
 slice_of(str or tup) :: substr logic
-map(tup, any)
-assign
-array assign
-delete
 */

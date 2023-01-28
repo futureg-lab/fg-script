@@ -58,6 +58,7 @@ namespace fg_script.core
         IN,                 // (i, val) in (1, 2, 3, 4..)
         OR,                 // x or y -> bool
         AND,                // x and y -> bool
+        XOR,                // x xor y -> bool
 
         IF,                 // if
         ELSE,               // else

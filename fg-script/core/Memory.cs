@@ -1,25 +1,30 @@
-﻿namespace fg_script.core
+﻿using System.ComponentModel;
+
+namespace fg_script.core
 {
     public enum ResultType
     {
+        [Description("void")]
         VOID,
+        [Description("str")]
         STRING,
+        [Description("num")]
         NUMBER,
+        [Description("bool")]
         BOOLEAN,
+        [Description("tup")]
         TUPLE,
+        [Description("null")]
         NULL
     }
 
     public class Memory
     {
         public List<Dictionary<string, Result>> MemStack { get; }
-        public List<FuncCall> CallStack { get; }
 
         public Memory()
         {
             MemStack = new List<Dictionary<string, Result>>();
-            CallStack = new List<FuncCall>();
-
             // init first mem
             MemStack.Add(new Dictionary<string, Result>());
         }

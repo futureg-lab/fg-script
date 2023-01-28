@@ -45,10 +45,22 @@
 
             if (Match(TokenType.KEYWORD_OR_NAME))
             {
-                 if (MatchNext(TokenType.ASSIGN)) return StateReAssign();
-                if (MatchNext(TokenType.LEFT_BRACKET)) return StateReAssignTuple();
+                if (MatchNext(TokenType.ASSIGN)) return StateReAssign();
+                if (MatchNext(TokenType.LEFT_BRACKET))
+                {
+                    int CurrPos = Position;
+                    try
+                    {
+                        // is it a root expression ?
+                        return StateRootExpression();
+                    }
+                    catch (Exception)
+                    {
+                        Position = CurrPos;
+                        return StateReAssignTuple();
+                    }
+                }
             }
-
 
             if (HasEnded())
                 return null;
@@ -293,7 +305,8 @@
 
         // 1. A general expression can be thought like this :
         // gen_expr  ::= or_expr (..) gen_expr | or_expr
-        // or_expr   ::= and_expr (or) or_expr | and_expr
+        // or_expr   ::= xor_expr (xor) or_expr | xor_expr
+        // xor_expr  ::= and_expr (or) xor_expr | and_expr
         // and_expr  ::= comp_expr (and) and_expr | expr
         // comp_expr ::= expr (== | >= | == | >= | != | < | >) comp_expr | expr
         // expr      ::= term (+| -) expr | term
@@ -314,13 +327,26 @@
             return expr;
         }
 
-        // or_expr   ::= and_expr (or) or_expr | and_expr
+        // or_expr   ::= xor_expr (xor) or_expr | xor_expr
         protected Expr ConsumeOrExpr()
         {
-            Expr expr = ConsumeAndExpr();
+            Expr expr = ConsumeXorExpr();
             if (Match(TokenType.OR))
             {
                 Token op_token = Consume(TokenType.OR);
+                Expr right = ConsumeOrExpr();
+                return new BinaryExpr(op_token, expr, right);
+            }
+            return expr;
+        }
+
+        // xor_expr  ::= and_expr (or) xor_expr | and_expr
+        protected Expr ConsumeXorExpr()
+        {
+            Expr expr = ConsumeAndExpr();
+            if (Match(TokenType.XOR))
+            {
+                Token op_token = Consume(TokenType.XOR);
                 Expr right = ConsumeOrExpr();
                 return new BinaryExpr(op_token, expr, right);
             }
@@ -600,7 +626,7 @@
                 NextToken();
                 return current;
             }
-            throw new SyntaxErrorException(err_message, current.Cursor, Filepath);
+            throw new SyntaxErrorException(err_message + ", got " + current.Type + " instead", current.Cursor, Filepath);
         }
 
         protected Token ConsumeAny(string err_message, params TokenType[] types)

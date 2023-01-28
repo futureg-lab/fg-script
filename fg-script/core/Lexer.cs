@@ -49,6 +49,7 @@
             ReservedWords.Add("in", TokenType.IN);
             ReservedWords.Add("and", TokenType.AND);
             ReservedWords.Add("or", TokenType.OR);
+            ReservedWords.Add("xor", TokenType.XOR);
             ReservedWords.Add("not", TokenType.NOT);
             ReservedWords.Add("ret", TokenType.RETURN);
             ReservedWords.Add("err", TokenType.ERROR);
@@ -251,7 +252,7 @@
             NextChar(); // ignore first '"'
             while (CurrentChar != '"')
             {
-                // if (CurrentChar == '\\') 
+                // if (CurrentChar == '\') 
                 //    NextChar();
                 str += CurrentChar;
                 NextChar();
