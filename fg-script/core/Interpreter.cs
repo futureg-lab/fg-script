@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.ComponentModel;
+using System.Text.RegularExpressions;
 
 namespace fg_script.core
 {
@@ -263,6 +264,9 @@ namespace fg_script.core
 
         private static string Fmt(string str, params object[] list)
         {
+            for (int i = 0; i < list.Count(); i++)
+                if (list[i] is ResultType type)
+                    list[i] = __Describe(type);
             return string.Format(str, list);
         }
 
@@ -323,30 +327,7 @@ namespace fg_script.core
         public static void TypeMismatchCheck(string raw_lexeme, ResultType reduced)
         {
             if (!AreSameType(raw_lexeme, reduced))
-            {
-                string got;
-                switch(reduced)
-                {
-                    case ResultType.BOOLEAN:
-                        got = "bool";
-                        break;
-                    case ResultType.STRING:
-                        got = "str";
-                        break;
-                    case ResultType.NUMBER:
-                        got = "num";
-                        break;
-                    case ResultType.TUPLE:
-                        got = "tup";
-                        break;
-                    case ResultType.NULL:
-                        got = "null";
-                        break;
-                    default:
-                        throw new FGRuntimeException(reduced + " is not a valid type");
-                }
-                throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", raw_lexeme, got));
-            }
+                throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", raw_lexeme, reduced));
         }
 
         // statements
@@ -380,6 +361,15 @@ namespace fg_script.core
             Machine.Replace(var_name, new_value);
             
             return null;
+        }
+        
+        private static string __Describe(ResultType type)
+        {
+            DescriptionAttribute[] attributes = (DescriptionAttribute[])type
+                .GetType()
+                .GetField(type.ToString())
+                .GetCustomAttributes(typeof(DescriptionAttribute), false);
+            return attributes.Length > 0 ? attributes[0].Description : string.Empty;
         }
 
         public object? VisitReAssignTupleIndex(ReAssignTuple stmt)
@@ -737,86 +727,150 @@ namespace fg_script.core
                 return eval_left.Type == type && eval_right.Type == type;
             };
 
+            var OneIsNull = (Memory.Result eval_left, Memory.Result eval_right) =>
+            {
+                return eval_left.Type == ResultType.NULL && eval_right.Type != ResultType.NULL
+                    || eval_left.Type != ResultType.NULL && eval_right.Type == ResultType.NULL;
+            };
 
             string incomp_message = Fmt("{0} does not support operands {1}, {2}", symbol.Lexeme, eval_left.Type, eval_right.Type);
+            var DoMod = (Memory.Result eval_left, Memory.Result eval_right) =>
+            {
+                if (BothSidesAre(ResultType.NUMBER))
+                {
+                    Double tmp = ((Double)eval_left.Value) % ((Double)eval_right.Value);
+                    return new Memory.Result(tmp, ResultType.NUMBER);
+                }
+                else if (BothSidesAre(ResultType.TUPLE))
+                {
+                    // todo
+                    throw new NotImplementedException();
+                }
+                else
+                    throw new FGRuntimeException(incomp_message);
+            };
+
+            var DoPlus = (Memory.Result eval_left, Memory.Result eval_right) =>
+            {
+                if (BothSidesAre(ResultType.NUMBER))
+                {
+                    Double tmp = ((Double)eval_left.Value) + ((Double)eval_right.Value);
+                    return new Memory.Result(tmp, ResultType.NUMBER);
+                }
+                else if (BothSidesAre(ResultType.TUPLE))
+                {
+                    // todo
+                    throw new NotImplementedException();
+                }
+                else
+                    throw new FGRuntimeException(incomp_message);
+            };
+
+            var DoMinus = (Memory.Result eval_left, Memory.Result eval_right) =>
+            {
+                if (BothSidesAre(ResultType.NUMBER))
+                {
+                    Double tmp = ((Double)eval_left.Value) - ((Double)eval_right.Value);
+                    return new Memory.Result(tmp, ResultType.NUMBER);
+                }
+                else if (BothSidesAre(ResultType.TUPLE))
+                {
+                    // todo
+                    throw new NotImplementedException();
+                }
+                else
+                    throw new FGRuntimeException(incomp_message);
+            };
+
+            var DoDiv = (Memory.Result eval_left, Memory.Result eval_right) =>
+            {
+                if (BothSidesAre(ResultType.NUMBER))
+                {
+                    Double tmp_right = (Double)eval_right.Value;
+                    if (tmp_right == 0)
+                        throw new FGRuntimeException("0 division error");
+                    Double tmp = ((Double)eval_left.Value) / tmp_right;
+                    return new Memory.Result(tmp, ResultType.NUMBER);
+                }
+                else if (BothSidesAre(ResultType.TUPLE))
+                {
+                    // todo
+                    throw new NotImplementedException();
+                }
+                else
+                    throw new FGRuntimeException(incomp_message);
+            };
+
+            var DoMult = (Memory.Result eval_left, Memory.Result eval_right) =>
+            {
+                if (BothSidesAre(ResultType.NUMBER))
+                {
+                    Double tmp = ((Double)eval_left.Value) * ((Double)eval_right.Value);
+                    return new Memory.Result(tmp, ResultType.NUMBER);
+                }
+                else if (BothSidesAre(ResultType.TUPLE))
+                {
+                    // todo
+                    throw new NotImplementedException();
+                }
+                else
+                    throw new FGRuntimeException(incomp_message);
+            };
+
+            var DoEQ = (Memory.Result eval_left, Memory.Result eval_right) =>
+            {
+                if (BothSidesAre(ResultType.NUMBER))
+                {
+                    Boolean tmp = ((Double)eval_left.Value) == ((Double)eval_right.Value);
+                    return new Memory.Result(tmp, ResultType.BOOLEAN);
+                }
+                else if (BothSidesAre(ResultType.STRING))
+                {
+                    Boolean tmp = ((String)eval_left.Value).Equals((String)eval_right.Value);
+                    return new Memory.Result(tmp, ResultType.BOOLEAN);
+                }
+                else if (BothSidesAre(ResultType.BOOLEAN))
+                {
+                    Boolean tmp = ((Boolean)eval_left.Value) == ((Boolean)eval_right.Value);
+                    return new Memory.Result(tmp, ResultType.BOOLEAN);
+                }
+                else if (BothSidesAre(ResultType.NULL))
+                {
+                    return new Memory.Result(true, ResultType.BOOLEAN);
+                }
+                else if (OneIsNull(eval_left, eval_right))
+                {
+                    return new Memory.Result(false, ResultType.BOOLEAN);
+                }
+                else if (BothSidesAre(ResultType.TUPLE))
+                {
+                    // todo
+                    throw new NotImplementedException();
+                }
+                else
+                    throw new FGRuntimeException(incomp_message);
+            };
+
+            var DoNotEQ = (Memory.Result eval_left, Memory.Result eval_right) =>
+            {
+                var temp = DoEQ(eval_left, eval_right);
+                return new Memory.Result(!((Boolean)temp.Value), ResultType.BOOLEAN);
+            };
+
 
             // this piece of code needs to be refactored smh
             switch (symbol.Type)
             {
                 case TokenType.MOD:
-                    if (BothSidesAre(ResultType.NUMBER))
-                    {
-                        Double tmp = ((Double)eval_left.Value) % ((Double)eval_right.Value);
-                        return new(tmp, ResultType.NUMBER);
-                    }
-                    else if (BothSidesAre(ResultType.TUPLE))
-                    {
-                        // todo
-                        throw new NotImplementedException();
-                    }
-                    else
-                        throw new FGRuntimeException(incomp_message);
+                    return DoMod(eval_left, eval_right);
                 case TokenType.PLUS:
-                    if (eval_left.Type == ResultType.STRING || eval_right.Type == ResultType.STRING)
-                    {
-                        // concatenate
-                        string tmp = __StringifyResult(eval_left) + __StringifyResult(eval_right);
-                        return new(tmp, ResultType.STRING);
-                    }
-                    else if(BothSidesAre(ResultType.NUMBER))
-                    {
-                        Double tmp = ((Double)eval_left.Value) + ((Double)eval_right.Value);
-                        return new(tmp, ResultType.NUMBER);
-                    }
-                    else if (BothSidesAre(ResultType.TUPLE))
-                    {
-                        // todo
-                        throw new NotImplementedException();
-                    }
-                    else
-                        throw new FGRuntimeException(incomp_message);
+                    return DoPlus(eval_left, eval_right);
                 case TokenType.MINUS:
-                    if (BothSidesAre(ResultType.NUMBER))
-                    {
-                        Double tmp = ((Double)eval_left.Value) - ((Double)eval_right.Value);
-                        return new(tmp, ResultType.NUMBER);
-                    }
-                    else if (BothSidesAre(ResultType.TUPLE))
-                    {
-                        // todo
-                        throw new NotImplementedException();
-                    }
-                    else
-                        throw new FGRuntimeException(incomp_message);
+                    return DoMinus(eval_left, eval_right);
                 case TokenType.DIV:
-                    if (BothSidesAre(ResultType.NUMBER))
-                    {
-                        Double tmp_right = (Double)eval_right.Value;
-                        if (tmp_right == 0)
-                            throw new FGRuntimeException("0 division error");
-                        Double tmp = ((Double)eval_left.Value) / tmp_right;
-                        return new(tmp, ResultType.NUMBER);
-                    }
-                    else if (BothSidesAre(ResultType.TUPLE))
-                    {
-                        // todo
-                        throw new NotImplementedException();
-                    }
-                    else
-                        throw new FGRuntimeException(incomp_message);
+                    return DoDiv(eval_left, eval_right);
                 case TokenType.MULT:
-                    if (BothSidesAre(ResultType.NUMBER))
-                    {
-                        Double tmp = ((Double)eval_left.Value) * ((Double)eval_right.Value);
-                        return new(tmp, ResultType.NUMBER);
-                    }
-                    else if (BothSidesAre(ResultType.TUPLE))
-                    {
-                        // todo
-                        throw new NotImplementedException();
-                    }
-                    else
-                        throw new FGRuntimeException(incomp_message);
+                    return DoMult(eval_left, eval_right);
                 case TokenType.AND:
                     if (BothSidesAre(ResultType.BOOLEAN))
                     {
@@ -834,37 +888,9 @@ namespace fg_script.core
                     else
                         throw new FGRuntimeException(incomp_message);
                 case TokenType.EQ:
-                    if (BothSidesAre(ResultType.NUMBER))
-                    {
-                        Boolean tmp = ((Double)eval_left.Value) == ((Double)eval_right.Value);
-                        return new(tmp, ResultType.BOOLEAN);
-                    }
-                    else if (BothSidesAre(ResultType.STRING))
-                    {
-                        Boolean tmp = ((String)eval_left.Value).Equals((String)eval_right.Value);
-                        return new(tmp, ResultType.BOOLEAN);
-                    }
-                    else if (BothSidesAre(ResultType.BOOLEAN))
-                    {
-                        Boolean tmp = ((Boolean)eval_left.Value) == ((Boolean)eval_right.Value);
-                        return new(tmp, ResultType.BOOLEAN);
-                    }
-                    else if (BothSidesAre(ResultType.NULL))
-                    {
-                        return new(true, ResultType.BOOLEAN);
-                    }
-                    else if (eval_left.Type == ResultType.NULL && eval_right.Type != ResultType.NULL
-                        || eval_left.Type != ResultType.NULL && eval_right.Type == ResultType.NULL )
-                    {
-                        return new(false, ResultType.BOOLEAN);
-                    }
-                    else if (BothSidesAre(ResultType.TUPLE))
-                    {
-                        // todo
-                        throw new NotImplementedException();
-                    }
-                    else
-                        throw new FGRuntimeException(incomp_message);
+                    return DoEQ(eval_left, eval_right);
+                case TokenType.NEQ:
+                    return DoNotEQ(eval_left, eval_right);
                 case TokenType.LT:
                     if (BothSidesAre(ResultType.NUMBER))
                     {
@@ -882,24 +908,6 @@ namespace fg_script.core
                     if (BothSidesAre(ResultType.NUMBER))
                     {
                         Boolean tmp = ((Double)eval_left.Value) > ((Double)eval_right.Value);
-                        return new(tmp, ResultType.BOOLEAN);
-                    }
-                    else if (BothSidesAre(ResultType.TUPLE))
-                    {
-                        // todo
-                        throw new NotImplementedException();
-                    }
-                    else
-                        throw new FGRuntimeException(incomp_message);
-                case TokenType.NEQ:
-                    if (BothSidesAre(ResultType.NUMBER))
-                    {
-                        Boolean tmp = ((Double)eval_left.Value) != ((Double)eval_right.Value);
-                        return new(tmp, ResultType.BOOLEAN);
-                    }
-                    else if (BothSidesAre(ResultType.STRING))
-                    {
-                        Boolean tmp = ((String)eval_left.Value).Equals((String) eval_right.Value);
                         return new(tmp, ResultType.BOOLEAN);
                     }
                     else if (BothSidesAre(ResultType.TUPLE))
@@ -1166,7 +1174,6 @@ namespace fg_script.core
 
             if (eval.Type == ResultType.VOID)
                 throw new FGRuntimeException("cannot stringify void type");
-
 
             if (value == null)
                 throw new FGRuntimeException("internal error", "processed value is not valid");
