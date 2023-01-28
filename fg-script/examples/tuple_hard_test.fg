@@ -6,7 +6,6 @@ fn rand_sign() -> num {
 	ret -1;
 }
 
-
 fn some_struct() -> tup {
 	num i = 0;
 	tup a = [];

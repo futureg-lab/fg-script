@@ -833,7 +833,14 @@ namespace fg_script.core
                     || eval_left.Type != ResultType.NULL && eval_right.Type == ResultType.NULL;
             };
 
-            string incomp_message = Fmt("{0} does not support operands {1}, {2}", symbol.Lexeme, eval_left.Type, eval_right.Type);
+            FGRuntimeException IncompMessage(Memory.Result eval_left, Memory.Result eval_right)
+            {
+                return new FGRuntimeException(
+                    "non-supported operands",
+                    Fmt("{0} does not support operands {1}, {2}", symbol.Lexeme, eval_left.Type, eval_right.Type)
+                  );
+            }
+                
             Memory.Result DoMod(Memory.Result eval_left, Memory.Result eval_right)
             {
                 if (BothSidesAre(eval_left, eval_right, ResultType.NUMBER))
@@ -846,7 +853,7 @@ namespace fg_script.core
                     return __LiftBinaryFnToTuple(eval_left, eval_right, DoMod);
                 }
                 else
-                    throw new FGRuntimeException(incomp_message);
+                    throw IncompMessage(eval_left, eval_right);
             }
 
             Memory.Result DoPlus(Memory.Result eval_left, Memory.Result eval_right)
@@ -867,7 +874,7 @@ namespace fg_script.core
                     return __LiftBinaryFnToTuple(eval_left, eval_right, DoPlus);
                 }
                 else
-                    throw new FGRuntimeException(incomp_message);
+                    throw IncompMessage(eval_left, eval_right);
             }
 
             Memory.Result DoMinus(Memory.Result eval_left, Memory.Result eval_right)
@@ -882,7 +889,7 @@ namespace fg_script.core
                     return __LiftBinaryFnToTuple(eval_left, eval_right, DoMinus);
                 }
                 else
-                    throw new FGRuntimeException(incomp_message);
+                    throw IncompMessage(eval_left, eval_right);
             };
 
             Memory.Result DoDiv(Memory.Result eval_left, Memory.Result eval_right)
@@ -900,7 +907,7 @@ namespace fg_script.core
                     return __LiftBinaryFnToTuple(eval_left, eval_right, DoDiv);
                 }
                 else
-                    throw new FGRuntimeException(incomp_message);
+                    throw IncompMessage(eval_left, eval_right);
             };
 
             Memory.Result DoMult(Memory.Result eval_left, Memory.Result eval_right)
@@ -915,7 +922,7 @@ namespace fg_script.core
                     return __LiftBinaryFnToTuple(eval_left, eval_right, DoMult);
                 }
                 else
-                    throw new FGRuntimeException(incomp_message);
+                    throw IncompMessage(eval_left, eval_right);
             };
 
             Memory.Result DoEQ(Memory.Result eval_left, Memory.Result eval_right)
@@ -948,7 +955,7 @@ namespace fg_script.core
                     return __LiftBinaryFnToTuple(eval_left, eval_right, DoEQ);
                 }
                 else
-                    throw new FGRuntimeException(incomp_message);
+                    throw IncompMessage(eval_left, eval_right);
             };
 
             Memory.Result DoNotEQ(Memory.Result eval_left, Memory.Result eval_right)
@@ -969,7 +976,7 @@ namespace fg_script.core
                     return __LiftBinaryFnToTuple(eval_left, eval_right, DoLT);
                 }
                 else
-                    throw new FGRuntimeException(incomp_message);
+                    throw IncompMessage(eval_left, eval_right);
             }
 
             Memory.Result DoAND(Memory.Result eval_left, Memory.Result eval_right)
@@ -984,7 +991,7 @@ namespace fg_script.core
                     return __LiftBinaryFnToTuple(eval_left, eval_right, DoAND);
                 }
                 else
-                    throw new FGRuntimeException(incomp_message);
+                    throw IncompMessage(eval_left, eval_right);
             }
 
             Memory.Result DoOR(Memory.Result eval_left, Memory.Result eval_right)
@@ -999,7 +1006,7 @@ namespace fg_script.core
                     return __LiftBinaryFnToTuple(eval_left, eval_right, DoOR);
                 }
                 else
-                    throw new FGRuntimeException(incomp_message);
+                    throw IncompMessage(eval_left, eval_right);
             }
 
             Memory.Result DoXOR(Memory.Result eval_left, Memory.Result eval_right)
@@ -1014,7 +1021,7 @@ namespace fg_script.core
                     return __LiftBinaryFnToTuple(eval_left, eval_right, DoXOR);
                 }
                 else
-                    throw new FGRuntimeException(incomp_message);
+                    throw IncompMessage(eval_left, eval_right);
             }
 
 
@@ -1030,7 +1037,7 @@ namespace fg_script.core
                     return __LiftBinaryFnToTuple(eval_left, eval_right, DoGT);
                 }
                 else
-                    throw new FGRuntimeException(incomp_message);
+                    throw IncompMessage(eval_left, eval_right);
             }
 
             Memory.Result DoLE(Memory.Result eval_left, Memory.Result eval_right)
@@ -1045,7 +1052,7 @@ namespace fg_script.core
                     return __LiftBinaryFnToTuple(eval_left, eval_right, DoLE);
                 }
                 else
-                    throw new FGRuntimeException(incomp_message);
+                    throw IncompMessage(eval_left, eval_right);
             }
 
             Memory.Result DoGE(Memory.Result eval_left, Memory.Result eval_right)
@@ -1060,7 +1067,7 @@ namespace fg_script.core
                     return __LiftBinaryFnToTuple(eval_left, eval_right, DoGE);
                 }
                 else
-                    throw new FGRuntimeException(incomp_message);
+                    throw IncompMessage(eval_left, eval_right);
             }
 
             // this piece of code needs to be refactored smh
@@ -1096,7 +1103,7 @@ namespace fg_script.core
                     return DoGE(eval_left, eval_right);
             }
 
-            throw new FGRuntimeException(incomp_message);
+            throw IncompMessage(eval_left, eval_right);
         }
 
 
