@@ -48,6 +48,7 @@
                 if (MatchNext(TokenType.ASSIGN)) return StateReAssign();
                 if (MatchNext(TokenType.LEFT_BRACKET))
                 {
+                    int CurrPos = Position;
                     try
                     {
                         // is it a root expression ?
@@ -55,6 +56,7 @@
                     }
                     catch (Exception)
                     {
+                        Position = CurrPos;
                         return StateReAssignTuple();
                     }
                 }
@@ -624,7 +626,7 @@
                 NextToken();
                 return current;
             }
-            throw new SyntaxErrorException(err_message, current.Cursor, Filepath);
+            throw new SyntaxErrorException(err_message + ", got " + current.Type + " instead", current.Cursor, Filepath);
         }
 
         protected Token ConsumeAny(string err_message, params TokenType[] types)
