@@ -151,6 +151,42 @@ namespace fg_script.core
                 throw FuncSignatureError("log", expected, cargs);
             }));
 
+            ImportFunction(new("sin", 1, (Memory.Result[] args) =>
+            {
+                if (ShareSameType(ResultType.NUMBER, args))
+                    return new(Math.Sin((Double)args.First().Value), ResultType.NUMBER);
+                List<ResultType> expected = new() { ResultType.NUMBER };
+                List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
+                throw FuncSignatureError("sin", expected, cargs);
+            }));
+
+            ImportFunction(new("cos", 1, (Memory.Result[] args) =>
+            {
+                if (ShareSameType(ResultType.NUMBER, args))
+                    return new(Math.Cos((Double)args.First().Value), ResultType.NUMBER);
+                List<ResultType> expected = new() { ResultType.NUMBER };
+                List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
+                throw FuncSignatureError("cos", expected, cargs);
+            }));
+
+            ImportFunction(new("tan", 1, (Memory.Result[] args) =>
+            {
+                if (ShareSameType(ResultType.NUMBER, args))
+                    return new(Math.Tan((Double)args.First().Value), ResultType.NUMBER);
+                List<ResultType> expected = new() { ResultType.NUMBER };
+                List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
+                throw FuncSignatureError("tan", expected, cargs);
+            }));
+
+            ImportFunction(new("abs", 1, (Memory.Result[] args) =>
+            {
+                if (ShareSameType(ResultType.NUMBER, args))
+                    return new(Math.Abs((Double)args.First().Value), ResultType.NUMBER);
+                List<ResultType> expected = new() { ResultType.NUMBER };
+                List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
+                throw FuncSignatureError("abs", expected, cargs);
+            }));
+
             ImportFunction(new("sqrt", 1, (Memory.Result[] args) =>
             {
                 if (ShareSameType(ResultType.NUMBER, args))
@@ -260,11 +296,60 @@ namespace fg_script.core
                 List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
                 throw FuncSignatureError("tempty", expected, cargs);
             }));
+
+            // utils
+            ImportFunction(new("split", 2, (Memory.Result[] args) =>
+            {
+                var _sep = args.First();
+                var _str = args.Last();
+                if (_sep.Type == ResultType.STRING && _str.Type == ResultType.STRING)
+                {
+                    string sep = _sep.Value.ToString();
+                    string str = _str.Value.ToString();
+                    string[] chunks = str.Split(sep);
+                    Dictionary<string, Memory.Result> res = new();
+                    for (int i = 0; i < chunks.Length; i++)
+                        res.Add(i.ToString(), new(chunks[i], ResultType.STRING));
+                    return new(res, ResultType.TUPLE);
+                }
+                List<ResultType> expected = new() { ResultType.STRING, ResultType.STRING };
+                List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
+                throw FuncSignatureError("split", expected, cargs);
+            }));
+
+            ImportFunction(new("join", 2, (Memory.Result[] args) =>
+            {
+                var str = args.First();
+                var tup = args.Last();
+                if (str.Type == ResultType.STRING && tup.Type == ResultType.TUPLE)
+                {
+                    var input = (Dictionary<string, Memory.Result>)tup.Value;
+                    string output = "";
+                    int i = 0, len = input.Count();
+                    foreach (var item in input)
+                    {
+                        if (item.Value.Type == ResultType.TUPLE)
+                            throw new FGRuntimeException(
+                                "unable to join", 
+                                Fmt("cannot join to a string, {0} is a tuple", __StringifyResult(item.Value)
+                            ));
+                        output += __StringifyResult(item.Value);
+                        if (i + 1 < len) output += str.Value;
+                        i++;
+                    }
+                    return new(output, ResultType.STRING);
+                }
+                List<ResultType> expected = new() { ResultType.STRING, ResultType.TUPLE };
+                List<ResultType> cargs = args.ToList().ConvertAll<ResultType>(x => x.Type);
+                throw FuncSignatureError("join", expected, cargs);
+            }));
         }
 
         public static FGRuntimeException FuncSignatureError(string name, List<ResultType> expected, List<ResultType> got)
         {
-            return new FGRuntimeException(Fmt("{0} takes {1}, got {2} instead", name, string.Join(", ", expected), string.Join(", ", got)));
+            string str_expected = string.Join(", ", expected.ConvertAll<string>(__Describe));
+            string str_got = string.Join(", ", got.ConvertAll<string>(__Describe));
+            return new FGRuntimeException("type error", Fmt("{0} takes {1}, got {2} instead", name, str_expected, str_got));
         }
 
         public void ImportFunction(FGScriptFunction function)
