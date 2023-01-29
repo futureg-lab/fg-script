@@ -2,7 +2,7 @@
 FGScript lang implementation in C#
 ## Typical use cases
 ```bash
-# Run the script
+# Run a script
 fg-script hello.fg
 # Print the AST
 fg-script hello.fg --source
