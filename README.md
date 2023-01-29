@@ -37,6 +37,24 @@ fn to_json(auto value) -> str {
 	ret to_str(value);
 }
 ```
+## Example 2 : flatten a tuple
+```rust
+fn flatten_helper (tup out, tup arr) -> void {
+	for i in arr {
+		if ((repr_of i) is "tup") {
+			flatten_helper(out, i);
+		} else {
+			tpush(out, i);
+		}
+	}
+}
+
+fn flatten (tup arr) -> tup {
+	tup inp = [];
+	flatten_helper(inp, arr);
+	ret inp;
+}
+```
 
 ## Example 2 : Fibonacci recursive
 ```rust

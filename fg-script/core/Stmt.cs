@@ -157,11 +157,15 @@ namespace fg_script.core
 
     public class Return : Stmt
     {
-        public Expr ReturnValue { get; }
+        public Expr? ReturnValue { get; };
 
         public Return (Expr returnValue)
         {
             ReturnValue = returnValue;
+        }
+        public Return()
+        {
+            ReturnValue = null;
         }
 
         override public T Accept<T>(IVisitorSTmt<T> vistor)

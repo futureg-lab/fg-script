@@ -285,6 +285,11 @@
         protected Return StateReturn()
         {
             Consume(TokenType.RETURN, @"""ret"" was expected");
+            if (Match(TokenType.SEMICOLON))
+            {
+                Consume(TokenType.SEMICOLON, @""";"" was expected");
+                return new();
+            }
             Expr returned = ConsumeGenExpr();
             Consume(TokenType.SEMICOLON, @""";"" was expected");
             return new(returned);
