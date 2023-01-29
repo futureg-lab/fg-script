@@ -49,7 +49,7 @@ fn to_json(auto value) -> str {
 ```
 ## Example 2 : flatten a tuple
 ```rust
-fn flatten_helper (tup out, tup arr) -> void {
+fn flatten_helper(tup out, tup arr) -> void {
 	for i in arr {
 		if ((repr_of i) is "tup") {
 			flatten_helper(out, i);
@@ -59,7 +59,7 @@ fn flatten_helper (tup out, tup arr) -> void {
 	}
 }
 
-fn flatten (tup arr) -> tup {
+fn flatten(tup arr) -> tup {
 	tup inp = [];
 	flatten_helper(inp, arr);
 	ret inp;
@@ -142,7 +142,7 @@ tup example = [a : 1, b : 2, [3]]; // ":" was expected, got LEFT_BRACKET instead
 auto a1 = [1, 2];
 auto a2 = "hello world";
 
-fn main -> void {
+fn run() -> void {
 	for i in 0 .. 10 {
 		println("index " + i);
 	}
@@ -165,5 +165,5 @@ fn main -> void {
 	}
 }
 
-main ();
+run ();
 ```
