@@ -16,7 +16,7 @@ The project solution is located at the root directory
 ## Example 1 : fg-script tuple to json
 ```rust
 fn to_json(auto value) -> str {
-	if repr_of value is "tup" {
+	if (repr_of value) is "tup" {
 		str tmp = "{";
 		num size = len(value);
 		num i = 0;
@@ -31,7 +31,7 @@ fn to_json(auto value) -> str {
 		tmp = tmp + "}";
 		ret tmp;
 	}
-	if repr_of value is "str" {
+	if (repr_of value) is "str" {
 		ret "\"" + value + "\"";
 	}
 	ret to_str(value);
@@ -56,7 +56,7 @@ fn flatten (tup arr) -> tup {
 }
 ```
 
-## Example 2 : Fibonacci recursive
+## Example 3 : Fibonacci recursive
 ```rust
 fn fib(num x) -> num {
 	if x < 0 {
@@ -69,7 +69,7 @@ fn fib(num x) -> num {
 }
 ```
 
-## Example 3 : fg-script features
+## Example 4 : fg-script features
 ```rust
 // expose a function to the host language
 expose fn sayHello(name) -> str {
@@ -142,7 +142,7 @@ fn main -> void {
 	}
 	
 	for (key, value) in example_dic {
-		if repr_of value is "tup" {
+		if (repr_of value) is "tup" {
 			println("Raw value at " + key + " : " + value);
 		}
 	}

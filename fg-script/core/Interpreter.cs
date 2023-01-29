@@ -865,8 +865,8 @@ namespace fg_script.core
                 }
                 else if (eval_left.Type == ResultType.STRING || eval_right.Type == ResultType.STRING)
                 {
-                    string left = eval_left.Value == null ? "null" : eval_left.Value.ToString();
-                    string right = eval_right.Value == null ? "null" : eval_right.Value.ToString();
+                    string left = __StringifyResult(eval_left);
+                    string right = __StringifyResult(eval_right);
                     return new(left + right, ResultType.STRING);
                 }
                 else if (BothSidesAre(eval_left, eval_right, ResultType.TUPLE))

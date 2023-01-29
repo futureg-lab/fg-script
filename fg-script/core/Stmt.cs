@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace fg_script.core
+﻿namespace fg_script.core
 {
     public class Stmt : INodeStmt
     {
@@ -157,7 +151,7 @@ namespace fg_script.core
 
     public class Return : Stmt
     {
-        public Expr? ReturnValue { get; };
+        public Expr? ReturnValue { get; }
 
         public Return (Expr returnValue)
         {
