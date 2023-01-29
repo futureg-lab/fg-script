@@ -25,3 +25,38 @@ for (k, v) in example_dic {
 for i in 1 .. 10 {
 	println("count {0}", i);
 }
+
+
+fn test() -> void {
+	num x = 0;
+	while x < 10 {
+		if x >= 5 {
+			println("while .. stopped !!! " + x);
+			ret;
+		}
+		x = x + 1;
+	}
+}
+
+fn test2() -> void {
+	for k in 0 .. 10 {
+		if k >= 5 {
+			println("for .. stopped !!! " + k);
+			ret;
+		}
+	}
+}
+
+
+fn test3() -> void {
+	for k in 0 .. 10 {
+		if k >= 5 {
+			println("for .. stopped !!! " + k);
+			err "force stop!";
+		}
+	}
+}
+
+test();
+test2();
+test3();

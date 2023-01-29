@@ -38,6 +38,15 @@ namespace fg_script.core
         }
     }
 
+    internal class ErrorHolder
+    {
+        public Memory.Result Error { get; }
+        public ErrorHolder(Memory.Result error)
+        {
+            Error = error;
+        }
+    }
+
     public class Interpreter : IVisitorSTmt<object?>, IVisitorExpr<Memory.Result>
     {
         public Memory Machine { get; } = new();
@@ -433,7 +442,7 @@ namespace fg_script.core
         public static void TypeMismatchCheck(string raw_lexeme, ResultType reduced)
         {
             if (!AreSameType(raw_lexeme, reduced))
-                throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", raw_lexeme, reduced));
+                throw new FGRuntimeException("type error", Fmt("type \"{0}\" was expected, got \"{1}\" instead", raw_lexeme, reduced));
         }
 
         // statements
@@ -462,7 +471,7 @@ namespace fg_script.core
             Memory.Result new_value = Eval(stmt.NewValue);
             // only a null can be re-assigned and promoted to a new type
             if (current.Type != new_value.Type && current.Type != ResultType.NULL)
-                throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", current.Type, new_value.Type));
+                throw new FGRuntimeException("type error", Fmt("type \"{0}\" was expected, got \"{1}\" instead", current.Type, new_value.Type));
 
             Machine.Replace(var_name, new_value);
             
@@ -499,7 +508,7 @@ namespace fg_script.core
             {
                 Memory.Result index = Eval(expr_index);
                 if (index.Type != ResultType.NUMBER && index.Type != ResultType.STRING)
-                    throw new FGRuntimeException(Fmt("index type num or str was expected, got \"{0}\" instead", new_value.Type));
+                    throw new FGRuntimeException("type error", Fmt("index type num or str was expected, got \"{0}\" instead", new_value.Type));
 
                 string sanitized_idx = __StringifyResult(index);
                 if (!to_mutate.ContainsKey(sanitized_idx))
@@ -514,7 +523,7 @@ namespace fg_script.core
                 }
                 // re assign
                 if (node.Type != new_value.Type && node.Type != ResultType.NULL)
-                    throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", node.Type, new_value.Type));
+                    throw new FGRuntimeException("type error", Fmt("type \"{0}\" was expected, got \"{1}\" instead", node.Type, new_value.Type));
                 if (done.Count < stmt.Indexes.Count)
                     throw new FGRuntimeException("array access", Fmt("{0}[{1}] is not a tuple", var_name, string.Join(", ", done)));
                 else
@@ -532,7 +541,7 @@ namespace fg_script.core
             
             foreach (var line in stmt.Statements)
             {
-                if (line is Return || line is Break || line is Continue)
+                if (line is Return || line is Break || line is Continue || line is Error)
                 {
                     interruption = Run(line);
                     break;
@@ -540,7 +549,7 @@ namespace fg_script.core
                 else
                 {
                     object? evaluation = Run(line);
-                    if (evaluation is ReturnHolder || evaluation is Break || evaluation is Continue)
+                    if (evaluation is ReturnHolder || evaluation is ErrorHolder || evaluation is Break || evaluation is Continue)
                     {
                         interruption = evaluation;
                         break;
@@ -570,7 +579,7 @@ namespace fg_script.core
             var IsItBoolean = (Memory.Result res) =>
             {
                 if (res.Type != ResultType.BOOLEAN)
-                    throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", ResultType.BOOLEAN, res.Type));
+                    throw new FGRuntimeException("type error", Fmt("type \"{0}\" was expected, got \"{1}\" instead", ResultType.BOOLEAN, res.Type));
             };
 
             // main body
@@ -628,9 +637,14 @@ namespace fg_script.core
                         break;
                     if (block_eval is Continue)
                         continue;
-                    if (block_eval is Memory.Result content)
+                    if (block_eval is ReturnHolder content)
                     {
                         potential_ret = content; // let a function handle this
+                        break;
+                    }
+                    if (block_eval is ErrorHolder error)
+                    {
+                        potential_ret = error; // let the user handle this
                         break;
                     }
                 }
@@ -645,7 +659,7 @@ namespace fg_script.core
         {
             Memory.Result cond = Eval(stmt.Condition);
             if (cond.Type != ResultType.BOOLEAN)
-                throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", ResultType.BOOLEAN, cond.Type));
+                throw new FGRuntimeException("type error", Fmt("type \"{0}\" was expected, got \"{1}\" instead", ResultType.BOOLEAN, cond.Type));
             
             Machine.MemPush(); // start new scope for the condition variable
             
@@ -663,9 +677,14 @@ namespace fg_script.core
                         break;
                     if (block_eval is Continue)
                         continue;
-                    if (block_eval is Memory.Result content)
+                    if (block_eval is ReturnHolder content)
                     {
                         potential_ret = content; // let a function handle this
+                        break;
+                    }
+                    if (block_eval is ErrorHolder error)
+                    {
+                        potential_ret = error; // let the user handle this
                         break;
                     }
                 }
@@ -675,7 +694,7 @@ namespace fg_script.core
                 Memory.Result? current = Machine.GetValue(temp_name);
 
                 if (current == null) // should never happen
-                    throw new FGRuntimeException(Fmt("internal error, temp reference {0} was not found", temp_name));
+                    throw new FGRuntimeException("type error", Fmt("internal error, temp reference {0} was not found", temp_name));
 
                 value = (Boolean) current.Value;
             }
@@ -693,7 +712,7 @@ namespace fg_script.core
 
         public object? VisitError(Error stmt)
         {
-            return stmt;
+            return new ErrorHolder(Eval(stmt.ThrownValue));
         }
 
         public object? VisitBreak(Break stmt)
@@ -1238,7 +1257,7 @@ namespace fg_script.core
 
                     if (!__TypeIsAutoInfered(func.Args[i].DataType) 
                         && !AreSameType(fun_arg_lex, curr_eval))
-                        throw new FGRuntimeException(Fmt("type \"{0}\" was expected, got \"{1}\" instead", fun_arg_lex, curr_eval));
+                        throw new FGRuntimeException("type error", Fmt("type \"{0}\" was expected, got \"{1}\" instead", fun_arg_lex, curr_eval));
 
                     // store arg as local scope variable with the appropriate name
                     Machine.Store(func.Args[i].Name.Lexeme, eval_args[i]);
@@ -1252,6 +1271,8 @@ namespace fg_script.core
                         if (!__TypeIsAutoInfered(func.ReturnType))
                             TypeMismatchCheck(func.ReturnType.Lexeme, output_value.Type);
                     }
+                    if (block_eval is ErrorHolder propag)
+                        output_value = propag.Error; // let the user handle this
                 }
                 Machine.MemPop();
 
@@ -1263,7 +1284,7 @@ namespace fg_script.core
                 .ConvertAll(x => __Describe(Eval(x).Type));
 
             string temp = string.Join(", ", args);
-            throw new FGRuntimeException(Fmt("reference error {0} with args {1} (arg_count {2}) is undefined", callee, temp, args.Count));
+            throw new FGRuntimeException("reference error", Fmt("{0} with args {1} (arg_count {2}) is undefined", callee, temp, args.Count));
         }
 
         public Memory.Result VisitVarCall(VarCall expr)
