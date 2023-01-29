@@ -254,6 +254,8 @@
             {
                 // if (CurrentChar == '\') 
                 //    NextChar();
+                if (CurrentChar == '\\' && PeekNextChar() == '"')
+                    NextChar();
                 str += CurrentChar;
                 NextChar();
                 if (HasEnded())

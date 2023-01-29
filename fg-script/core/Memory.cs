@@ -15,7 +15,9 @@ namespace fg_script.core
         [Description("tup")]
         TUPLE,
         [Description("null")]
-        NULL
+        NULL,
+        [Description("err")]
+        ERROR
     }
 
     public class Memory
