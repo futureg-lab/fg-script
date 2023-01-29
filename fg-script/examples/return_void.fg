@@ -1,0 +1,30 @@
+﻿fn do_stuff (tup x) -> void {
+	if len(x) > 5 {
+		ret;
+	}
+	tpush(x, 1);
+}
+
+tup x = [1,2,3];
+
+do_stuff(x);
+println(x);
+
+do_stuff(x);
+println(x);
+
+
+do_stuff(x);
+println(x);
+
+
+do_stuff(x);
+println(x);
+
+
+do_stuff(x);
+println(x);
+
+
+do_stuff(x);
+println(x);

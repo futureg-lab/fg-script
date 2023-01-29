@@ -418,7 +418,8 @@ namespace fg_script.core
             return raw_lexeme == "bool" && reduced == ResultType.BOOLEAN
                 || raw_lexeme == "str" && reduced == ResultType.STRING
                 || raw_lexeme == "num" && reduced == ResultType.NUMBER
-                || raw_lexeme == "tup" && reduced == ResultType.TUPLE; 
+                || raw_lexeme == "tup" && reduced == ResultType.TUPLE
+                || raw_lexeme == "void" && reduced == ResultType.VOID; 
         }
 
         public static bool ShareSameType(ResultType type, Memory.Result[] tests)
@@ -687,7 +688,7 @@ namespace fg_script.core
         {
             if (stmt.ReturnValue != null)
                 return new ReturnHolder(Eval(stmt.ReturnValue));
-            return null;
+            return new ReturnHolder(Memory.Result.Void());
         }
 
         public object? VisitError(Error stmt)
@@ -865,8 +866,8 @@ namespace fg_script.core
                 }
                 else if (eval_left.Type == ResultType.STRING || eval_right.Type == ResultType.STRING)
                 {
-                    string left = eval_left.Value == null ? "null" : eval_left.Value.ToString();
-                    string right = eval_right.Value == null ? "null" : eval_right.Value.ToString();
+                    string left = __StringifyResult(eval_left);
+                    string right = __StringifyResult(eval_right);
                     return new(left + right, ResultType.STRING);
                 }
                 else if (BothSidesAre(eval_left, eval_right, ResultType.TUPLE))
