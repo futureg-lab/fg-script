@@ -13,7 +13,7 @@ void loadfile()
     string source = "";
     try
     {
-        string filePath = "../../../examples/tuple.fg";
+        string filePath = "../../../examples/tuple_hard_test.fg";
         source = Utils.ReadTextFile(filePath);
 
         Lexer lexer = new(source, "");
@@ -138,5 +138,5 @@ void interactive()
     }
 }
 
-interactive();
-// loadfile();
+// interactive();
+loadfile();
