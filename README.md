@@ -1,6 +1,16 @@
 # fg-script
 FGScript lang implementation in C#
-
+## Typical use cases
+```bash
+# Run the script
+fg-script hello.fg
+# Print the AST
+fg-script hello.fg --source
+# Interative mode
+fg-script
+# Display help
+fg-script -h
+```
 # Building and Testing
 ## CLI (Linux, Windows)
 ```bash
