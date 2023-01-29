@@ -81,7 +81,7 @@ namespace fg_script.core
                     }
                     catch (Exception)
                     {
-                        throw new FGRuntimeException(Fmt("cannot convert str {0} to a num", input));
+                        throw new FGRuntimeException("type error", Fmt("cannot convert str {0} to a num", input));
                     }
                 }
                 List<ResultType> expected = new() { ResultType.STRING };
@@ -397,7 +397,7 @@ namespace fg_script.core
             }
             catch (Exception)
             {
-                throw new FGRuntimeException(repr + "is not a boolean");
+                throw new FGRuntimeException("type error", Fmt("{0} is not a boolean", repr));
             }
         }
 
@@ -410,7 +410,7 @@ namespace fg_script.core
             }
             catch (Exception)
             {
-                throw new FGRuntimeException(repr + " is not a number");
+                throw new FGRuntimeException("type error", Fmt("{0} is not a number", repr));
             }
         }
 
@@ -418,7 +418,7 @@ namespace fg_script.core
         private static string EvalString(string str)
         {
             if (!str.StartsWith("\"") && str.EndsWith("\""))
-                throw new FGRuntimeException(str + " is not a string");
+                throw new FGRuntimeException("type error", Fmt("{0} is not a string", str));
             return str.Substring(1, str.Length - 2);
         }
 
@@ -466,7 +466,7 @@ namespace fg_script.core
             string var_name = stmt.Callee.Lexeme;
             Memory.Result? current = Machine.GetValue(var_name);
             if (current == null)
-                throw new FGRuntimeException("re-assign", "\"" + var_name + "\" has not been defined yet");
+                throw new FGRuntimeException("re-assign", Fmt("\"{0}\" has not been defined yet", var_name));
 
             Memory.Result new_value = Eval(stmt.NewValue);
             // only a null can be re-assigned and promoted to a new type
@@ -493,10 +493,10 @@ namespace fg_script.core
             string var_name = stmt.Callee.Lexeme;
             Memory.Result? current = Machine.GetValue(var_name);
             if (current == null)
-                throw new FGRuntimeException("re-assign", "\"" + var_name + "\" has not been defined yet");
+                throw new FGRuntimeException("re-assign", Fmt("\"{0}\" has not been defined yet", var_name));
 
             if (current.Type != ResultType.TUPLE)
-                throw new FGRuntimeException("array access", "\"" + var_name + "\" is not a tuple");
+                throw new FGRuntimeException("array access", Fmt("\"{0}\" is not a tuple", var_name));
 
             Memory.Result new_value = Eval(stmt.NewValue);
 
@@ -1271,7 +1271,7 @@ namespace fg_script.core
                         if (!__TypeIsAutoInfered(func.ReturnType))
                             TypeMismatchCheck(func.ReturnType.Lexeme, output_value.Type);
                     }
-                    if (block_eval is ErrorHolder propag)
+                    else if (block_eval is ErrorHolder propag)
                         output_value = propag.Error; // let the user handle this
                 }
                 Machine.MemPop();
@@ -1292,7 +1292,7 @@ namespace fg_script.core
             string var_name = expr.Callee.Lexeme;
             Memory.Result? result = Machine.GetValue(var_name);
             if (result == null)
-                throw new FGRuntimeException(Fmt("reference error {0} is undefined", var_name));
+                throw new FGRuntimeException("reference error", Fmt("{ 0} is undefined", var_name));
             return result;
         }
 
@@ -1396,7 +1396,7 @@ namespace fg_script.core
                 return "null";
 
             if (eval.Type == ResultType.VOID)
-                throw new FGRuntimeException("cannot stringify void type");
+                throw new FGRuntimeException("type error", "cannot stringify void type");
 
             if (value == null)
                 throw new FGRuntimeException("internal error", "processed value is not valid");
