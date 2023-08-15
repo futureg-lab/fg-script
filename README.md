@@ -79,16 +79,46 @@ fn fib(num x) -> num {
 }
 ```
 
-## Example 4 : fg-script features
+## Example 4 : compute 100 decimals of pi
 ```rust
-// expose a function to the host language
-expose fn sayHello(name) -> str {
-    ret "Hello World! " + name;
+// compute the digits of pi
+fn pi(num n) -> str {
+    num d = n * 3;
+    tup arr = [];
+    for i in 0 .. d {
+        tpush(arr, 2);
+    }
+
+    str digits = "";
+
+    for i in 0 .. n {
+        num c = 0;
+        num k = d - 1;
+        while k >= 0 {
+            num v = 10 * arr[k] + c;
+            num r = v % (2*k + 1);
+            num q = floor(v / (2*k + 1));
+            if k > 0 {
+                arr[k] = r;
+                c = q * k;
+            } else {
+                arr[k] = q % 10;
+                digits = digits + floor(q / 10);
+                c = 0;
+            }
+            k = k - 1;
+        }
+    }
+
+    ret digits;
 }
+// print the result to stdout
+print(pi(100));
+```
 
+## Example 5 : syntax overview
+```rust
 // Native types : str, num (double representation), tup
-// a value, a tuple, an array, a dictionary, everything is a tuple !
-
 tup tuple = [1, 2, 3, 4, 5, [1, 2 ["something", 2]]];
 tup tup_empt = [];
 tpush(tup_empt, 1);
@@ -156,7 +186,7 @@ fn run() -> void {
 			println("Raw value at " + key + " : " + value);
 		}
 	}
-	
+
 	some_data = requestHttpJSON();
 	
 	cond_expr = false;
