@@ -26,56 +26,56 @@ The project solution is located at the root directory
 ## Example 1: fg-script tuple to json
 ```rust
 fn to_json(auto value) -> str {
-	if (repr_of value) is "tup" {
-		str tmp = "{";
-		num size = len(value);
-		num i = 0;
-		for (k, v) in value {
-			str row = "\"" + k + "\""+ " : " + to_json(v);
-			tmp = tmp + row;
-			if i + 1 < size {
-				tmp = tmp + ",";
-			}
-			i = i + 1;
-		}
-		tmp = tmp + "}";
-		ret tmp;
-	}
-	if (repr_of value) is "str" {
-		ret "\"" + value + "\"";
-	}
-	ret to_str(value);
+    if (repr_of value) is "tup" {
+        str tmp = "{";
+        num size = len(value);
+        num i = 0;
+        for (k, v) in value {
+            str row = "\"" + k + "\""+ " : " + to_json(v);
+            tmp = tmp + row;
+            if i + 1 < size {
+                tmp = tmp + ",";
+            }
+            i = i + 1;
+        }
+        tmp = tmp + "}";
+        ret tmp;
+    }
+    if (repr_of value) is "str" {
+        ret "\"" + value + "\"";
+    }
+    ret to_str(value);
 }
 ```
 ## Example 2: Flatten a tuple
 ```rust
 fn flatten_helper(tup out, tup arr) -> void {
-	for i in arr {
-		if ((repr_of i) is "tup") {
-			flatten_helper(out, i);
-		} else {
-			tpush(out, i);
-		}
-	}
+    for i in arr {
+        if ((repr_of i) is "tup") {
+            flatten_helper(out, i);
+        } else {
+            tpush(out, i);
+        }
+    }
 }
 
 fn flatten(tup arr) -> tup {
-	tup inp = [];
-	flatten_helper(inp, arr);
-	ret inp;
+    tup inp = [];
+    flatten_helper(inp, arr);
+    ret inp;
 }
 ```
 
 ## Example 3: Fibonacci recursive
 ```rust
 fn fib(num x) -> num {
-	if x < 0 {
-		ret 0;
-	}
-	if x < 1 {
-		ret 1;
-	}
-	ret fib(x - 1) + fib(x - 2);
+    if x < 0 {
+        ret 0;
+    }
+    if x < 1 {
+        ret 1;
+    }
+    ret fib(x - 1) + fib(x - 2);
 }
 ```
 
@@ -156,13 +156,13 @@ tup res4 = vec1 / vec2; // / does not support operands num, str
 
 // a dic is a tuple, with a label on each item
 tup example_dic = [
-	a : 6,
-	b : 8,
-	c :  [
-		e : "Some text",
-		h : 3,
-		q : [1, 2, 3, 4, 5]
-	]
+    a : 6,
+    b : 8,
+    c :  [
+        e : "Some text",
+        h : 3,
+        q : [1, 2, 3, 4, 5]
+    ]
 ];
 
 // In this example [3] should be labeled with an explicit key
@@ -173,26 +173,26 @@ auto a1 = [1, 2];
 auto a2 = "hello world";
 
 fn run() -> void {
-	for i in 0 .. 10 {
-		println("index " + i);
-	}
-	
-	for (i, val) in [1, 2, 3, 4] {
-		println("index " + i + ":" + val + "\n");
-	}
-	
-	for (key, value) in example_dic {
-		if (repr_of value) is "tup" {
-			println("Raw value at " + key + " : " + value);
-		}
-	}
+    for i in 0 .. 10 {
+    	println("index " + i);
+    }
+    
+    for (i, val) in [1, 2, 3, 4] {
+        println("index " + i + ":" + val + "\n");
+    }
+    
+    for (key, value) in example_dic {
+        if (repr_of value) is "tup" {
+            println("Raw value at " + key + " : " + value);
+        }
+    }
 
-	some_data = requestHttpJSON();
-	
-	cond_expr = false;
-	while cond_expr {
-		do_stuff();
-	}
+    some_data = requestHttpJSON();
+    
+    cond_expr = false;
+    while cond_expr {
+        do_stuff();
+    }
 }
 
 run ();
