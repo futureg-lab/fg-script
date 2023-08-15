@@ -13,20 +13,49 @@ class FGScriptCLI
         {
             source = Utils.ReadTextFile(filePath);
 
-            Lexer lexer = new(source, "");
+            Lexer lexer = new(source, filePath);
             List<Token> list = lexer.Tokenize();
 
             Parser parser = new(filePath, ref list);
             List<Stmt> stmts = parser.Run();
 
-            PrintVisitor printer = new PrintVisitor();
-            Interpreter engine = new Interpreter();
+            PrintVisitor printer = new();
+            Interpreter engine = new();
             foreach (Stmt stmt in stmts)
             {
                 if (printIR)
                     Console.WriteLine(printer.Print(stmt));
                 else
                     engine.Run(stmt);
+            }
+        }
+        catch (SyntaxErrorException syntax_excp)
+        {
+            Console.Error.WriteLine(Utils.UnderlineTextLine(source, syntax_excp.Cursor, 1));
+            Console.Error.Write(syntax_excp.Message);
+        }
+        catch (FGScriptException fgexception)
+        {
+            Console.Error.WriteLine(fgexception.Message);
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine(e);
+        }
+    }
+
+    static void LoadFileAndTokenize(string filePath)
+    {
+        string source = "";
+        try
+        {
+            source = Utils.ReadTextFile(filePath);
+            Lexer lexer = new(source, filePath);
+            List<Token> list = lexer.Tokenize();
+            foreach (Token token in list) 
+            {
+                string formated = string.Format("<{0}>, {1}", token.Lexeme, token.Type);
+                Console.WriteLine(formated);
             }
         }
         catch (SyntaxErrorException syntax_excp)
@@ -143,11 +172,14 @@ class FGScriptCLI
     static void CliHelp()
     {
         ShowHeader();
-        Console.WriteLine("fg-script [--help|-h] [sourcefile] [--source|-s]");
+        Console.WriteLine("fg-script [--help|-h] [sourcefile] [--source|-s] [--tokens|-t]");
     }
 
     static void Main(string[] args)
     {
+        // string filePath = "../../../examples/error_handling.fg";
+        // LoadFileAndTokenize(filePath);
+        
         switch(args.Length + 1)
         {
             case 1:
@@ -160,10 +192,11 @@ class FGScriptCLI
                     LoadFile(args.Last(), false);
                 break;
             case 3:
-                // string filePath = "../../../examples/for_loop_and_iterables.fg";
                 string param = args.Last();
                 if (param.Equals("--source") || param.Equals("-s"))
                     LoadFile(args.First(), true);
+                else if (param.Equals("--tokens") || param.Equals("-t"))
+                    LoadFileAndTokenize(args.First());
                 else
                     LoadFile(args.First(), false);
                 break;
@@ -171,5 +204,6 @@ class FGScriptCLI
                 CliHelp();
                 break;
         }
+        
     }
 }

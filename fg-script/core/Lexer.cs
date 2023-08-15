@@ -173,7 +173,7 @@
                 if (IsStandardSymbol(CurrentChar))
                 {
                     string str = MakeStandardSymbols();
-                    TokenType type = TokenType.KEYWORD_OR_NAME;
+                    TokenType type = TokenType.UNKNOWN;
                     if (ReservedSymbols.ContainsKey(str))
                     {
                         type = ReservedSymbols[str];
@@ -287,12 +287,28 @@
         protected string MakeStandardSymbols()
         {
             string str = "";
+            int temp = Cursor.Pos;
             while (IsStandardSymbol(CurrentChar))
             {
                 str += CurrentChar;
                 NextChar();
             }
-            return str;
+
+            HashSet<string> edgecaseContiguous = new()
+            {
+                "/*", "*/",
+                "//"
+            };
+
+            if (!ReservedSymbols.ContainsKey(str) 
+                && !edgecaseContiguous.Contains(str))
+            {
+                Cursor.Pos = temp;
+                NextChar();
+                return str.First().ToString();
+            }
+            else
+                return str;
         }
 
         // [a-zA-Z0-9_]+

@@ -23,7 +23,7 @@ The project solution is located at the root directory
 
 # fg-script lang overview
 
-## Example 1 : fg-script tuple to json
+## Example 1: fg-script tuple to json
 ```rust
 fn to_json(auto value) -> str {
 	if (repr_of value) is "tup" {
@@ -47,7 +47,7 @@ fn to_json(auto value) -> str {
 	ret to_str(value);
 }
 ```
-## Example 2 : flatten a tuple
+## Example 2: Flatten a tuple
 ```rust
 fn flatten_helper(tup out, tup arr) -> void {
 	for i in arr {
@@ -66,7 +66,7 @@ fn flatten(tup arr) -> tup {
 }
 ```
 
-## Example 3 : Fibonacci recursive
+## Example 3: Fibonacci recursive
 ```rust
 fn fib(num x) -> num {
 	if x < 0 {
@@ -79,7 +79,7 @@ fn fib(num x) -> num {
 }
 ```
 
-## Example 4 : compute 100 decimals of pi
+## Example 4: Compute 100 digits of pi
 ```rust
 // compute the digits of pi
 fn pi(num n) -> str {
@@ -116,7 +116,7 @@ fn pi(num n) -> str {
 print(pi(100));
 ```
 
-## Example 5 : syntax overview
+## Example 5: fg-script syntax overview
 ```rust
 // Native types : str, num (double representation), tup
 tup tuple = [1, 2, 3, 4, 5, [1, 2 ["something", 2]]];
