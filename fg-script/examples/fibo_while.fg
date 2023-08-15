@@ -8,18 +8,18 @@ num N = 10;
 num iter = 0;
 
 while iter < N {
-	num c = a + b;
-	a = b; b = c;
-	iter = iter + 1;
+    num c = a + b;
+    a = b; b = c;
+    iter = iter + 1;
 
-	str descr = "";
-	// if stmt overview
-	if a % 2 == 0 {
-		descr = "even";
-	} else {
-		descr = "odd";
-	}
+    str descr = "";
+    // if stmt overview
+    if a % 2 == 0 {
+        descr = "even";
+    } else {
+        descr = "odd";
+    }
 
-	println("fib {0} = {1}, mod = {2} ({3})", iter, a, a % 2, descr);
-	// __mem_debug__();
+    println("fib {0} = {1}, mod = {2} ({3})", iter, a, a % 2, descr);
+    // __mem_debug__();
 }

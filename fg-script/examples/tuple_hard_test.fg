@@ -1,23 +1,23 @@
 ﻿
 fn rand_sign() -> num {
-	if rand() > 0.5 {
-		ret 1;
-	}
-	ret -1;
+    if rand() > 0.5 {
+        ret 1;
+    }
+    ret -1;
 }
 
 fn some_struct() -> tup {
-	num i = 0;
-	tup a = [];
-	tup b = [];
-	tup c = [];
-	while i < 2 {
-		tpush(a, rand_sign() * floor(1 + rand() * 10));
-		tpush(b, rand_sign() * floor(1 + rand() * 10));
-		tpush(c, rand_sign() * floor(1 + rand() * 10));
-		i = i + 1;
-	}
-	ret [a, [b, [c]]];
+    num i = 0;
+    tup a = [];
+    tup b = [];
+    tup c = [];
+    while i < 2 {
+        tpush(a, rand_sign() * floor(1 + rand() * 10));
+        tpush(b, rand_sign() * floor(1 + rand() * 10));
+        tpush(c, rand_sign() * floor(1 + rand() * 10));
+        i = i + 1;
+    }
+    ret [a, [b, [c]]];
 }
 
 tup ta = some_struct();

@@ -81,17 +81,13 @@ fn fib(num x) -> num {
 
 ## Example 4: Compute 100 digits of pi
 ```rust
-// compute the digits of pi
-fn pi(num n) -> str {
+fn pi(num n) -> void {
     num d = n * 3;
     tup arr = [];
-    for i in 0 .. d {
+    for i in 1 .. d {
         tpush(arr, 2);
     }
-
-    str digits = "";
-
-    for i in 0 .. n {
+    for i in 1 .. d {
         num c = 0;
         num k = d - 1;
         while k >= 0 {
@@ -103,17 +99,15 @@ fn pi(num n) -> str {
                 c = q * k;
             } else {
                 arr[k] = q % 10;
-                digits = digits + floor(q / 10);
+                print(floor(q / 10));
                 c = 0;
             }
             k = k - 1;
         }
     }
-
-    ret digits;
 }
-// print the result to stdout
-print(pi(100));
+
+pi(100);
 ```
 
 ## Example 5: fg-script syntax overview

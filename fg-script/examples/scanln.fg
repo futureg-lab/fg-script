@@ -1,16 +1,16 @@
 ﻿
 /*
 while true {
-	println("Type something: ");
-	auto a = null;
-	scanln(a);
-	println("{0} = {1} {2}", "a", repr_of a, a);
+    println("Type something: ");
+    auto a = null;
+    scanln(a);
+    println("{0} = {1} {2}", "a", repr_of a, a);
 }
 */
 
 while true {
-	println("Type a number: ");
-	num a = 0;
-	scanln(a);
-	println("{0} = {1} {2}", "a", repr_of a, a);
+    println("Type a number: ");
+    num a = 0;
+    scanln(a);
+    println("{0} = {1} {2}", "a", repr_of a, a);
 }

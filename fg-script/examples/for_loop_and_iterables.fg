@@ -1,13 +1,13 @@
 ﻿tup x = [1, 2, ["x" : 3, "q" : ["y" : 4], "z" : 5]];
 tup z = 1 .. 9;
 tup example_dic = [
-	a : 6,
-	b : 8,
-	c :  [
-		e : "Some text",
-		h : 3,
-		q : [1, 2, 3, 4, 5]
-	]
+    a : 6,
+    b : 8,
+    c :  [
+        e : "Some text",
+        h : 3,
+        q : [1, 2, 3, 4, 5]
+    ]
 ];
 
 
@@ -15,46 +15,46 @@ tup example_dic = [
 
 
 for (k, v) in example_dic {
-	/*
-	if (k is "c") {
-		break;
-	}*/
-	println("key {0}, value {1}", k, v);
+    /*
+    if (k is "c") {
+        break;
+    }*/
+    println("key {0}, value {1}", k, v);
 }
 
 for i in 1 .. 10 {
-	println("count {0}", i);
+    println("count {0}", i);
 }
 
 
 fn test() -> void {
-	num x = 0;
-	while x < 10 {
-		if x >= 5 {
-			println("while .. stopped !!! " + x);
-			ret;
-		}
-		x = x + 1;
-	}
+    num x = 0;
+    while x < 10 {
+        if x >= 5 {
+            println("while .. stopped !!! " + x);
+            ret;
+        }
+        x = x + 1;
+    }
 }
 
 fn test2() -> void {
-	for k in 0 .. 10 {
-		if k >= 5 {
-			println("for .. stopped !!! " + k);
-			ret;
-		}
-	}
+    for k in 0 .. 10 {
+        if k >= 5 {
+            println("for .. stopped !!! " + k);
+            ret;
+        }
+    }
 }
 
 
 fn test3() -> void {
-	for k in 0 .. 10 {
-		if k >= 5 {
-			println("for .. stopped !!! " + k);
-			err "force stop!";
-		}
-	}
+    for k in 0 .. 10 {
+        if k >= 5 {
+            println("for .. stopped !!! " + k);
+            err "force stop!";
+        }
+    }
 }
 
 test();

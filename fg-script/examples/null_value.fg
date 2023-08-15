@@ -10,7 +10,7 @@
 
 
 fn show_content(auto v, str name) -> void {
-	println("rerpr_of {0} :: {1} => {2}", name, repr_of v, v);
+    println("rerpr_of {0} :: {1} => {2}", name, repr_of v, v);
 }
 
 
