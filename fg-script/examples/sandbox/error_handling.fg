@@ -1,0 +1,9 @@
+﻿// test
+num x = 3;
+
+
+
+if x is 3 {
+	print("We got 3 yay");
+	err "It's 3";
+}

@@ -1,0 +1,36 @@
+﻿// compute the digits of pi
+fn pi(num n) -> str {
+    num d = n * 3;
+    tup arr = [];
+    for i in 0 .. d {
+        tpush(arr, 2);
+    }
+
+    str digits = "";
+    auto digitRange = 0 .. n;
+    auto digitRange = 0 .. n;
+
+    for i in 0 .. n {
+        num c = 0;
+        num k = d - 1;
+        while k >= 0 {
+            num v = 10 * arr[k] + c;
+            num r = v % (2*k + 1);
+            num q = floor(v / (2*k + 1));
+            if k > 0 {
+                arr[k] = r;
+                c = q * k;
+            } else {
+                arr[k] = q % 10;
+                digits = digits + floor(q / 10);
+                c = 0;
+            }
+            k = k - 1;
+        }
+    }
+
+    ret digits;
+}
+
+
+print(pi(100));
