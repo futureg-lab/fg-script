@@ -1,12 +1,12 @@
 fn pi(num n) -> void {
-    num d = n * 3;
+    num b = n * 3;
     tup arr = [];
-    for i in 1 .. d {
+    for i in 1 .. b {
         tpush(arr, 2);
     }
-    for i in 1 .. d {
+    for i in 1 .. n {
         num c = 0;
-        num k = d - 1;
+        num k = len(arr) - 1;
         while k >= 0 {
             num v = 10 * arr[k] + c;
             num r = v % (2*k + 1);
@@ -24,4 +24,4 @@ fn pi(num n) -> void {
     }
 }
 
-pi(100);
+pi(10);

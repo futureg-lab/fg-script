@@ -381,7 +381,18 @@ namespace fg_script.core
             for (int i = 0; i < list.Count(); i++)
                 if (list[i] is ResultType type)
                     list[i] = __Describe(type);
-            return string.Format(str, list);
+            try
+            {
+                return string.Format(str, list);
+            } 
+            catch(FormatException _e)
+            {
+                throw new FGRuntimeException(_e.Message);
+            } 
+            catch(Exception e)
+            {
+                throw e;
+            }
         }
 
         private static Boolean EvalBoolean(string repr)
@@ -1292,7 +1303,7 @@ namespace fg_script.core
             string var_name = expr.Callee.Lexeme;
             Memory.Result? result = Machine.GetValue(var_name);
             if (result == null)
-                throw new FGRuntimeException("reference error", Fmt("{ 0} is undefined", var_name));
+                throw new FGRuntimeException("reference error", Fmt("{0} is undefined", var_name));
             return result;
         }
 
