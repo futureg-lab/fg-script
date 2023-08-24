@@ -121,14 +121,13 @@ tpush(tup_empt, "3");
 tshift(tup_empt); // remove first item "1" and return the modified tuple pointer 
 tpop(tup_empt); // remove last item "3" and return the modified tuple pointer
 
-// using tuples as a dynamic array
-tup arr = []; // add a flags that enforces number indexing
+// tuple as dynamic array
+tup arr = [];
 arr[0] = 1;
 arr[1] = 2;
-// arr[2] = 3 // error
 println(len(arr)); // 2
 println(repr_of arr); // tup
-println(repr_of arr == "tup"); // true
+println((repr_of arr) == "tup"); // true
 
 // string
 str some_str = "Hello World";
@@ -162,7 +161,7 @@ tup example_dic = [
 // In this example [3] should be labeled with an explicit key
 tup example = [a : 1, b : 2, [3]]; // ":" was expected, got LEFT_BRACKET instead
 
-// type inference (!= generic, acts the same as auto in C++)
+// type inference (!= generic, acts the same as auto in C++ or var in C#)
 auto a1 = [1, 2];
 auto a2 = "hello world";
 
@@ -181,9 +180,7 @@ fn run() -> void {
         }
     }
 
-    some_data = requestHttpJSON();
-    
-    cond_expr = false;
+    bool cond_expr = false;
     while cond_expr {
         do_stuff();
     }
