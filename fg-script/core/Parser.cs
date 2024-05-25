@@ -468,8 +468,18 @@
                 else if (Match(TokenType.NOT)) op = Consume(TokenType.NOT);
                 else op = Consume(TokenType.REPR_OF);
 
-                Expr expr = ConsumeGenExpr();
-                return new UnaryExpr(op, expr);
+                if (Match(TokenType.LEFT_PARENTH))
+                {
+                    Consume(TokenType.LEFT_PARENTH);
+                    Expr expr = ConsumeGenExpr();
+                    Consume(TokenType.RIGHT_PARENTH);
+                    return new UnaryExpr(op, expr);
+                } 
+                else
+                {
+                    Expr expr = ConsumeUnary();
+                    return new UnaryExpr(op, expr);
+                }
             }
 
             if (Match(TokenType.LEFT_BRACKET))

@@ -4,7 +4,7 @@ using fg_script.utils;
 class FGScriptCLI
 {
     static string APP_NAME = "fg-script";
-    static string VERSION = "v0.0.1";
+    static string VERSION = "v0.0.2";
 
     static void LoadFile(string filePath, bool printIR = false)
     {

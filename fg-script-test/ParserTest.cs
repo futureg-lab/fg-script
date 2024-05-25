@@ -42,12 +42,14 @@ namespace fg_script_test
                 num x = 1 + 2 * 3;
                 num y = 1 * 2 + 3;
                 num z = (1 + 2) * 3;
+                auto un = repr_of 2 + - 3;
             ";
             List<string> tests = new()
             {
                 "(num:x => (+ 1 (* 2 3)))",
                 "(num:y => (+ (* 1 2) 3))",
-                "(num:z => (* (+ 1 2) 3))"
+                "(num:z => (* (+ 1 2) 3))",
+                "(auto:un => (+ (repr_of 2) (- 3)))"
             };
             TestSetFrom(source, tests);
         }
