@@ -1,9 +1,10 @@
 ﻿using fg_script.core;
+using System.Reflection;
 
 namespace fg_script_test
 {
     [TestClass]
-    public class ParserTest
+    public class ProgramTest
     {
         public string Compress(string str)
         {
@@ -222,6 +223,7 @@ namespace fg_script_test
             };
             TestSetFrom(source, tests);
         }
+
         [TestMethod]
         public void ForAndWhileLoopTest()
         {
@@ -270,5 +272,59 @@ namespace fg_script_test
             };
             TestSetFrom(source, tests, true);
         }
+        [TestMethod]
+        public void SampleProgram()
+        {
+            string source = @"
+                fn to_json(auto value) -> str {
+                    // println(""repr is "" + repr_of value);
+                    if (repr_of value) is ""tup"" {
+                        str tmp = ""{"";
+                        num size = len(value);
+                        num i = 0;
+                        for (k, v) in value {
+                            str row = ""\"""" + k + ""\""""+ "" : "" + to_json(v);
+                            tmp = tmp + row;
+                            if i + 1 < size {
+                                tmp = tmp + "","";
+                            }
+                            i = i + 1;
+                        }
+                        tmp = tmp + ""}"";
+                        ret tmp;
+                    }
+                    if repr_of value is ""str"" {
+                        ret ""\"""" + value + ""\"""";
+                    }
+                    ret to_str(value);
+                }
+
+                auto out = to_json([
+                    a: 1,
+                    b: [c : 3],
+                    c: [1, 2],
+                    d: [
+                        h: ""some str"",
+                        e: ""another""
+                    ]
+                ]);
+            ";
+
+            Lexer lexer = new(source, "<test>");
+            List<Token> list = lexer.Tokenize();
+
+            Parser parser = new("<test>", ref list);
+            List<Stmt> stmts = parser.Run();
+            Interpreter engine = new();
+
+            foreach (Stmt stmt in stmts)
+            {
+                engine.Run(stmt);
+            }
+
+            string expected = "{\"a\" : 1,\"b\" : {\"c\" : 3},\"c\" : {\"0\" : 1,\"1\" : 2},\"d\" : {\"h\" : \"some str\",\"e\" : \"another\"}}";
+            Assert.AreEqual(expected, engine.Machine.GetValue("out")?.Value);
+        }
+
     }
 }

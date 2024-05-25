@@ -587,11 +587,11 @@ namespace fg_script.core
 
         public object? VisitIf(If stmt)
         {
-            var IsItBoolean = (Memory.Result res) =>
+            static void IsItBoolean(Memory.Result res)
             {
                 if (res.Type != ResultType.BOOLEAN)
                     throw new FGRuntimeException("type error", Fmt("type \"{0}\" was expected, got \"{1}\" instead", ResultType.BOOLEAN, res.Type));
-            };
+            }
 
             // main body
             Memory.Result res = Eval(stmt.IfCondition);
@@ -608,7 +608,7 @@ namespace fg_script.core
                 {
                     Memory.Result br_cond = Eval(elif.Condition);
                     IsItBoolean(br_cond);
-                    if ((Boolean) br_cond.Value)
+                    if ((Boolean)br_cond.Value)
                         return VisitBlock(elif.Body);
                 }
                 // has else and main_cond is false

@@ -511,7 +511,7 @@
 
         protected TupleExpr ConsumeTuple()
         {
-            var FetchKey = () =>
+            string FetchKey()
             {
                 string key = "";
                 if (Match(TokenType.STRING))
@@ -521,10 +521,10 @@
                 else if (Match(TokenType.NUMBER))
                     key = Consume(TokenType.NUMBER, "number expected").Lexeme;
                 return key;
-            };
+            }
 
-            var IsKeyable = () => Match(TokenType.STRING) 
-                || Match(TokenType.KEYWORD_OR_NAME) 
+            bool IsKeyable() => Match(TokenType.STRING)
+                || Match(TokenType.KEYWORD_OR_NAME)
                 || Match(TokenType.NUMBER);
 
             Consume(TokenType.LEFT_BRACKET, @"""["" was expected");
