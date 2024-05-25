@@ -26,7 +26,7 @@ The project solution is located at the root directory
 ## Example 1: fg-script tuple to json
 ```rust
 fn to_json(auto value) -> str {
-    if (repr_of value) is "tup" {
+    if repr_of value is "tup" {
         str tmp = "{";
         num size = len(value);
         num i = 0;
@@ -41,7 +41,7 @@ fn to_json(auto value) -> str {
         tmp = tmp + "}";
         ret tmp;
     }
-    if (repr_of value) is "str" {
+    if repr_of value is "str" {
         ret "\"" + value + "\"";
     }
     ret to_str(value);
@@ -51,7 +51,7 @@ fn to_json(auto value) -> str {
 ```rust
 fn flatten_helper(tup out, tup arr) -> void {
     for i in arr {
-        if ((repr_of i) is "tup") {
+        if repr_of i is "tup" {
             flatten_helper(out, i);
         } else {
             tpush(out, i);
